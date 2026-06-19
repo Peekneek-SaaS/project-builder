@@ -11,11 +11,19 @@ import { DashboardSearchProvider } from "@/features/dashboard/context/dashboard-
 import { UserButton } from "@clerk/nextjs";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import Logo from "../../../public/Logo/Logo";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
   prefetch(trpc.card.list.queryOptions());
   prefetch(trpc.card.listTrash.queryOptions());
   prefetch(trpc.billing.getPlan.queryOptions());
+
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
   return (
     <HydrateClient>
