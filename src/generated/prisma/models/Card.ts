@@ -44,6 +44,7 @@ export type CardMinAggregateOutputType = {
   published: boolean | null
   publishedAt: Date | null
   slug: string | null
+  qrCodeId: string | null
   viewCount: number | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -60,6 +61,7 @@ export type CardMaxAggregateOutputType = {
   published: boolean | null
   publishedAt: Date | null
   slug: string | null
+  qrCodeId: string | null
   viewCount: number | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -77,6 +79,7 @@ export type CardCountAggregateOutputType = {
   published: number
   publishedAt: number
   slug: number
+  qrCodeId: number
   viewCount: number
   deletedAt: number
   createdAt: number
@@ -103,6 +106,7 @@ export type CardMinAggregateInputType = {
   published?: true
   publishedAt?: true
   slug?: true
+  qrCodeId?: true
   viewCount?: true
   deletedAt?: true
   createdAt?: true
@@ -119,6 +123,7 @@ export type CardMaxAggregateInputType = {
   published?: true
   publishedAt?: true
   slug?: true
+  qrCodeId?: true
   viewCount?: true
   deletedAt?: true
   createdAt?: true
@@ -136,6 +141,7 @@ export type CardCountAggregateInputType = {
   published?: true
   publishedAt?: true
   slug?: true
+  qrCodeId?: true
   viewCount?: true
   deletedAt?: true
   createdAt?: true
@@ -240,6 +246,7 @@ export type CardGroupByOutputType = {
   published: boolean
   publishedAt: Date | null
   slug: string | null
+  qrCodeId: string | null
   viewCount: number
   deletedAt: Date | null
   createdAt: Date
@@ -280,6 +287,7 @@ export type CardWhereInput = {
   published?: Prisma.BoolFilter<"Card"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   slug?: Prisma.StringNullableFilter<"Card"> | string | null
+  qrCodeId?: Prisma.StringNullableFilter<"Card"> | string | null
   viewCount?: Prisma.IntFilter<"Card"> | number
   deletedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
@@ -300,6 +308,7 @@ export type CardOrderByWithRelationInput = {
   published?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrCodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -312,6 +321,7 @@ export type CardOrderByWithRelationInput = {
 export type CardWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   slug?: string
+  qrCodeId?: string
   AND?: Prisma.CardWhereInput | Prisma.CardWhereInput[]
   OR?: Prisma.CardWhereInput[]
   NOT?: Prisma.CardWhereInput | Prisma.CardWhereInput[]
@@ -330,7 +340,7 @@ export type CardWhereUniqueInput = Prisma.AtLeast<{
   resume?: Prisma.XOR<Prisma.ResumeScalarRelationFilter, Prisma.ResumeWhereInput>
   views?: Prisma.CardViewListRelationFilter
   linkClicks?: Prisma.CardLinkClickListRelationFilter
-}, "id" | "slug">
+}, "id" | "slug" | "qrCodeId">
 
 export type CardOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -343,6 +353,7 @@ export type CardOrderByWithAggregationInput = {
   published?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrCodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -368,6 +379,7 @@ export type CardScalarWhereWithAggregatesInput = {
   published?: Prisma.BoolWithAggregatesFilter<"Card"> | boolean
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Card"> | Date | string | null
   slug?: Prisma.StringNullableWithAggregatesFilter<"Card"> | string | null
+  qrCodeId?: Prisma.StringNullableWithAggregatesFilter<"Card"> | string | null
   viewCount?: Prisma.IntWithAggregatesFilter<"Card"> | number
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Card"> | Date | string
@@ -384,6 +396,7 @@ export type CardCreateInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -404,6 +417,7 @@ export type CardUncheckedCreateInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -422,6 +436,7 @@ export type CardUpdateInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -442,6 +457,7 @@ export type CardUncheckedUpdateInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,6 +477,7 @@ export type CardCreateManyInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -477,6 +494,7 @@ export type CardUpdateManyMutationInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,6 +512,7 @@ export type CardUncheckedUpdateManyInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -521,6 +540,7 @@ export type CardCountOrderByAggregateInput = {
   published?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  qrCodeId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -541,6 +561,7 @@ export type CardMaxOrderByAggregateInput = {
   published?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  qrCodeId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -557,6 +578,7 @@ export type CardMinOrderByAggregateInput = {
   published?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  qrCodeId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -664,6 +686,7 @@ export type CardCreateWithoutResumeInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -682,6 +705,7 @@ export type CardUncheckedCreateWithoutResumeInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -730,6 +754,7 @@ export type CardScalarWhereInput = {
   published?: Prisma.BoolFilter<"Card"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   slug?: Prisma.StringNullableFilter<"Card"> | string | null
+  qrCodeId?: Prisma.StringNullableFilter<"Card"> | string | null
   viewCount?: Prisma.IntFilter<"Card"> | number
   deletedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
@@ -746,6 +771,7 @@ export type CardCreateWithoutViewsInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -765,6 +791,7 @@ export type CardUncheckedCreateWithoutViewsInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -798,6 +825,7 @@ export type CardUpdateWithoutViewsInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -817,6 +845,7 @@ export type CardUncheckedUpdateWithoutViewsInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -834,6 +863,7 @@ export type CardCreateWithoutLinkClicksInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -853,6 +883,7 @@ export type CardUncheckedCreateWithoutLinkClicksInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -886,6 +917,7 @@ export type CardUpdateWithoutLinkClicksInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -905,6 +937,7 @@ export type CardUncheckedUpdateWithoutLinkClicksInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -922,6 +955,7 @@ export type CardCreateManyResumeInput = {
   published?: boolean
   publishedAt?: Date | string | null
   slug?: string | null
+  qrCodeId?: string | null
   viewCount?: number
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -938,6 +972,7 @@ export type CardUpdateWithoutResumeInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -956,6 +991,7 @@ export type CardUncheckedUpdateWithoutResumeInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -974,6 +1010,7 @@ export type CardUncheckedUpdateManyWithoutResumeInput = {
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrCodeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1031,6 +1068,7 @@ export type CardSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   published?: boolean
   publishedAt?: boolean
   slug?: boolean
+  qrCodeId?: boolean
   viewCount?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1052,6 +1090,7 @@ export type CardSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   published?: boolean
   publishedAt?: boolean
   slug?: boolean
+  qrCodeId?: boolean
   viewCount?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1070,6 +1109,7 @@ export type CardSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   published?: boolean
   publishedAt?: boolean
   slug?: boolean
+  qrCodeId?: boolean
   viewCount?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1088,13 +1128,14 @@ export type CardSelectScalar = {
   published?: boolean
   publishedAt?: boolean
   slug?: boolean
+  qrCodeId?: boolean
   viewCount?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "resumeId" | "cardSetId" | "themeId" | "cardData" | "displayMode" | "published" | "publishedAt" | "slug" | "viewCount" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["card"]>
+export type CardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "resumeId" | "cardSetId" | "themeId" | "cardData" | "displayMode" | "published" | "publishedAt" | "slug" | "qrCodeId" | "viewCount" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["card"]>
 export type CardInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resume?: boolean | Prisma.ResumeDefaultArgs<ExtArgs>
   views?: boolean | Prisma.Card$viewsArgs<ExtArgs>
@@ -1126,6 +1167,7 @@ export type $CardPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     published: boolean
     publishedAt: Date | null
     slug: string | null
+    qrCodeId: string | null
     viewCount: number
     deletedAt: Date | null
     createdAt: Date
@@ -1566,6 +1608,7 @@ export interface CardFieldRefs {
   readonly published: Prisma.FieldRef<"Card", 'Boolean'>
   readonly publishedAt: Prisma.FieldRef<"Card", 'DateTime'>
   readonly slug: Prisma.FieldRef<"Card", 'String'>
+  readonly qrCodeId: Prisma.FieldRef<"Card", 'String'>
   readonly viewCount: Prisma.FieldRef<"Card", 'Int'>
   readonly deletedAt: Prisma.FieldRef<"Card", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Card", 'DateTime'>

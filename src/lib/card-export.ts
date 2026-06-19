@@ -87,32 +87,45 @@ export async function downloadCardAsPdf(
 ) {
   if (targets.length === 0) return;
 
-  let pdf: jsPDF | null = null;
+  const rendered = await Promise.all(
+    targets.map(async ({ element, side }) => {
+      const dataUrl = await renderPng(element);
+      const image = await loadImage(dataUrl);
+      return { dataUrl, image, side };
+    }),
+  );
 
-  for (const { element } of targets) {
-    const dataUrl = await renderPng(element);
-    const image = await loadImage(dataUrl);
-    const width = image.naturalWidth;
-    const height = image.naturalHeight;
-    const orientation = width >= height ? "landscape" : "portrait";
+  const pageWidth = Math.max(...rendered.map(({ image }) => image.naturalWidth));
+  const pageHeight = Math.max(
+    ...rendered.map(({ image }) => image.naturalHeight),
+  );
+  const orientation = pageWidth >= pageHeight ? "landscape" : "portrait";
 
-    if (!pdf) {
-      pdf = new jsPDF({
-        orientation,
-        unit: "px",
-        format: [width, height],
-        compress: true,
-      });
-    } else {
-      pdf.addPage([width, height], orientation);
+  const pdf = new jsPDF({
+    orientation,
+    unit: "px",
+    format: [pageWidth, pageHeight],
+    compress: true,
+  });
+
+  rendered.forEach(({ dataUrl, image }, index) => {
+    if (index > 0) {
+      pdf.addPage([pageWidth, pageHeight], orientation);
     }
 
-    pdf.addImage(dataUrl, "PNG", 0, 0, width, height, undefined, "FAST");
-  }
-
-  if (!pdf) {
-    throw new Error("Failed to create PDF.");
-  }
+    const x = (pageWidth - image.naturalWidth) / 2;
+    const y = (pageHeight - image.naturalHeight) / 2;
+    pdf.addImage(
+      dataUrl,
+      "PNG",
+      x,
+      y,
+      image.naturalWidth,
+      image.naturalHeight,
+      undefined,
+      "FAST",
+    );
+  });
 
   pdf.save(`${sanitizeFilename(filenameBase)}.pdf`);
 }

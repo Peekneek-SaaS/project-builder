@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -40,10 +40,15 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { inferRouterOutputs } from "@trpc/server";
 import { DashboardCardSearch } from "./dashboard-card-search";
+import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
+import { motion } from "motion/react";
 
 type DashboardCard = inferRouterOutputs<AppRouter>["card"]["list"][number];
 
 const DashboardContent = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  // render mounted ? totalViews.toLocaleString("en-US") : totalViews
   const trpc = useTRPC();
   const { debouncedQuery, query, isDebouncing } = useDashboardSearch();
   const { data: cards = [], isLoading } = useQuery(
@@ -58,7 +63,7 @@ const DashboardContent = () => {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <DashboardCardSearch className="flex md:hidden" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -72,13 +77,19 @@ const DashboardContent = () => {
             Create new card
           </Link>
         </Button>
-      </div>
+      </FadeIn>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <Stat label="Total cards" value={String(cards.length)} />
-        <Stat label="Published" value={String(publishedCount)} />
-        <Stat label="Total views" value={totalViews.toLocaleString()} />
-      </div>
+      <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
+        <StaggerItem>
+          <Stat label="Total cards" value={String(cards.length)} />
+        </StaggerItem>
+        <StaggerItem>
+          <Stat label="Published" value={String(publishedCount)} />
+        </StaggerItem>
+        <StaggerItem>
+          <Stat label="Total views" value={totalViews.toLocaleString()} />
+        </StaggerItem>
+      </Stagger>
 
       <div className="mt-8">
         {isLoading ? (
@@ -121,11 +132,13 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredCards.map((card) => (
-                <CardTile key={card.id} card={card} />
+                <StaggerItem key={card.id}>
+                  <CardTile card={card} />
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </>
         )}
       </div>
@@ -172,7 +185,11 @@ function CardTile({ card }: { card: DashboardCard }) {
 
   return (
     <>
-      <div className="group relative overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg hover:shadow-black/5">
+      <motion.div
+        className="group relative overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg hover:shadow-black/5"
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
         <Link href={builderHref} className="block">
           <div
             className={cn(
@@ -210,8 +227,14 @@ function CardTile({ card }: { card: DashboardCard }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant={card.published ? "default" : "secondary"}>
-              {card.published ? "published" : "draft"}
+            <Badge
+              className={cn(
+                card.published
+                  ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                  : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+              )}
+            >
+              {card.published ? "Published" : "Draft"}
             </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -252,7 +275,7 @@ function CardTile({ card }: { card: DashboardCard }) {
             </DropdownMenu>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <DeleteCardDialog
         open={deleteOpen}

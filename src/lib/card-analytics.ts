@@ -53,6 +53,8 @@ export function parseTrafficSourceFromServer(
   const utm = utmSource?.trim().toLowerCase();
   if (utm) {
     if (utm.includes("qr")) return "QR scan";
+    if (utm === "iframe" || utm.includes("embed")) return "Website embed";
+    if (utm === "link" || utm === "share") return "Shared link";
     if (utm.includes("linkedin")) return "LinkedIn";
     if (utm.includes("email")) return "Email signature";
     if (utm === "direct") return "Direct link";

@@ -51,7 +51,7 @@ export default function RootLayout({
           inter.variable,
         )}
       >
-        <body className="min-h-full flex flex-col dark">
+        <body className="min-h-full flex flex-col">
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
           <TRPCReactProvider>
             <TooltipProvider>{children}</TooltipProvider>

@@ -54,8 +54,7 @@ export default function SettingsPage() {
                     : `${billing?.usage.cards ?? 0} / 1`}
                 </li>
                 <li>
-                  Themes:{" "}
-                  {billing?.isPro ? "All themes" : "3 free themes"}
+                  Themes: {billing?.isPro ? "All themes" : "3 free themes"}
                 </li>
                 <li>
                   Analytics:{" "}
@@ -90,7 +89,7 @@ export default function SettingsPage() {
           )}
         </div>
 
-        <div className="relative z-[60] rounded-xl border border-border bg-card p-6">
+        <div className="relative rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 text-sm font-semibold">Change plan</h2>
           <PricingTable />
         </div>

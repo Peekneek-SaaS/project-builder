@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Wrapper from "@/components/Wrapper";
+import * as motion from "motion/react-client";
+import { defaultTransition, fadeInUp, staggerContainer, staggerItem } from "@/lib/motion";
 import {
   ArrowLeft01Icon,
   AiMagicIcon,
@@ -36,9 +38,15 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 </Link>
               </Button>
             </div>
-            <div className="flex items-center justify-center h-full">
+            <motion.div
+              className="flex items-center justify-center h-full"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={defaultTransition}
+            >
               {children}
-            </div>
+            </motion.div>
           </Wrapper>
           <div className="hidden lg:flex flex-1 bg-primary text-white dark:text-black">
             <Wrapper className="py-4 flex flex-col justify-between h-full">
@@ -52,35 +60,56 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 </Badge>
               </div>
               <div className="flex flex-col">
-                <div className="space-y-3">
-                  <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight text-balance">
+                <motion.div
+                  className="space-y-3"
+                  initial="hidden"
+                  animate="visible"
+                  variants={staggerContainer}
+                >
+                  <motion.h1
+                    variants={staggerItem}
+                    className="scroll-m-20 text-3xl font-extrabold tracking-tight text-balance"
+                  >
                     One upload away from a card people remember.
-                  </h1>
-                  <ul className="space-y-1">
-                    <li className="flex gap-1 items-center">
+                  </motion.h1>
+                  <motion.ul className="space-y-1" variants={staggerContainer}>
+                    <motion.li
+                      variants={staggerItem}
+                      className="flex gap-1 items-center"
+                    >
                       <HugeiconsIcon icon={GoogleDocIcon} size={20} />
                       Parse your resume automatically with AI
-                    </li>
-                    <li className="flex gap-1 items-center">
+                    </motion.li>
+                    <motion.li
+                      variants={staggerItem}
+                      className="flex gap-1 items-center"
+                    >
                       <HugeiconsIcon
                         icon={CursorMagicSelection03Icon}
                         size={20}
                       />
                       Choose from beautiful, modern themes
-                    </li>
-                    <li className="flex gap-1 items-center">
+                    </motion.li>
+                    <motion.li
+                      variants={staggerItem}
+                      className="flex gap-1 items-center"
+                    >
                       <HugeiconsIcon icon={Share08Icon} size={20} />
                       Share via link or QR and track every view
-                    </li>
-                  </ul>
-                </div>
+                    </motion.li>
+                  </motion.ul>
+                </motion.div>
               </div>
-              <div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...defaultTransition, delay: 0.3 }}
+              >
                 <p className="leading-7">
                   “Cardably replaced my paper cards entirely. I share one link
                   and I'm done.”
                 </p>
-              </div>
+              </motion.div>
             </Wrapper>
           </div>
         </div>

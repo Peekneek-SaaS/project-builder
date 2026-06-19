@@ -858,6 +858,7 @@ export const CardScalarFieldEnum = {
   published: 'published',
   publishedAt: 'publishedAt',
   slug: 'slug',
+  qrCodeId: 'qrCodeId',
   viewCount: 'viewCount',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',

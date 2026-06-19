@@ -8,13 +8,14 @@ import {
   type CardDisplayMode,
 } from "@/lib/card-data";
 import { cardDataSchema, cardDisplayModeSchema } from "@/lib/card-schema";
-import { generateCardSlug } from "@/lib/card-slug";
+import { generateCardSlug, generateQrCodeId } from "@/lib/card-slug";
 import { TRASH_RETENTION_MS } from "@/lib/card-trash";
 import { prisma } from "@/lib/db";
 import { recordCardLinkClick, recordCardView } from "@/lib/card-analytics-server";
 import {
   assertCanCreateCards,
   assertCanUseTheme,
+  getBillingProfile,
 } from "@/lib/billing";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../init";
 
@@ -49,6 +50,7 @@ function parseCardRecord(card: {
   published: boolean;
   publishedAt: Date | null;
   slug: string | null;
+  qrCodeId: string | null;
   viewCount: number;
   deletedAt: Date | null;
   createdAt: Date;
@@ -65,6 +67,7 @@ function parseCardRecord(card: {
     published: card.published,
     publishedAt: card.publishedAt,
     slug: card.slug,
+    qrCodeId: card.qrCodeId,
     viewCount: card.viewCount,
     deletedAt: card.deletedAt,
     createdAt: card.createdAt,
@@ -82,6 +85,28 @@ async function uniqueSlug(name: string): Promise<string> {
   }
 
   return `${generateCardSlug(name)}-${Date.now().toString(36)}`;
+}
+
+async function ensureQrCodeId(card: { id: string; qrCodeId: string | null }) {
+  if (card.qrCodeId) return card.qrCodeId;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const qrCodeId = generateQrCodeId();
+    try {
+      await prisma.card.update({
+        where: { id: card.id },
+        data: { qrCodeId },
+      });
+      return qrCodeId;
+    } catch {
+      // Unique collision — retry.
+    }
+  }
+
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Failed to assign QR code.",
+  });
 }
 
 async function getOwnedActiveCard(userId: string, id: string) {
@@ -159,6 +184,7 @@ export const cardRouter = createTRPCRouter({
               themeId,
               cardData: cloneCardData(baseData),
               displayMode: "pair",
+              qrCodeId: generateQrCodeId(),
             },
           }),
         ),
@@ -214,7 +240,9 @@ export const cardRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const card = await getOwnedActiveCard(ctx.userId, input.id);
-      return parseCardRecord(card);
+      await ensureQrCodeId(card);
+      const fresh = await getOwnedActiveCard(ctx.userId, input.id);
+      return parseCardRecord(fresh);
     }),
 
   update: protectedProcedure
@@ -375,7 +403,12 @@ export const cardRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Card not found." });
       }
 
-      return parseCardRecord(card);
+      const billing = await getBillingProfile(card.userId);
+
+      return {
+        ...parseCardRecord(card),
+        showBranding: !billing.isPro,
+      };
     }),
 
   recordView: publicProcedure

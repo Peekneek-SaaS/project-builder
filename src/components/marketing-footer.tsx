@@ -1,29 +1,52 @@
 import Link from "next/link";
+import * as motion from "motion/react-client";
+import { defaultTransition, fadeInUp, viewportOnce } from "@/lib/motion";
 import Logo from "../../public/Logo/Logo";
 
 export function MarketingFooter() {
   const cols = [
     {
       title: "Product",
-      links: ["Features", "Themes", "Analytics", "Pricing"],
+      links: [
+        { label: "Product", href: "#features" },
+        { label: "How it works", href: "#how" },
+        { label: "Pricing", href: "#pricing" },
+        { label: "FAQ", href: "#faq" },
+      ],
     },
     {
-      title: "Company",
-      links: ["About", "Blog", "Careers", "Contact"],
+      title: "Social",
+      links: [
+        { label: "LinkedIn", href: "#" },
+        { label: "X", href: "#" },
+        { label: "Reddit", href: "#" },
+        { label: "Instagram", href: "#" },
+      ],
     },
-    {
-      title: "Resources",
-      links: ["Help center", "Guides", "API", "Status"],
-    },
-    {
-      title: "Legal",
-      links: ["Privacy", "Terms", "Security", "Cookies"],
-    },
+    // {
+    //   title: "Company",
+    //   links: ["About", "Blog", "Careers", "Contact"],
+    // },
+    // {
+    //   title: "Resources",
+    //   links: ["Help center", "Guides", "API", "Status"],
+    // },
+    // {
+    //   title: "Legal",
+    //   links: ["Privacy", "Terms", "Security", "Cookies"],
+    // },
   ];
   return (
-    <footer className="border-t border-border bg-background">
+    <motion.footer
+      className="border-t border-border bg-background"
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewportOnce}
+      variants={fadeInUp}
+      transition={defaultTransition}
+    >
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.5fr_repeat(4,1fr)]">
+        <div className="flex gap-10 flex-col md:flex-row justify-between">
           <div className="space-y-4">
             <Logo />
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -35,13 +58,13 @@ export function MarketingFooter() {
             <div key={col.title} className="space-y-3">
               <h4 className="text-sm font-medium">{col.title}</h4>
               <ul className="space-y-2">
-                {col.links.map((link) => (
-                  <li key={link}>
+                {col.links.map(({ label, href }) => (
+                  <li key={label}>
                     <Link
-                      href="#"
+                      href={href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link}
+                      {label}
                     </Link>
                   </li>
                 ))}
@@ -54,6 +77,6 @@ export function MarketingFooter() {
           <p>Made for people who network.</p>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

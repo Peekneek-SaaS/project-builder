@@ -1,4 +1,6 @@
 import Link from "next/link";
+import * as motion from "motion/react-client";
+import { defaultTransition, fadeIn } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
 import Logo from "../../public/Logo/Logo";
 import { Show } from "@clerk/nextjs";
@@ -13,7 +15,13 @@ export function MarketingNav() {
     { label: "FAQ", href: "#faq" },
   ];
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
+    <motion.header
+      className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md"
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      transition={defaultTransition}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Logo />
 
@@ -46,6 +54,6 @@ export function MarketingNav() {
           </Show>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -8,6 +8,7 @@ import { DashboardSidebar } from "@/features/dashboard/components/dashboard-side
 import { DashboardCardSearch } from "@/features/dashboard/components/dashboard-card-search";
 import { BillingSync } from "@/features/dashboard/components/billing-sync";
 import { DashboardSearchProvider } from "@/features/dashboard/context/dashboard-search-context";
+import { PageEnter } from "@/components/motion";
 import { UserButton } from "@clerk/nextjs";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import Logo from "../../../public/Logo/Logo";
@@ -42,7 +43,9 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
                 <UserButton />
               </div>
             </header>
-            <main>{children}</main>
+            <main>
+              <PageEnter>{children}</PageEnter>
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </DashboardSearchProvider>

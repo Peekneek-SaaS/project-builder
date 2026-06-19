@@ -21,8 +21,13 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import type { CardDisplayMode } from "@/lib/card-data";
+import { ShareQrCode } from "@/features/share/components/share-qr-code";
 import { downloadCard, type CardDownloadFormat } from "@/lib/card-export";
-import { getPublicCardUrl } from "@/lib/card-slug";
+import {
+  buildEmbedIframeCode,
+  getPublicCardUrl,
+  getTrackableShareUrl,
+} from "@/lib/card-slug";
 import { getTheme } from "@/lib/card-themes";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -51,6 +56,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const queryClient = useQueryClient();
   const cardPreviewRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedIframe, setCopiedIframe] = useState(false);
   const [downloading, setDownloading] = useState<CardDownloadFormat | null>(
     null,
   );
@@ -65,6 +71,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   } = useQuery(trpc.card.getById.queryOptions({ id: cardId }));
 
   const { data: allCards = [] } = useQuery(trpc.card.list.queryOptions());
+  const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
 
   const setPublished = useMutation(
     trpc.card.setPublished.mutationOptions({
@@ -92,9 +99,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const cardSetCards = useMemo(
     () =>
       allCards
-        .filter(
-          (item) => card && item.cardSetId === card.cardSetId,
-        )
+        .filter((item) => card && item.cardSetId === card.cardSetId)
         .sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -123,7 +128,11 @@ export function ShareView({ cardId }: { cardId: string }) {
   }
 
   const theme = getTheme(card.themeId);
-  const cardUrl = card.slug ? getPublicCardUrl(card.slug) : "";
+  const cardUrl = card.slug ? getTrackableShareUrl(card.slug) : "";
+  const publicCardUrl = card.slug ? getPublicCardUrl(card.slug) : "";
+  const embedCode = card.slug
+    ? buildEmbedIframeCode(card.slug, card.cardData.name || theme.name)
+    : "";
 
   const bundleIndex = cardSetCards.findIndex((item) => item.id === card.id);
   const prevCard = bundleIndex > 0 ? cardSetCards[bundleIndex - 1] : null;
@@ -174,6 +183,18 @@ export function ShareView({ cardId }: { cardId: string }) {
     setCopied(true);
     toast.success("Link copied to clipboard");
     setTimeout(() => setCopied(false), 1800);
+  }
+
+  function copyIframe() {
+    if (!embedCode) {
+      toast.error("Publish the card first to get embed code.");
+      return;
+    }
+
+    void navigator.clipboard?.writeText(embedCode);
+    setCopiedIframe(true);
+    toast.success("Embed code copied to clipboard");
+    setTimeout(() => setCopiedIframe(false), 1800);
   }
 
   return (
@@ -279,7 +300,8 @@ export function ShareView({ cardId }: { cardId: string }) {
           </DropdownMenuContent>
         </DropdownMenu>
         <p className="text-xs text-muted-foreground">
-          Transparent background · 4× quality · PDF uses separate pages
+          Transparent background · 4× quality · PDF puts each side on its own
+          page in one file
         </p>
       </div>
 
@@ -292,9 +314,7 @@ export function ShareView({ cardId }: { cardId: string }) {
               size="icon"
               disabled={!prevCard}
               aria-label="Previous card in bundle"
-              onClick={() =>
-                prevCard && router.push(`/share/${prevCard.id}`)
-              }
+              onClick={() => prevCard && router.push(`/share/${prevCard.id}`)}
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
             </Button>
@@ -307,9 +327,7 @@ export function ShareView({ cardId }: { cardId: string }) {
               size="icon"
               disabled={!nextCard}
               aria-label="Next card in bundle"
-              onClick={() =>
-                nextCard && router.push(`/share/${nextCard.id}`)
-              }
+              onClick={() => nextCard && router.push(`/share/${nextCard.id}`)}
             >
               <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
             </Button>
@@ -320,7 +338,8 @@ export function ShareView({ cardId }: { cardId: string }) {
             data={card.cardData}
             theme={theme}
             displayMode="pair"
-            className="md:flex-row flex-col"
+            showSideLabels={false}
+            className="flex-col items-center md:flex-row md:items-start md:justify-center"
           />
         </div>
       </div>
@@ -329,6 +348,7 @@ export function ShareView({ cardId }: { cardId: string }) {
         <TabsList>
           <TabsTrigger value="link">Link</TabsTrigger>
           <TabsTrigger value="qr">QR Code</TabsTrigger>
+          <TabsTrigger value="iframe">iFrame</TabsTrigger>
         </TabsList>
 
         <TabsContent value="link" className="mt-6 space-y-6">
@@ -356,7 +376,7 @@ export function ShareView({ cardId }: { cardId: string }) {
                 </Button>
                 {cardUrl ? (
                   <Button variant="outline" asChild>
-                    <a href={cardUrl} target="_blank" rel="noreferrer">
+                    <a href={publicCardUrl} target="_blank" rel="noreferrer">
                       Open
                     </a>
                   </Button>
@@ -364,8 +384,12 @@ export function ShareView({ cardId }: { cardId: string }) {
               </div>
             </div>
 
+            <p className="mt-4 text-xs text-muted-foreground">
+              Copied links include tracking so shared visits appear as{" "}
+              <strong>Shared link</strong> in Analytics.
+            </p>
             {!card.published ? (
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Turn on publishing above to generate your public link.
               </p>
             ) : null}
@@ -389,13 +413,88 @@ export function ShareView({ cardId }: { cardId: string }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="qr" className="mt-6">
-          <div className="rounded-xl border border-border bg-card p-8 text-center">
-            <p className="text-sm font-medium">QR code coming soon</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Use your share link in the meantime.
+        <TabsContent value="qr" className="mt-6 space-y-6">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h2 className="text-sm font-semibold">QR code</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Each card has a permanent QR code. Once generated, the encoded
+              link never changes — even if you edit the card.
+            </p>
+            {!card.published ? (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Publish your card so scans open your live page. The QR code is
+                already assigned to this card.
+              </p>
+            ) : null}
+            {card.qrCodeId ? (
+              <div className="mt-6">
+                <ShareQrCode
+                  qrCodeId={card.qrCodeId}
+                  downloadName={downloadName}
+                />
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Loading QR code…
+              </p>
+            )}
+            <p className="mt-4 text-xs text-muted-foreground">
+              Scans are tracked as <strong>QR scan</strong> in Analytics.
             </p>
           </div>
+        </TabsContent>
+
+        <TabsContent value="iframe" className="mt-6 space-y-6">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <Label htmlFor="embed-code">Embed on your website</Label>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Paste this code into your site. The card stays live — edits you
+              make here appear automatically (refreshes every 15 seconds).
+            </p>
+            <textarea
+              id="embed-code"
+              readOnly
+              rows={8}
+              value={embedCode || "Publish your card to generate embed code."}
+              className="mt-4 w-full resize-none rounded-lg border border-input bg-muted/30 px-3 py-2 font-mono text-xs leading-relaxed"
+            />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button onClick={copyIframe} disabled={!embedCode}>
+                {copiedIframe ? (
+                  <HugeiconsIcon icon={CheckIcon} size={16} />
+                ) : (
+                  <HugeiconsIcon icon={Copy01Icon} size={16} />
+                )}
+                {copiedIframe ? "Copied" : "Copy embed code"}
+              </Button>
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              {billing?.isPro
+                ? "Pro plan: no Cardably branding in the embed."
+                : "Free plan: a small “Powered by Cardably” badge appears below the card."}{" "}
+              Embed views appear as <strong>Website embed</strong> in Analytics.
+            </p>
+            {!card.published ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Turn on publishing above to enable embedding.
+              </p>
+            ) : null}
+          </div>
+
+          {embedCode ? (
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
+              <p className="mb-4 text-sm font-medium">Preview</p>
+              <div className="overflow-hidden rounded-lg border border-border bg-muted/20 p-2 sm:p-4">
+                <iframe
+                  src={card.slug ? `/embed/${card.slug}` : undefined}
+                  title={`${card.cardData.name || theme.name} embed preview`}
+                  className="mx-auto w-full max-w-[960px] rounded-lg border-0 bg-background"
+                  height={560}
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          ) : null}
         </TabsContent>
       </Tabs>
     </div>

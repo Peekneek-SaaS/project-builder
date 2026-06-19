@@ -1,4 +1,12 @@
 import Link from "next/link";
+import * as motion from "motion/react-client";
+import {
+  defaultTransition,
+  fadeInUp,
+  staggerContainer,
+  staggerItem,
+  viewportOnce,
+} from "@/lib/motion";
 // import {
 //   ArrowRight,
 //   Upload,
@@ -31,6 +39,9 @@ import {
 } from "@hugeicons/core-free-icons";
 import { PricingTable } from "@clerk/nextjs";
 import Logo from "../../../public/Logo/Logo";
+import { getTheme } from "@/lib/card-themes";
+import CardStack from "@/lib/homepage-card/CardStack";
+import { cards } from "@/lib/homepage-card/data";
 
 export default function HomePage() {
   return (
@@ -54,13 +65,23 @@ function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-        <div className="space-y-7">
+        <motion.div
+          className="space-y-7"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={defaultTransition}
+        >
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <HugeiconsIcon icon={SparklesIcon} />
-            AI-powered · Resume to business card
+            <HugeiconsIcon
+              icon={SparklesIcon}
+              size="14"
+              className="text-primary"
+            />
+            AI-powered · Resume to Business Card
           </span>
           <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Your resume, reborn as a digital business card
+            Your Resume transform into a Business Card
           </h1>
           <p className="max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground">
             Upload your resume and let AI extract everything that matters. Pick
@@ -75,29 +96,30 @@ function Hero() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/dashboard">View live demo</Link>
+              <Link href="/dashboard">View all cards</Link>
             </Button>
           </div>
           <div className="flex items-center gap-6 pt-2 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-2">
-              <HugeiconsIcon icon={CheckIcon} /> No design skills
+            <span className="inline-flex items-center gap-1">
+              <HugeiconsIcon icon={CheckIcon} className="text-primary" /> No
+              design skills
             </span>
-            <span className="inline-flex items-center gap-2">
-              <HugeiconsIcon icon={CheckIcon} /> Ready in 60 seconds
+            <span className="inline-flex items-center gap-1">
+              <HugeiconsIcon icon={CheckIcon} className="text-primary" /> Ready
+              in 60 seconds
             </span>
           </div>
-        </div>
-        <div className="relative flex justify-center lg:justify-end">
-          <div
-            aria-hidden
-            className="absolute -inset-8 -z-10 rounded-[2rem] bg-linear-to-tr from-primary/10 via-transparent to-transparent blur-2xl"
-          />
-          {/* <BusinessCard
-            data={sampleCard}
-            theme={getTheme("midnight")}
-            className="rotate-2"
-          /> */}
-        </div>
+        </motion.div>
+        <motion.div
+          className="relative flex justify-center lg:justify-end"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ ...defaultTransition, delay: 0.12 }}
+        >
+          <div aria-hidden className="py-8" />
+
+          <CardStack cards={cards} mode="lift" />
+        </motion.div>
       </div>
     </section>
   );
@@ -114,21 +136,32 @@ function LogoCloud() {
   ];
   return (
     <section className="border-y border-border bg-card/40">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <motion.div
+        className="mx-auto max-w-6xl px-4 py-10 sm:px-6"
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={fadeInUp}
+        transition={defaultTransition}
+      >
         <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
           Trusted by professionals at fast-moving teams
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+        <motion.div
+          className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4"
+          variants={staggerContainer}
+        >
           {names.map((n) => (
-            <span
+            <motion.span
               key={n}
+              variants={staggerItem}
               className="text-lg font-semibold tracking-tight text-muted-foreground/70"
             >
               {n}
-            </span>
+            </motion.span>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
@@ -158,10 +191,17 @@ function HowItWorks() {
         title="From resume to ready-to-share in three steps"
         subtitle="No templates to wrestle with. Just upload, refine, and share."
       />
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
+      <motion.div
+        className="mt-12 grid gap-6 md:grid-cols-3"
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={staggerContainer}
+      >
         {steps.map((s, i) => (
-          <div
+          <motion.div
             key={s.title}
+            variants={staggerItem}
             className="relative rounded-xl border border-border bg-card p-6"
           >
             <span className="text-sm font-medium text-primary">0{i + 1}</span>
@@ -172,9 +212,9 @@ function HowItWorks() {
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {s.desc}
             </p>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -220,10 +260,17 @@ function Features() {
           title="Everything you need to network smarter"
           subtitle="A focused toolkit that turns a static document into a living, shareable identity."
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={staggerContainer}
+        >
           {features.map((f) => (
-            <div
+            <motion.div
               key={f.title}
+              variants={staggerItem}
               className="rounded-xl border border-border bg-background p-6"
             >
               <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
@@ -233,9 +280,9 @@ function Features() {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {f.desc}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -294,7 +341,14 @@ function Pricing() {
         title="Simple pricing that scales with you"
         subtitle="Start free. Upgrade when you want more cards, themes, and insight."
       />
-      <div className="relative z-[60] mt-12">
+      <motion.div
+        className="relative z-[60] mt-12"
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={fadeInUp}
+        transition={{ ...defaultTransition, delay: 0.08 }}
+      >
         <PricingTable newSubscriptionRedirectUrl="/dashboard" />
         {/* {plans.map((plan) => (
           <div
@@ -340,7 +394,7 @@ function Pricing() {
             </Button>
           </div>
         ))} */}
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -368,16 +422,22 @@ function FAQ() {
     <section id="faq" className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
         <SectionHeading eyebrow="FAQ" title="Questions, answered" />
-        <div className="mt-10 divide-y divide-border rounded-xl border border-border bg-background">
+        <motion.div
+          className="mt-10 divide-y divide-border rounded-xl border border-border bg-background"
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={staggerContainer}
+        >
           {faqs.map((f) => (
-            <div key={f.q} className="p-6">
+            <motion.div key={f.q} variants={staggerItem} className="p-6">
               <h3 className="font-medium">{f.q}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {f.a}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -386,7 +446,14 @@ function FAQ() {
 function CTA() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-foreground px-6 py-16 text-center text-background sm:px-12">
+      <motion.div
+        className="relative overflow-hidden rounded-3xl border border-border bg-foreground px-6 py-16 text-center text-background sm:px-12"
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={fadeInUp}
+        transition={defaultTransition}
+      >
         <HugeiconsIcon icon={CreditCardIcon} className="mx-auto" />
         {/* <Logo className="mx-auto" /> */}
         <h2 className="mx-auto mt-4 max-w-xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -397,12 +464,12 @@ function CTA() {
           takes a minute.
         </p>
         <Button asChild size="lg" variant="secondary" className="mt-8">
-          <Link href="/sign-in">
+          <Link href="/create">
             Get started free
             <HugeiconsIcon icon={ArrowRight01Icon} />
           </Link>
         </Button>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -417,7 +484,14 @@ function SectionHeading({
   subtitle?: string;
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
+    <motion.div
+      className="mx-auto max-w-2xl text-center"
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewportOnce}
+      variants={fadeInUp}
+      transition={defaultTransition}
+    >
       <p className="text-sm font-medium text-primary">{eyebrow}</p>
       <h2 className="mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
         {title}
@@ -425,6 +499,6 @@ function SectionHeading({
       {subtitle && (
         <p className="mt-3 text-pretty text-muted-foreground">{subtitle}</p>
       )}
-    </div>
+    </motion.div>
   );
 }

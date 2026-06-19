@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { BusinessCard } from "@/features/builder/components/business-card";
 import type { LinkClickPayload } from "@/features/builder/components/card-layouts";
+import { usePublicCardViewTracking } from "@/features/share/hooks/use-public-card-view-tracking";
 import { getVisitorId } from "@/lib/analytics-client";
-import { getUtmSourceFromUrl } from "@/lib/card-analytics";
 import { getTheme } from "@/lib/card-themes";
 import { useTRPC } from "@/trpc/client";
 
@@ -17,23 +17,11 @@ export function PublicCardView({ slug }: { slug: string }) {
     trpc.card.getPublicBySlug.queryOptions({ slug }),
   );
 
-  const recordView = useMutation(trpc.card.recordView.mutationOptions());
+  usePublicCardViewTracking(card?.slug ?? undefined);
+
   const recordLinkClick = useMutation(
     trpc.card.recordLinkClick.mutationOptions(),
   );
-  const countedRef = useRef(false);
-
-  useEffect(() => {
-    if (!card?.slug || countedRef.current) return;
-    countedRef.current = true;
-
-    recordView.mutate({
-      slug: card.slug,
-      visitorId: getVisitorId(),
-      referrer: document.referrer || undefined,
-      utmSource: getUtmSourceFromUrl(window.location.href) ?? undefined,
-    });
-  }, [card?.slug]);
 
   const handleLinkClick = useCallback(
     (payload: LinkClickPayload) => {

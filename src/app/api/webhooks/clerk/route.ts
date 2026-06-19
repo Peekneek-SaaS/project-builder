@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { FREE_PLAN_SLUG, isPlanId, PRO_PLAN_SLUG, type PlanId } from "@/lib/plan";
+import {
+  FREE_PLAN_SLUG,
+  isPlanId,
+  PRO_PLAN_SLUG,
+  type PlanId,
+} from "@/lib/plan";
 import { setUserPlan } from "@/lib/billing";
 
 type ClerkWebhookEvent = {
@@ -15,11 +20,7 @@ type ClerkWebhookEvent = {
 };
 
 function getClerkUserId(event: ClerkWebhookEvent): string | null {
-  return (
-    event.data.user_id ??
-    event.data.payer?.user_id ??
-    null
-  );
+  return event.data.user_id ?? event.data.payer?.user_id ?? null;
 }
 
 function resolvePlanFromEvent(event: ClerkWebhookEvent): PlanId | null {
@@ -60,7 +61,10 @@ export async function POST(request: Request) {
   try {
     event = (await request.json()) as ClerkWebhookEvent;
   } catch {
-    return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON payload." },
+      { status: 400 },
+    );
   }
 
   const clerkUserId = getClerkUserId(event);
