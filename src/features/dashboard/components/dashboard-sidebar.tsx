@@ -48,7 +48,7 @@ export function DashboardSidebar({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center justify-between">
             <SidebarMenuButton asChild className="p-0!">
-              <Link href="/" className="flex items-center gap-2">
+              {/* <Link href="/" className="flex items-center gap-2">
                 <HugeiconsIcon
                   icon={CreditCardIcon}
                   size={22}
@@ -57,8 +57,10 @@ export function DashboardSidebar({
                 <p className="leading-7 text-sm font-semibold group-data-[collapsible=icon]:hidden!">
                   Cardably
                 </p>
-              </Link>
+              </Link> */}
+              <Logo />
             </SidebarMenuButton>
+            <SidebarTrigger size="lg" className="flex md:hidden" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -126,7 +128,7 @@ export function NavMain({
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               tooltip="Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground "
+              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
               asChild
             >
               <Link href="/create">
@@ -162,7 +164,7 @@ export function NavMain({
                     tooltip={item.title}
                     isActive={isNavActive(item.url)}
                     asChild
-                    className="data-active:border data-active:shadow-xs"
+                    className="data-active:border data-active:shadow-sm "
                   >
                     <Link
                       href={item.url}

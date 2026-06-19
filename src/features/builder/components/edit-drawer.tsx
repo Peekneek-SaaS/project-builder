@@ -39,7 +39,11 @@ type EditCardPanelProps = {
   className?: string;
 };
 
-export function EditCardPanel({ data, setData, className }: EditCardPanelProps) {
+export function EditCardPanel({
+  data,
+  setData,
+  className,
+}: EditCardPanelProps) {
   const [skillInput, setSkillInput] = useState("");
   const uploadErrorRef = useRef<string | null>(null);
   const { startUpload, isUploading } = useUploadThing("logoUploader", {
@@ -108,15 +112,15 @@ export function EditCardPanel({ data, setData, className }: EditCardPanelProps) 
               <img
                 src={data.logoUrl}
                 alt="Logo preview"
-                className="h-12 max-w-[120px] object-contain"
+                className="h-12 max-w-[120px] object-contain rounded-sm"
               />
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => update("logoUrl", "")}
               >
-                Remove
+                Remove <HugeiconsIcon icon={Cancel01Icon} color="red" />
               </Button>
             </div>
           ) : (
@@ -373,13 +377,7 @@ export function EditCardDrawer({
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-3">
       <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -414,7 +412,9 @@ function FieldStyleControls({
             "size-4 rounded-full border border-border",
             !settings.color && "bg-muted",
           )}
-          style={settings.color ? { backgroundColor: settings.color } : undefined}
+          style={
+            settings.color ? { backgroundColor: settings.color } : undefined
+          }
         />
       </label>
       <Toggle

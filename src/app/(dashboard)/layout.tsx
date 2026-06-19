@@ -14,6 +14,7 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import Logo from "../../../public/Logo/Logo";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
   prefetch(trpc.card.list.queryOptions());
@@ -26,14 +27,17 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
     redirect("/sign-in");
   }
 
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
   return (
     <HydrateClient>
       <BillingSync />
       <DashboardSearchProvider>
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={defaultOpen}>
           <DashboardSidebar />
-          <SidebarInset>
-            <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
+          <SidebarInset className="min-w-0">
+            <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background/80 px-4 backdrop-blur-md supports-backdrop-filter:bg-background/60 sm:px-6">
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <SidebarTrigger size="lg" />
                 <Logo className="flex md:hidden" />
@@ -43,9 +47,9 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
                 <UserButton />
               </div>
             </header>
-            <main>
+            <div className="min-w-0 flex-1 overflow-x-hidden">
               <PageEnter>{children}</PageEnter>
-            </main>
+            </div>
           </SidebarInset>
         </SidebarProvider>
       </DashboardSearchProvider>

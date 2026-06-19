@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -26,15 +26,21 @@ import { useTRPC } from "@/trpc/client";
 import { useDashboardSearch } from "@/features/dashboard/context/dashboard-search-context";
 import type { AppRouter } from "@/trpc/routers/_app";
 import {
+  BubblesIcon,
   Chart03Icon,
+  ClipboardIcon,
   Clock01Icon,
   CreditCardNotFoundIcon,
   Delete02Icon,
   Edit02Icon,
+  Home02Icon,
   Loading03Icon,
   MoreVerticalIcon,
   PlusSignIcon,
+  RocketIcon,
   Share08Icon,
+  StarIcon,
+  UserCircleIcon,
   ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -46,9 +52,6 @@ import { motion } from "motion/react";
 type DashboardCard = inferRouterOutputs<AppRouter>["card"]["list"][number];
 
 const DashboardContent = () => {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  // render mounted ? totalViews.toLocaleString("en-US") : totalViews
   const trpc = useTRPC();
   const { debouncedQuery, query, isDebouncing } = useDashboardSearch();
   const { data: cards = [], isLoading } = useQuery(
@@ -62,9 +65,8 @@ const DashboardContent = () => {
   const totalViews = cards.reduce((sum, card) => sum + card.viewCount, 0);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-4 py-8 sm:px-6">
       <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <DashboardCardSearch className="flex md:hidden" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -81,17 +83,33 @@ const DashboardContent = () => {
 
       <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
         <StaggerItem>
-          <Stat label="Total cards" value={String(cards.length)} />
+          <Stat
+            label="Total cards"
+            value={String(cards.length)}
+            variant="cards"
+          />
         </StaggerItem>
         <StaggerItem>
-          <Stat label="Published" value={String(publishedCount)} />
+          <Stat
+            label="Published"
+            value={String(publishedCount)}
+            variant="published"
+          />
         </StaggerItem>
         <StaggerItem>
-          <Stat label="Total views" value={totalViews.toLocaleString()} />
+          <Stat
+            label="Total views"
+            value={totalViews.toLocaleString("en-US")}
+            variant="views"
+          />
         </StaggerItem>
       </Stagger>
 
-      <div className="mt-8">
+      <div className="py-4">
+        <DashboardCardSearch className="flex md:hidden" />
+      </div>
+
+      <div className="">
         {isLoading ? (
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             <HugeiconsIcon icon={Loading03Icon} className="animate-spin" />
@@ -132,7 +150,7 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {filteredCards.map((card) => (
                 <StaggerItem key={card.id}>
                   <CardTile card={card} />
@@ -148,13 +166,57 @@ const DashboardContent = () => {
 
 export default DashboardContent;
 
-function Stat({ label, value }: { label: string; value: string }) {
+type StatVariant = "cards" | "published" | "views";
+
+function Stat({
+  label,
+  value,
+  variant,
+}: {
+  label: string;
+  value: string;
+  variant: StatVariant;
+}) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card p-5">
+      <div className="relative z-10">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
+      </div>
+      <StatDecoration variant={variant} />
     </div>
   );
+}
+
+function StatDecoration({ variant }: { variant: StatVariant }) {
+  switch (variant) {
+    case "cards":
+      return (
+        <HugeiconsIcon
+          icon={ClipboardIcon}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 -rotate-12 text-primary/14 sm:size-24"
+        />
+      );
+    case "published":
+      return (
+        <>
+          <HugeiconsIcon
+            icon={StarIcon}
+            aria-hidden
+            className="pointer-events-none absolute -bottom-6 -right-6 size-23 text-emerald-500/14 sm:size-24"
+          />
+        </>
+      );
+    case "views":
+      return (
+        <HugeiconsIcon
+          icon={UserCircleIcon}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 text-amber-500/14 sm:size-24"
+        />
+      );
+  }
 }
 
 function CardTile({ card }: { card: DashboardCard }) {
@@ -186,14 +248,14 @@ function CardTile({ card }: { card: DashboardCard }) {
   return (
     <>
       <motion.div
-        className="group relative overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg hover:shadow-black/5"
+        className="group relative min-w-0 w-full overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg hover:shadow-black/5"
         whileHover={{ y: -2 }}
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <Link href={builderHref} className="block">
           <div
             className={cn(
-              "relative flex h-44 items-center justify-center overflow-hidden",
+              "relative flex h-28 items-center justify-center overflow-hidden sm:h-36 md:h-44",
               styles.frontSurface,
             )}
           >
@@ -201,13 +263,14 @@ function CardTile({ card }: { card: DashboardCard }) {
               data={card.cardData}
               theme={theme}
               displayMode="front"
+              compact
               className="pointer-events-none shadow-none ring-0"
             />
 
-            <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <p className="text-sm font-semibold text-white">{title}</p>
-              <div className="mt-1.5 space-y-1 space-x-2 text-xs text-white/80">
-                <span>{card.cardData.title || theme.name}</span>
+            <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              {/* <p className="text-sm font-semibold text-white">{title}</p> */}
+              <div className="space-y-1 space-x-2 text-xs text-white/80">
+                {/* <span>{card.cardData.title || theme.name}</span> */}
                 <span className="flex items-center gap-1">
                   <HugeiconsIcon icon={Clock01Icon} size={12} />
                   Updated{" "}
@@ -218,17 +281,18 @@ function CardTile({ card }: { card: DashboardCard }) {
           </div>
         </Link>
 
-        <div className="flex items-center justify-between gap-2 p-4">
-          <div className="min-w-0">
+        <div className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:p-4">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{title}</p>
             <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
               <HugeiconsIcon icon={ViewIcon} size={14} />
-              {card.viewCount.toLocaleString()} views
+              {card.viewCount.toLocaleString("en-US")} views
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-2">
             <Badge
               className={cn(
+                "max-w-22 truncate px-1.5 text-[10px] sm:max-w-none sm:px-2 sm:text-xs",
                 card.published
                   ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
                   : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
@@ -238,7 +302,7 @@ function CardTile({ card }: { card: DashboardCard }) {
             </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="size-8 shrink-0">
                   <HugeiconsIcon icon={MoreVerticalIcon} />
                 </Button>
               </DropdownMenuTrigger>

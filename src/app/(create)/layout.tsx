@@ -11,7 +11,7 @@ const CreateLayout = async ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
       <PageEnter>{children}</PageEnter>
     </div>
   );

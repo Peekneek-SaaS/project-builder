@@ -226,8 +226,8 @@ export function ThemePickerGrid({
 
   return (
     <>
-      <div className="-mx-4 max-h-[520px] overflow-y-auto px-4 pb-2 sm:mx-0 sm:px-0">
-        <div className="mx-auto grid w-full grid-cols-1 gap-3 md:grid-cols-3 sm:max-w-3xl sm:gap-4">
+      <div className="max-h-[520px] overflow-x-hidden overflow-y-auto pb-2">
+        <div className="mx-auto grid w-full min-w-0 grid-cols-2 gap-3 sm:max-w-3xl sm:gap-4 md:grid-cols-3">
           {themes.map((theme) => (
             <ThemePickerCard
               key={theme.id}

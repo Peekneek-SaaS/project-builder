@@ -233,7 +233,7 @@ export default function BuilderView() {
   const displayData = withPreviewFallback(activeCard.data);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background">
       <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -395,17 +395,26 @@ export default function BuilderView() {
                 ))}
               </div>
             </div>
-            <div className="mt-5 flex min-h-[580px] w-full flex-1 items-center justify-center overflow-x-auto rounded-2xl border border-border bg-muted/30 p-8 sm:p-10 lg:p-12">
-              <BusinessCard
-                data={displayData}
-                theme={activeTheme}
-                displayMode={displayMode}
-                className={
+            <div className="mt-5 flex min-h-[420px] w-full flex-1 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/30 p-4 sm:min-h-[520px] sm:p-8 lg:min-h-[580px] lg:p-12">
+              <div
+                className={cn(
+                  "origin-center",
                   displayMode === "pair"
-                    ? "flex-col lg:items-start lg:justify-center lg:gap-10 xl:gap-14"
-                    : undefined
-                }
-              />
+                    ? "scale-[0.62] sm:scale-[0.78] md:scale-90 lg:scale-100"
+                    : "scale-[0.78] sm:scale-90 lg:scale-100",
+                )}
+              >
+                <BusinessCard
+                  data={displayData}
+                  theme={activeTheme}
+                  displayMode={displayMode}
+                  className={
+                    displayMode === "pair"
+                      ? "flex-col lg:items-start lg:justify-center lg:gap-10 xl:gap-14"
+                      : undefined
+                  }
+                />
+              </div>
             </div>
           </section>
 

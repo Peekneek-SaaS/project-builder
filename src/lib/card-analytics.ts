@@ -207,6 +207,18 @@ export type CardAnalyticsSnapshot = {
   locations: { city: string; views: number }[];
 };
 
+export type AnalyticsOverviewCard = {
+  id: string;
+  name: string;
+  themeId: string;
+  views: number;
+};
+
+export type AnalyticsOverviewSnapshot = CardAnalyticsSnapshot & {
+  totalCards: number;
+  topCards: AnalyticsOverviewCard[];
+};
+
 export function createEmptyAnalytics(
   card: { id: string; themeId: string; name: string },
   period: AnalyticsPeriod,
@@ -327,5 +339,25 @@ export function createAnalyticsFromViewCount(
     topLinks: [],
     sources: [{ name: "Direct link", value: 100, count: viewCount }],
     locations: [],
+  };
+}
+
+const OVERVIEW_CARD = {
+  id: "overview",
+  themeId: "midnight",
+  name: "All cards",
+} as const;
+
+export function createOverviewFromViewCounts(
+  cards: AnalyticsOverviewCard[],
+  period: AnalyticsPeriod,
+): AnalyticsOverviewSnapshot {
+  const totalViews = cards.reduce((sum, card) => sum + card.views, 0);
+  const base = createAnalyticsFromViewCount(OVERVIEW_CARD, period, totalViews);
+
+  return {
+    ...base,
+    totalCards: cards.length,
+    topCards: [...cards].sort((a, b) => b.views - a.views),
   };
 }

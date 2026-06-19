@@ -222,9 +222,14 @@ const CreateForm = ({ className }: { className: string }) => {
     parsing || isUploading || parseResume.isPending || createCards.isPending;
 
   return (
-    <div className={cn("flex flex-1 flex-col min-h-0", className)}>
+    <div
+      className={cn(
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
+        className,
+      )}
+    >
       <div className="shrink-0 border-b border-border bg-card/40">
-        <Wrapper className="mx-auto flex max-w-2xl items-center justify-center gap-4 px-4 py-4 sm:px-6">
+        <Wrapper className="mx-auto flex max-w-2xl min-w-0 items-center justify-center gap-2 px-4 py-4 sm:gap-4 sm:px-6">
           <StepDot
             index={1}
             current={step}
@@ -273,10 +278,10 @@ const CreateForm = ({ className }: { className: string }) => {
         </Wrapper>
       </div>
 
-      <footer className="shrink-0 border-t border-border bg-background/90 backdrop-blur-md">
+      <footer className="shrink-0 overflow-x-hidden border-t border-border bg-background/90 backdrop-blur-md">
         <div
           className={cn(
-            "mx-auto flex items-center justify-between px-4 py-4 sm:px-6",
+            "mx-auto flex min-w-0 items-center justify-between gap-2 px-4 py-4 sm:px-6",
             step === 1 ? "max-w-md" : "max-w-5xl",
           )}
         >
@@ -301,7 +306,7 @@ const CreateForm = ({ className }: { className: string }) => {
           ) : (
             <Button
               disabled={selected.length === 0 || createCards.isPending}
-              className="gap-1.5"
+              className="shrink-0 gap-1.5 text-xs"
               onClick={() => void handleBuild()}
             >
               {createCards.isPending

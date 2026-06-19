@@ -10,14 +10,14 @@ import { UserButton } from "@clerk/nextjs";
 
 const CreateHeader = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Wrapper className="flex items-center justify-between py-4 border-b">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
+      <Wrapper className="flex min-w-0 items-center justify-between gap-2 overflow-hidden border-b py-4">
         <Logo />
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild>
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <Button variant="ghost" size="sm" asChild className="px-2 sm:px-3">
             <Link href="/dashboard">
               <HugeiconsIcon icon={Cancel01Icon} size={20} />
-              Exit
+              <span className="hidden sm:inline">Exit</span>
             </Link>
           </Button>
           <UserButton afterSwitchSessionUrl="/" />
