@@ -47,9 +47,9 @@ export function DashboardSidebar({
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center justify-between">
-            <SidebarMenuButton asChild className="p-0!">
-              {/* <Link href="/" className="flex items-center gap-2">
+          <SidebarMenuItem className="flex items-center justify-between py-2">
+            {/* <SidebarMenuButton asChild className="p-0!"> */}
+            {/* <Link href="/" className="flex items-center gap-2">
                 <HugeiconsIcon
                   icon={CreditCardIcon}
                   size={22}
@@ -59,8 +59,8 @@ export function DashboardSidebar({
                   Cardably
                 </p>
               </Link> */}
-              <Logo />
-            </SidebarMenuButton>
+            <Logo className2="group-data-[collapsible=icon]:hidden!" />
+            {/* </SidebarMenuButton> */}
             <SidebarTrigger size="lg" className="flex md:hidden" />
           </SidebarMenuItem>
         </SidebarMenu>

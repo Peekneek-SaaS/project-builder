@@ -48,6 +48,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import type { inferRouterOutputs } from "@trpc/server";
 import { DashboardCardSearch } from "./dashboard-card-search";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { motion } from "motion/react";
 
 type DashboardCard = inferRouterOutputs<AppRouter>["card"]["list"][number];
@@ -61,6 +62,13 @@ const DashboardContent = () => {
 
   const filteredCards = filterCardsByQuery(cards, debouncedQuery);
   const isFiltering = debouncedQuery.trim().length > 0;
+
+  const {
+    visibleItems: visibleCards,
+    hasMore,
+    isLoadingMore,
+    sentinelRef,
+  } = useInfiniteScroll(filteredCards, { resetKey: debouncedQuery });
 
   const publishedCount = cards.filter((card) => card.published).length;
   const totalViews = cards.reduce((sum, card) => sum + card.viewCount, 0);
@@ -151,13 +159,33 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-              {filteredCards.map((card) => (
-                <StaggerItem key={card.id}>
-                  <CardTile card={card} />
-                </StaggerItem>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              {visibleCards.map((card) => (
+                <CardTile key={card.id} card={card} />
               ))}
-            </Stagger>
+            </div>
+            {hasMore ? (
+              <div
+                ref={sentinelRef}
+                className="mt-6 flex min-h-12 items-center justify-center py-4"
+              >
+                {isLoadingMore ? (
+                  <div className="flex items-center gap-2">
+                    <HugeiconsIcon
+                      icon={Loading03Icon}
+                      className="animate-spin text-muted-foreground"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Loading more cards…
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ) : filteredCards.length > 10 ? (
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                Showing all {filteredCards.length} cards
+              </p>
+            ) : null}
           </>
         )}
       </div>

@@ -192,7 +192,7 @@ export function AnalyticsView({ cardId }: { cardId: string }) {
       <AnalyticsDashboard
         data={displayAnalytics}
         period={period}
-        chartIdPrefix={`card-${cardId}`}
+        chartIdPrefix={`card-${cardId}-${period}`}
       />
     </div>
   );

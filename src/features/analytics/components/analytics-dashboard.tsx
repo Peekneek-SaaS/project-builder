@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -23,6 +24,8 @@ import {
   type CardAnalyticsSnapshot,
 } from "@/lib/card-analytics";
 import { cn } from "@/lib/utils";
+import { ListPagination } from "@/components/list-pagination";
+import { paginateItems, PAGE_SIZE } from "@/lib/pagination";
 import {
   ArrowDownRight01Icon,
   ArrowUpRight01Icon,
@@ -55,6 +58,14 @@ export function AnalyticsDashboard({
   period: AnalyticsPeriod;
   chartIdPrefix?: string;
 }) {
+  const [locationsPage, setLocationsPage] = useState(1);
+
+  useEffect(() => {
+    setLocationsPage(1);
+  }, [data.locations, period, chartIdPrefix]);
+
+  const paginatedLocations = paginateItems(data.locations, locationsPage);
+
   const dailyMax = Math.max(
     ...data.daily.flatMap((point) => [point.views, point.visitors]),
     1,
@@ -263,22 +274,31 @@ export function AnalyticsDashboard({
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-card p-6">
-        <h2 className="text-sm font-semibold">Top locations</h2>
-        <p className="text-xs text-muted-foreground">Visitor cities</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold">Top locations</h2>
+            <p className="text-xs text-muted-foreground">Visitor cities</p>
+          </div>
+          <ListPagination
+            page={locationsPage}
+            totalItems={data.locations.length}
+            onPageChange={setLocationsPage}
+          />
+        </div>
         {data.locations.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
             Location data will appear once visitors view your public cards.
           </p>
         ) : (
           <div className="mt-4 divide-y divide-border">
-            {data.locations.map((loc, i) => (
+            {paginatedLocations.map((loc, i) => (
               <div
                 key={loc.city}
                 className="flex items-center justify-between py-3"
               >
                 <div className="flex items-center gap-3">
                   <span className="grid size-6 place-items-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
-                    {i + 1}
+                    {(locationsPage - 1) * PAGE_SIZE + i + 1}
                   </span>
                   <span className="text-sm">{loc.city}</span>
                 </div>

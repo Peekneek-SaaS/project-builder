@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { AnalyticsDashboard } from "@/features/analytics/components/analytics-dashboard";
 import { Button } from "@/components/ui/button";
+import { ListPagination } from "@/components/list-pagination";
+import { paginateItems, PAGE_SIZE } from "@/lib/pagination";
 import {
   Select,
   SelectContent,
@@ -47,6 +50,12 @@ export function AnalyticsOverviewView() {
   const { data: overview, isLoading: overviewLoading } = useQuery(
     trpc.analytics.getOverview.queryOptions({ period }),
   );
+
+  const [cardsPage, setCardsPage] = useState(1);
+
+  useEffect(() => {
+    setCardsPage(1);
+  }, [period, overview?.topCards.length]);
 
   function setPeriod(nextPeriod: AnalyticsPeriod) {
     const params = new URLSearchParams(searchParams.toString());
@@ -100,6 +109,8 @@ export function AnalyticsOverviewView() {
     );
   }
 
+  const paginatedTopCards = paginateItems(overview.topCards, cardsPage);
+
   return (
     <div className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-4 py-8 sm:px-6">
       <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -132,22 +143,32 @@ export function AnalyticsOverviewView() {
       <AnalyticsDashboard
         data={overview}
         period={period}
-        chartIdPrefix="overview"
+        chartIdPrefix={`overview-${period}`}
       />
 
       <div className="mt-6 rounded-xl border border-border bg-card p-6">
-        <h2 className="text-sm font-semibold">Views by card</h2>
-        <p className="text-xs text-muted-foreground">
-          Card performance in the selected period
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold">Views by card</h2>
+            <p className="text-xs text-muted-foreground">
+              Card performance in the selected period
+            </p>
+          </div>
+          <ListPagination
+            page={cardsPage}
+            totalItems={overview.topCards.length}
+            onPageChange={setCardsPage}
+          />
+        </div>
         {overview.topCards.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
             No card views recorded in this period yet.
           </p>
         ) : (
           <div className="mt-4 divide-y divide-border">
-            {overview.topCards.map((card, index) => {
+            {paginatedTopCards.map((card, index) => {
               const theme = getTheme(card.themeId);
+              const rank = (cardsPage - 1) * PAGE_SIZE + index + 1;
               return (
                 <Link
                   key={card.id}
@@ -156,7 +177,7 @@ export function AnalyticsOverviewView() {
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="grid size-6 shrink-0 place-items-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
-                      {index + 1}
+                      {rank}
                     </span>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">

@@ -237,7 +237,6 @@ export const analyticsRouter = createTRPCRouter({
             })),
           locations: [...locationGroups]
             .sort((a, b) => b._count._all - a._count._all)
-            .slice(0, 5)
             .map((group) => ({
               city: [group.city, group.country].filter(Boolean).join(", "),
               views: group._count._all,
@@ -466,7 +465,6 @@ export const analyticsRouter = createTRPCRouter({
             })),
           locations: [...locationGroups]
             .sort((a, b) => b._count._all - a._count._all)
-            .slice(0, 5)
             .map((group) => ({
               city: [group.city, group.country].filter(Boolean).join(", "),
               views: group._count._all,
