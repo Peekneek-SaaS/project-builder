@@ -21,6 +21,7 @@ import {
   CursorMagicSelection03Icon,
   File01Icon,
   GoogleDocIcon,
+  Loading03Icon,
   SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
@@ -41,6 +42,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type step = 1 | 2;
 
@@ -79,7 +81,7 @@ const CreateForm = ({ className }: { className: string }) => {
   const [extractedData, setExtractedData] = useState<ExtractedCardData | null>(
     null,
   );
-  const [selected, setSelected] = useState<string[]>(["midnight"]);
+  const [selected, setSelected] = useState<string[]>([]);
   const [fromHistory, setFromHistory] = useState(false);
   const [selectedHistory, setSelectedHistory] =
     useState<ResumeHistoryItem | null>(null);
@@ -178,7 +180,7 @@ const CreateForm = ({ className }: { className: string }) => {
 
     setSelected((prev) => {
       if (prev.includes(theme.id)) {
-        return prev.length === 1 ? prev : prev.filter((id) => id !== theme.id);
+        return prev.filter((id) => id !== theme.id);
       }
       if (isProPlan) {
         return [...prev, theme.id];
@@ -531,11 +533,11 @@ function ResumeExtractedPanel({
       >
         <div className="mb-2 flex items-center gap-2">
           <HugeiconsIcon
-            icon={SparklesIcon}
+            icon={parsing ? Loading03Icon : SparklesIcon}
             size={20}
             className={cn(
               "size-4",
-              parsing ? "animate-pulse text-primary" : "text-primary",
+              parsing ? "animate-spin text-primary" : "text-primary",
             )}
           />
           <p className="text-sm font-medium">
@@ -555,7 +557,7 @@ function ResumeExtractedPanel({
                 {label}
               </p>
               <p className="truncate text-sm font-medium">
-                {parsing ? "— — —" : value || "—"}
+                {parsing ? <Skeleton className="h-4 w-full" /> : value || "—"}
               </p>
             </div>
           ))}
@@ -606,7 +608,11 @@ function StepTheme({
             </>
           ) : (
             <>
-              Pick a look for your card. Select multiple themes with{" "}
+              Pick a look for your card.{" "}
+              <span className="font-medium text-foreground">
+                {selected.length} selected
+              </span>
+              . Select multiple themes with{" "}
               <span className="font-medium text-foreground">Pro</span>.
             </>
           )}

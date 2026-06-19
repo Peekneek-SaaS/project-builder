@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import {
   CheckIcon,
-  LockIcon,
   LockPasswordIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -12,9 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import type { CardTheme } from "@/lib/card-themes";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import { cn } from "@/lib/utils";
-import { ThemePreviewModal } from "@/features/builder/components/theme-preview-modal";
-
-const HOVER_PREVIEW_DELAY_MS = 1000;
 
 export function ThemeSwatch({
   theme,
@@ -88,50 +83,20 @@ export function ThemePickerCard({
   previewInitials,
   selected,
   onSelect,
-  onPreview,
 }: {
   theme: CardTheme;
   previewName: string;
   previewInitials: string;
   selected: boolean;
   onSelect: () => void;
-  onPreview: (theme: CardTheme) => void;
 }) {
   const styles = getThemeStyleClasses(theme.id);
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function clearHoverTimer() {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-  }
-
-  useEffect(() => {
-    return () => clearHoverTimer();
-  }, []);
-
-  function handleMouseEnter() {
-    clearHoverTimer();
-    hoverTimerRef.current = setTimeout(() => {
-      onPreview(theme);
-    }, HOVER_PREVIEW_DELAY_MS);
-  }
-
-  function handleMouseLeave() {
-    clearHoverTimer();
-  }
 
   return (
     <button
       type="button"
       onClick={onSelect}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onFocus={handleMouseEnter}
-      onBlur={handleMouseLeave}
       aria-pressed={selected}
-      title="Hover for 1-2 seconds to preview"
       className={cn(
         "flex w-full flex-col overflow-hidden rounded-xl border-2 text-left transition-all",
         selected
@@ -216,38 +181,20 @@ export function ThemePickerGrid({
   selected: string[];
   onToggle: (theme: CardTheme) => void;
 }) {
-  const [previewTheme, setPreviewTheme] = useState<CardTheme | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-
-  function openPreview(theme: CardTheme) {
-    setPreviewTheme(theme);
-    setPreviewOpen(true);
-  }
-
   return (
-    <>
-      <div className="max-h-[520px] overflow-x-hidden overflow-y-auto pb-2">
-        <div className="mx-auto grid w-full min-w-0 grid-cols-2 gap-3 sm:max-w-3xl sm:gap-4 md:grid-cols-3">
-          {themes.map((theme) => (
-            <ThemePickerCard
-              key={theme.id}
-              theme={theme}
-              previewName={previewName}
-              previewInitials={previewInitials}
-              selected={selected.includes(theme.id)}
-              onSelect={() => onToggle(theme)}
-              onPreview={openPreview}
-            />
-          ))}
-        </div>
+    <div className="max-h-[520px] overflow-x-hidden overflow-y-auto pb-2">
+      <div className="mx-auto grid w-full min-w-0 grid-cols-2 gap-3 sm:max-w-3xl sm:gap-4 md:grid-cols-3">
+        {themes.map((theme) => (
+          <ThemePickerCard
+            key={theme.id}
+            theme={theme}
+            previewName={previewName}
+            previewInitials={previewInitials}
+            selected={selected.includes(theme.id)}
+            onSelect={() => onToggle(theme)}
+          />
+        ))}
       </div>
-
-      <ThemePreviewModal
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        theme={previewTheme}
-        previewName={previewName}
-      />
-    </>
+    </div>
   );
 }

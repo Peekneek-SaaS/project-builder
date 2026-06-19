@@ -6,12 +6,17 @@ import { cn } from "@/lib/utils";
 const Logo = ({
   className,
   className2,
+  href,
 }: {
   className?: string;
   className2?: string;
+  href?: string;
 }) => {
   return (
-    <Link href="/" className={cn("flex items-center gap-2", className)}>
+    <Link
+      href={href ? href : "/"}
+      className={cn("flex items-center gap-2", className)}
+    >
       <span className="p-1 bg-primary rounded-md">
         <HugeiconsIcon icon={CreditCardIcon} size={22} color="white" />
       </span>

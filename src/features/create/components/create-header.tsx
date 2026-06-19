@@ -12,7 +12,7 @@ const CreateHeader = () => {
   return (
     <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
       <Wrapper className="flex min-w-0 items-center justify-between gap-2 overflow-hidden border-b py-4">
-        <Logo />
+        <Logo href="/dashboard" />
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button variant="ghost" size="sm" asChild className="px-2 sm:px-3">
             <Link href="/dashboard">
