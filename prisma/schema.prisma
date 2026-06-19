@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                      String    @id @default(cuid())
+  clerkId                 String    @unique
+  plan                    String    @default("free")
+  clerkSubscriptionId     String?
+  clerkSubscriptionStatus String?
+  planExpiresAt           DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([plan])
+}
+
+model Resume {
+  id            String   @id @default(cuid())
+  userId        String
+  fileName      String
+  fileUrl       String
+  fileKey       String
+  mimeType      String
+  extractedData Json
+  rawText       String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  cards         Card[]
+
+  @@index([userId])
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  userId      String
+  resumeId    String
+  cardSetId   String
+  themeId     String
+  cardData    Json
+  displayMode String    @default("pair")
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  slug        String?   @unique
+  viewCount   Int       @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  resume     Resume          @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  views      CardView[]
+  linkClicks CardLinkClick[]
+
+  @@index([userId])
+  @@index([resumeId])
+  @@index([cardSetId])
+  @@index([slug])
+  @@index([deletedAt])
+}
+
+model CardView {
+  id        String   @id @default(cuid())
+  cardId    String
+  visitorId String
+  source    String
+  referrer  String?
+  city      String?
+  country   String?
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([cardId, createdAt])
+  @@index([cardId, visitorId])
+  @@index([cardId, source])
+}
+
+model CardLinkClick {
+  id        String   @id @default(cuid())
+  cardId    String
+  visitorId String
+  linkLabel String
+  linkUrl   String?
+  city      String?
+  country   String?
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([cardId, createdAt])
+  @@index([cardId, linkLabel])
+}
