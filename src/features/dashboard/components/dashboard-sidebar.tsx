@@ -8,6 +8,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Logo from "../../../../public/Logo/Logo";
 
@@ -121,6 +122,10 @@ export function NavMain({
     return !billing.analyticsEnabled;
   }
 
+  const { isMobile, setOpenMobile } = useSidebar();
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -131,7 +136,7 @@ export function NavMain({
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
               asChild
             >
-              <Link href="/create">
+              <Link href="/create" onClick={closeMobileSidebar}>
                 <HugeiconsIcon icon={PlusSignIcon} />
                 <span>Create new card</span>
               </Link>
@@ -150,6 +155,7 @@ export function NavMain({
                     disabled
                     aria-disabled
                     className="cursor-not-allowed opacity-60"
+                    onClick={closeMobileSidebar}
                   >
                     {item.icon ? <HugeiconsIcon icon={item.icon} /> : null}
                     <span>{item.title}</span>
@@ -163,12 +169,13 @@ export function NavMain({
                   <SidebarMenuButton
                     tooltip={item.title}
                     isActive={isNavActive(item.url)}
+                    className="data-active:border data-active:shadow-sm"
                     asChild
-                    className="data-active:border data-active:shadow-sm "
                   >
                     <Link
                       href={item.url}
                       className={cn(item.textColor, item.hoverTextColor)}
+                      onClick={closeMobileSidebar}
                     >
                       {item.icon ? <HugeiconsIcon icon={item.icon} /> : null}
                       <span>{item.title}</span>

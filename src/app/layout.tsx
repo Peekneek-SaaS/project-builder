@@ -15,6 +15,8 @@ import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/client";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider"
+
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -53,11 +55,21 @@ export default function RootLayout({
           "font-sans",
           inter.variable,
         )}
+        suppressHydrationWarning
       >
         <body className="min-h-full flex flex-col">
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
           <TRPCReactProvider>
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+              </ThemeProvider>
+            </TooltipProvider>
             <Toaster position="top-center" />
           </TRPCReactProvider>
         </body>

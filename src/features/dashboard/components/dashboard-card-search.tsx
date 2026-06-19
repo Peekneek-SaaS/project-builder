@@ -49,10 +49,8 @@ export function DashboardCardSearch({ className }: { className?: string }) {
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
 
-  function getBuilderHref(cardId: string) {
-    const resumeId = cards.find((card) => card.id === cardId)?.resumeId;
-    if (!resumeId) return "/dashboard";
-    return `/builder/${resumeId}?cards=${cardId}`;
+  function getShareHref(cardId: string) {
+    return `/share/${cardId}`;
   }
 
   return (
@@ -115,7 +113,7 @@ export function DashboardCardSearch({ className }: { className?: string }) {
                 return (
                   <li key={card.id}>
                     <Link
-                      href={getBuilderHref(card.id)}
+                      href={getShareHref(card.id)}
                       className={cn(
                         "flex flex-col gap-0.5 px-4 py-2.5 text-left transition-colors hover:bg-muted",
                       )}

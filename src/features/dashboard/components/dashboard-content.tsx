@@ -41,6 +41,7 @@ import {
   Share08Icon,
   StarIcon,
   UserCircleIcon,
+  UserGroupIcon,
   ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -70,7 +71,7 @@ const DashboardContent = () => {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage, edit, and share your business cards.
+            Manage, edit, and share your business cards
           </p>
         </div>
         <Button asChild>
@@ -211,7 +212,7 @@ function StatDecoration({ variant }: { variant: StatVariant }) {
     case "views":
       return (
         <HugeiconsIcon
-          icon={UserCircleIcon}
+          icon={UserGroupIcon}
           aria-hidden
           className="pointer-events-none absolute -bottom-6 -right-6 size-23 text-amber-500/14 sm:size-24"
         />

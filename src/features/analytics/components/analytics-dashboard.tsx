@@ -26,7 +26,15 @@ import { cn } from "@/lib/utils";
 import {
   ArrowDownRight01Icon,
   ArrowUpRight01Icon,
+  BubblesIcon,
+  ChartIcon,
+  ClipboardIcon,
+  DivideSignIcon,
+  Link01Icon,
   SquareMousePointerIcon,
+  StarIcon,
+  UserCircleIcon,
+  UserGroupIcon,
   UserIcon,
   ViewIcon,
 } from "@hugeicons/core-free-icons";
@@ -68,6 +76,7 @@ export function AnalyticsDashboard({
           value={formatKpi(data.kpis.totalViews)}
           delta={data.kpis.deltas.totalViews.label}
           up={data.kpis.deltas.totalViews.up}
+          variant="views"
         />
         <Kpi
           icon={UserIcon}
@@ -75,6 +84,7 @@ export function AnalyticsDashboard({
           value={formatKpi(data.kpis.uniqueVisitors)}
           delta={data.kpis.deltas.uniqueVisitors.label}
           up={data.kpis.deltas.uniqueVisitors.up}
+          variant="visitors"
         />
         <Kpi
           icon={SquareMousePointerIcon}
@@ -82,6 +92,7 @@ export function AnalyticsDashboard({
           value={formatKpi(data.kpis.linkClicks)}
           delta={data.kpis.deltas.linkClicks.label}
           up={data.kpis.deltas.linkClicks.up}
+          variant="clicks"
         />
         <Kpi
           icon={ArrowUpRight01Icon}
@@ -89,6 +100,7 @@ export function AnalyticsDashboard({
           value={formatKpi(data.kpis.clickRate, "%")}
           delta={data.kpis.deltas.clickRate.label}
           up={data.kpis.deltas.clickRate.up}
+          variant="clickRate"
         />
       </div>
 
@@ -282,43 +294,89 @@ export function AnalyticsDashboard({
   );
 }
 
+type KpiVariant = "views" | "visitors" | "clicks" | "clickRate";
+
 function Kpi({
   icon,
   label,
   value,
   delta,
   up,
+  variant,
 }: {
   icon?: IconSvgElement;
   label: string;
   value: string;
   delta: string;
   up: boolean;
+  variant: KpiVariant;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
-          {icon ? <HugeiconsIcon icon={icon} /> : null}
-        </span>
-        <span
-          className={cn(
-            "inline-flex items-center gap-0.5 text-xs font-medium",
-            up ? "text-emerald-600" : "text-destructive",
-          )}
-        >
-          {up ? (
-            <HugeiconsIcon icon={ArrowUpRight01Icon} />
-          ) : (
-            <HugeiconsIcon icon={ArrowDownRight01Icon} />
-          )}
-          {delta}
-        </span>
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card p-5">
+      <div className="relative z-10">
+        <div className="flex items-center justify-between">
+          <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
+            {icon ? <HugeiconsIcon icon={icon} /> : null}
+          </span>
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5 text-xs font-medium",
+              up ? "text-emerald-600" : "text-destructive",
+            )}
+          >
+            {up ? (
+              <HugeiconsIcon icon={ArrowUpRight01Icon} />
+            ) : (
+              <HugeiconsIcon icon={ArrowDownRight01Icon} />
+            )}
+            {delta}
+          </span>
+        </div>
+        <p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{label}</p>
       </div>
-      <p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-0.5 text-sm text-muted-foreground">{label}</p>
+      <KpiDecoration variant={variant} />
     </div>
   );
+}
+
+function KpiDecoration({ variant }: { variant: KpiVariant }) {
+  switch (variant) {
+    case "views":
+      return (
+        <HugeiconsIcon
+          icon={UserGroupIcon}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 text-amber-500/14 sm:size-24"
+        />
+      );
+    case "visitors":
+      return (
+        <HugeiconsIcon
+          icon={UserCircleIcon}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 text-emerald-500/14 sm:size-24"
+        />
+      );
+    case "clicks":
+      return (
+        <>
+          <HugeiconsIcon
+            icon={Link01Icon}
+            aria-hidden
+            className="pointer-events-none absolute -bottom-8 -right-8 size-24 -rotate-8 text-indigo-500/14 sm:size-28"
+          />
+        </>
+      );
+    case "clickRate":
+      return (
+        <HugeiconsIcon
+          icon={DivideSignIcon}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 -rotate-12 text-red-500/14 sm:size-24"
+        />
+      );
+  }
 }
 
 function Legend({ color, label }: { color: string; label: string }) {

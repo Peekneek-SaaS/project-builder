@@ -9,7 +9,7 @@ const Logo = ({ className }: { className?: string }) => {
       <span className="p-1 bg-primary rounded-md">
         <HugeiconsIcon icon={CreditCardIcon} size={22} color="white" />
       </span>
-      <p className="leading-7 text-sm font-semibold">Cardify</p>
+      <p className="leading-7 text-lg font-semibold">Cardify</p>
     </Link>
   );
 };

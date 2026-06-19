@@ -112,7 +112,10 @@ export function AnalyticsOverviewView() {
             </span>
           </p>
         </div>
-        <Select value={period} onValueChange={(value) => setPeriod(value as AnalyticsPeriod)}>
+        <Select
+          value={period}
+          onValueChange={(value) => setPeriod(value as AnalyticsPeriod)}
+        >
           <SelectTrigger className="w-40">
             <SelectValue />
           </SelectTrigger>
@@ -156,7 +159,9 @@ export function AnalyticsOverviewView() {
                       {index + 1}
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{card.name}</p>
+                      <p className="truncate text-sm font-medium">
+                        {card.name}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {theme.name}
                       </p>
