@@ -62,6 +62,9 @@ const CreateForm = ({ className }: { className: string }) => {
   const isProPlan = billing?.isPro ?? false;
 
   const parseResume = useMutation(trpc.resume.parse.mutationOptions());
+  const createBlankResume = useMutation(
+    trpc.resume.createBlank.mutationOptions(),
+  );
   const createCards = useMutation(trpc.card.createBatch.mutationOptions());
   const { data: resumeHistory = [], isLoading: historyLoading } = useQuery(
     trpc.resume.list.queryOptions(),
@@ -147,6 +150,41 @@ const CreateForm = ({ className }: { className: string }) => {
     }
   }
 
+  async function handleSkip() {
+    try {
+      setFromHistory(false);
+      setSelectedHistory(null);
+      setParsing(true);
+      setParsed(false);
+      setExtractedData(null);
+      setResumeId(null);
+
+      const result = await createBlankResume.mutateAsync();
+
+      setResumeId(result.id);
+      setExtractedData(result.extractedData);
+      setFileName("No resume uploaded");
+      setParsed(true);
+      await queryClient.invalidateQueries(trpc.resume.list.queryFilter());
+    } catch (error) {
+      setFileName(null);
+      setParsed(false);
+      setExtractedData(null);
+      setResumeId(null);
+
+      const message =
+        error instanceof TRPCClientError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Failed to start without a resume.";
+
+      toast.error(message);
+    } finally {
+      setParsing(false);
+    }
+  }
+
   function handleClear() {
     setFileName(null);
     setParsed(false);
@@ -221,12 +259,16 @@ const CreateForm = ({ className }: { className: string }) => {
   }
 
   const isProcessing =
-    parsing || isUploading || parseResume.isPending || createCards.isPending;
+    parsing ||
+    isUploading ||
+    parseResume.isPending ||
+    createBlankResume.isPending ||
+    createCards.isPending;
 
   return (
     <div
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden",
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
         className,
       )}
     >
@@ -248,11 +290,16 @@ const CreateForm = ({ className }: { className: string }) => {
         </Wrapper>
       </div>
 
-      <div className="flex flex-1 flex-col min-h-0 px-4 py-6">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col px-4 py-6",
+          step === 1 ? "overflow-y-auto" : "overflow-hidden",
+        )}
+      >
         <Wrapper
           className={cn(
-            "mx-auto flex w-full flex-1 flex-col min-h-0",
-            step === 1 ? "max-w-2xl" : "max-w-5xl",
+            "mx-auto flex w-full min-h-0 flex-1 flex-col",
+            step === 1 ? "max-w-2xl" : "w-full max-w-none",
           )}
         >
           {step === 1 ? (
@@ -268,6 +315,8 @@ const CreateForm = ({ className }: { className: string }) => {
               onSelectHistory={handleSelectHistory}
               onFile={handleFile}
               onClear={handleClear}
+              onSkip={() => void handleSkip()}
+              skipping={createBlankResume.isPending}
             />
           ) : (
             <StepTheme
@@ -280,11 +329,11 @@ const CreateForm = ({ className }: { className: string }) => {
         </Wrapper>
       </div>
 
-      <footer className="shrink-0 overflow-x-hidden border-t border-border bg-background/90 backdrop-blur-md">
+      <footer className="sticky bottom-0 z-20 shrink-0 overflow-x-hidden border-t border-border bg-background/95 backdrop-blur-md">
         <div
           className={cn(
             "mx-auto flex min-w-0 items-center justify-between gap-2 px-4 py-4 sm:px-6",
-            step === 1 ? "max-w-md" : "max-w-5xl",
+            step === 1 ? "max-w-md" : "w-full max-w-none",
           )}
         >
           {step === 1 ? (
@@ -337,6 +386,8 @@ function StepUpload({
   onSelectHistory,
   onFile,
   onClear,
+  onSkip,
+  skipping,
 }: {
   fileName: string | null;
   parsing: boolean;
@@ -349,6 +400,8 @@ function StepUpload({
   onSelectHistory: (resume: ResumeHistoryItem | null) => void;
   onFile: (file: File) => void;
   onClear: () => void;
+  onSkip: () => void;
+  skipping: boolean;
 }) {
   const [dragging, setDragging] = useState(false);
 
@@ -406,7 +459,16 @@ function StepUpload({
           <div className="flex items-center justify-center gap-2">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs text-muted-foreground">
-              or select from previous
+              Select from previous or{" "}
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto p-0 text-xs"
+                disabled={parsing || skipping}
+                onClick={onSkip}
+              >
+                {skipping ? "Skipping" : "Skip"}
+              </Button>
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
@@ -455,6 +517,7 @@ function StepUpload({
           parsed={parsed}
           extractedData={extractedData}
           fromHistory={fromHistory}
+          skipped={fileName === "No resume uploaded"}
           onClear={onClear}
         />
       )}
@@ -468,6 +531,7 @@ function ResumeExtractedPanel({
   parsed,
   extractedData,
   fromHistory,
+  skipped,
   onClear,
 }: {
   fileName: string;
@@ -475,6 +539,7 @@ function ResumeExtractedPanel({
   parsed: boolean;
   extractedData: ExtractedCardData | null;
   fromHistory: boolean;
+  skipped?: boolean;
   onClear: () => void;
 }) {
   const fields = extractedData
@@ -509,9 +574,11 @@ function ResumeExtractedPanel({
               ? "Uploading and extracting information…"
               : fromHistory
                 ? "Loaded from saved history"
-                : parsed
-                  ? "Ready"
-                  : "Uploaded"}
+                : skipped
+                  ? "Start from scratch — edit in the builder"
+                  : parsed
+                    ? "Ready"
+                    : "Uploaded"}
           </p>
         </div>
         <Button
@@ -535,13 +602,14 @@ function ResumeExtractedPanel({
           <HugeiconsIcon
             icon={parsing ? Loading03Icon : SparklesIcon}
             size={20}
-            className={cn(
-              "size-4",
-              parsing ? "animate-spin text-primary" : "text-primary",
-            )}
+            className={cn("size-4", parsing ? "animate-spin" : "")}
           />
           <p className="text-sm font-medium">
-            {parsing ? "AI is reading your resume…" : "Information extracted"}
+            {parsing
+              ? "AI is reading your resume…"
+              : skipped
+                ? "Ready to build your card"
+                : "Information extracted"}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -556,15 +624,17 @@ function ResumeExtractedPanel({
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 {label}
               </p>
-              <p className="truncate text-sm font-medium">
+              <div className="truncate text-sm font-medium">
                 {parsing ? <Skeleton className="h-4 w-full" /> : value || "—"}
-              </p>
+              </div>
             </div>
           ))}
         </div>
         {parsed && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            You can edit any of these details in the next step.
+            {skipped
+              ? "You can add your details in the builder after choosing a theme."
+              : "You can edit any of these details in the next step."}
           </p>
         )}
       </div>
@@ -593,8 +663,8 @@ function StepTheme({
     .toUpperCase();
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <div className="space-y-2 text-center">
+    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
+      <div className="shrink-0 space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Choose a theme
         </h1>
@@ -628,7 +698,7 @@ function StepTheme({
       />
 
       {!isProPlan ? (
-        <div className="rounded-xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
+        <div className="shrink-0 rounded-xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
           Want to build multiple cards at once?{" "}
           <Link href="/#pricing" className="font-medium text-primary">
             Upgrade to Pro

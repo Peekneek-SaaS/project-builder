@@ -176,7 +176,7 @@ const DashboardContent = () => {
                       className="animate-spin text-muted-foreground"
                     />
                     <p className="text-sm text-muted-foreground">
-                      Loading more cards…
+                      Loading more cards
                     </p>
                   </div>
                 ) : null}
@@ -224,7 +224,7 @@ function StatDecoration({ variant }: { variant: StatVariant }) {
         <HugeiconsIcon
           icon={ClipboardIcon}
           aria-hidden
-          className="pointer-events-none absolute -bottom-6 -right-6 size-23 -rotate-12 text-primary/14 sm:size-24"
+          className="pointer-events-none absolute -bottom-6 -right-6 size-23 -rotate-12 text-indigo-500/14 sm:size-24"
         />
       );
     case "published":

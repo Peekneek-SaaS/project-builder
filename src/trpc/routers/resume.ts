@@ -10,6 +10,17 @@ import { extractResumeText, ResumeExtractionError } from "@/lib/resume/extract-t
 import { extensionFromFileName } from "@/lib/resume/validate-file";
 import { createTRPCRouter, protectedProcedure } from "../init";
 
+const blankExtractedData = {
+  name: "",
+  title: "",
+  email: "",
+  phone: "",
+  location: "",
+  skills: [] as string[],
+  company: "",
+  website: "",
+} satisfies ExtractedCardData;
+
 const parseResumeInput = z.object({
   fileUrl: z.url(),
   fileKey: z.string().min(1),
@@ -92,6 +103,25 @@ export const resumeRouter = createTRPCRouter({
         });
       }
     }),
+
+  createBlank: protectedProcedure.mutation(async ({ ctx }) => {
+    const resume = await prisma.resume.create({
+      data: {
+        userId: ctx.userId,
+        fileName: "No resume uploaded",
+        fileUrl: "",
+        fileKey: "manual",
+        mimeType: "application/octet-stream",
+        extractedData: blankExtractedData,
+        rawText: null,
+      },
+    });
+
+    return {
+      id: resume.id,
+      extractedData: blankExtractedData,
+    };
+  }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))

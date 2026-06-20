@@ -31,9 +31,12 @@ import {
   DashboardSquare01Icon,
   Delete02Icon,
   Home02Icon,
+  Invoice02Icon,
   Loading03Icon,
+  MoneyBag02Icon,
   Moon02Icon,
   PlusSignIcon,
+  Refresh01Icon,
   Settings01Icon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
@@ -144,7 +147,7 @@ export default function SettingsPage() {
             </div>
             <Button
               type="button"
-              variant="outline"
+              // variant="outline"
               className="w-full gap-2 sm:w-auto"
               onClick={() => openUserProfile()}
             >
@@ -209,7 +212,7 @@ export default function SettingsPage() {
                   className="gap-2"
                   onClick={handleManagePlan}
                 >
-                  <HugeiconsIcon icon={CreditCardIcon} size={16} />
+                  <HugeiconsIcon icon={MoneyBag02Icon} size={16} />
                   {billing?.isPro ? "Manage subscription" : "View plans"}
                 </Button>
                 {billing?.isPro ? (
@@ -219,6 +222,7 @@ export default function SettingsPage() {
                     className="gap-2"
                     onClick={() => openUserProfile()}
                   >
+                    <HugeiconsIcon icon={Invoice02Icon} size={16} />
                     Billing & invoices
                   </Button>
                 ) : null}
@@ -238,7 +242,10 @@ export default function SettingsPage() {
                       Refreshing
                     </>
                   ) : (
-                    "Refresh plan status"
+                    <span className="flex items-center gap-2">
+                      <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                      Refresh plan status
+                    </span>
                   )}
                 </Button>
               </div>

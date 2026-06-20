@@ -43,10 +43,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
+const CHART_PRIMARY = "var(--primary)";
+const CHART_PRIMARY_MUTED =
+  "color-mix(in oklch, var(--primary) 55%, var(--background))";
+
 const chartConfig = {
-  views: { label: "Views", color: "var(--chart-1)" },
-  visitors: { label: "Visitors", color: "var(--chart-2)" },
-  clicks: { label: "Clicks", color: "var(--chart-1)" },
+  views: { label: "Views", color: CHART_PRIMARY },
+  visitors: { label: "Visitors", color: CHART_PRIMARY_MUTED },
+  clicks: { label: "Clicks", color: CHART_PRIMARY },
 } satisfies ChartConfig;
 
 export function AnalyticsDashboard({
@@ -125,8 +129,8 @@ export function AnalyticsDashboard({
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs">
-            <Legend color="var(--chart-1)" label="Views" />
-            <Legend color="var(--chart-2)" label="Visitors" />
+            <Legend color={CHART_PRIMARY} label="Views" />
+            <Legend color={CHART_PRIMARY_MUTED} label="Visitors" />
           </div>
         </div>
         <ChartContainer config={chartConfig} className="mt-6 h-72 w-full">
@@ -384,7 +388,7 @@ function KpiDecoration({ variant }: { variant: KpiVariant }) {
           <HugeiconsIcon
             icon={Link01Icon}
             aria-hidden
-            className="pointer-events-none absolute -bottom-8 -right-8 size-24 -rotate-8 text-indigo-500/14 sm:size-28"
+            className="pointer-events-none absolute -bottom-10 -right-8 size-24 -rotate-8 text-indigo-500/14 sm:size-28"
           />
         </>
       );

@@ -59,10 +59,7 @@ export function DashboardSidebar({
                   Cardably
                 </p>
               </Link> */}
-            <Logo
-              className2="group-data-[collapsible=icon]:hidden!"
-              href="/dashboard"
-            />
+            <Logo className2="group-data-[collapsible=icon]:hidden!" />
             {/* </SidebarMenuButton> */}
             <SidebarTrigger size="lg" className="flex md:hidden" />
           </SidebarMenuItem>
