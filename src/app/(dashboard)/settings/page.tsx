@@ -38,6 +38,7 @@ import {
   PlusSignIcon,
   Refresh01Icon,
   Settings01Icon,
+  Sun03Icon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -83,7 +84,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-4 py-8 sm:px-6">
+    <div className="mx-auto min-w-0 overflow-x-hidden px-4 py-8 sm:px-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -95,7 +96,15 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <HugeiconsIcon icon={Moon02Icon} size={18} />
+              {/* <HugeiconsIcon icon={Moon02Icon} size={18} /> */}
+              <HugeiconsIcon
+                icon={Sun03Icon}
+                className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+              />
+              <HugeiconsIcon
+                icon={Moon02Icon}
+                className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+              />
               Appearance
             </CardTitle>
             <CardDescription>
@@ -207,18 +216,18 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex flex-col gap-2 sm:min-w-48">
-                <Button
+                {/* <Button
                   type="button"
                   className="gap-2"
                   onClick={handleManagePlan}
                 >
                   <HugeiconsIcon icon={MoneyBag02Icon} size={16} />
                   {billing?.isPro ? "Manage subscription" : "View plans"}
-                </Button>
+                </Button> */}
                 {billing?.isPro ? (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     className="gap-2"
                     onClick={() => openUserProfile()}
                   >
@@ -228,7 +237,7 @@ export default function SettingsPage() {
                 ) : null}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   className="gap-2"
                   disabled={syncPlan.isPending}
                   onClick={() => syncPlan.mutate()}

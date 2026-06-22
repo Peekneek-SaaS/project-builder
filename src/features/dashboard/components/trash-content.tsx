@@ -24,6 +24,7 @@ import {
   ArrowLeft01Icon,
   ArrowMoveUpLeftIcon,
   DashboardSquare01Icon,
+  Delete01Icon,
   Delete02Icon,
   Delete04Icon,
   Loading03Icon,
@@ -31,17 +32,37 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { inferRouterOutputs } from "@trpc/server";
+import { FadeIn } from "@/components/motion";
 
 type TrashedCard = inferRouterOutputs<AppRouter>["card"]["listTrash"][number];
 
 export function TrashContent() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [emptyTrashOpen, setEmptyTrashOpen] = useState(false);
   const { data: cards = [], isLoading } = useQuery(
     trpc.card.listTrash.queryOptions(),
   );
 
+  const emptyTrash = useMutation(
+    trpc.card.emptyTrash.mutationOptions({
+      onSuccess: (result) => {
+        toast.success(
+          result.count === 0
+            ? "Trash is already empty."
+            : `${result.count} card${result.count === 1 ? "" : "s"} permanently deleted.`,
+        );
+        setEmptyTrashOpen(false);
+        void queryClient.invalidateQueries(trpc.card.listTrash.queryFilter());
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to empty trash.");
+      },
+    }),
+  );
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto px-4 py-8 sm:px-6">
       <div className="mb-6">
         <Button asChild variant="ghost">
           <Link href="/dashboard">
@@ -51,13 +72,37 @@ export function TrashContent() {
         </Button>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Trash</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Deleted cards are kept for {TRASH_RETENTION_DAYS} days, then removed
-          permanently.
-        </p>
-      </div>
+      <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Trash</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Deleted cards are kept for {TRASH_RETENTION_DAYS} days, then removed
+            permanently.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {cards.length > 0 ? (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              disabled={emptyTrash.isPending}
+              onClick={() => setEmptyTrashOpen(true)}
+            >
+              <HugeiconsIcon icon={Delete01Icon} />
+              Empty trash
+            </Button>
+          ) : null}
+        </div>
+      </FadeIn>
+
+      {/* <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight"></h1>
+          <p className="mt-1 text-sm text-muted-foreground"></p>
+        </div>
+
+        <Button>Empty</Button>
+      </div> */}
 
       <div className="mt-8">
         {isLoading ? (
@@ -86,13 +131,23 @@ export function TrashContent() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {cards.map((card) => (
               <TrashCardTile key={card.id} card={card} />
             ))}
           </div>
         )}
       </div>
+
+      <DeleteCardDialog
+        open={emptyTrashOpen}
+        onOpenChange={setEmptyTrashOpen}
+        title="Empty trash?"
+        description={`All ${cards.length} card${cards.length === 1 ? "" : "s"} in trash will be permanently deleted. This action cannot be undone.`}
+        confirmLabel="Empty trash"
+        loading={emptyTrash.isPending}
+        onConfirm={() => emptyTrash.mutate()}
+      />
     </div>
   );
 }

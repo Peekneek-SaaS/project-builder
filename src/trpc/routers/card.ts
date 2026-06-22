@@ -300,6 +300,40 @@ export const cardRouter = createTRPCRouter({
       return parseCardRecord(card);
     }),
 
+  moveManyToTrash: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      await purgeExpiredTrash(ctx.userId);
+
+      const uniqueIds = [...new Set(input.ids)];
+      const cards = await prisma.card.findMany({
+        where: {
+          id: { in: uniqueIds },
+          userId: ctx.userId,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (cards.length !== uniqueIds.length) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "One or more cards were not found.",
+        });
+      }
+
+      await prisma.card.updateMany({
+        where: { id: { in: uniqueIds }, userId: ctx.userId },
+        data: {
+          deletedAt: new Date(),
+          published: false,
+          publishedAt: null,
+        },
+      });
+
+      return { count: uniqueIds.length };
+    }),
+
   restore: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -322,6 +356,16 @@ export const cardRouter = createTRPCRouter({
 
       return { ok: true as const };
     }),
+
+  emptyTrash: protectedProcedure.mutation(async ({ ctx }) => {
+    await purgeExpiredTrash(ctx.userId);
+
+    const result = await prisma.card.deleteMany({
+      where: trashedCardWhere(ctx.userId),
+    });
+
+    return { count: result.count };
+  }),
 
   publish: protectedProcedure
     .input(

@@ -198,7 +198,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="mx-auto px-4 py-8 sm:px-6">
       <div className="mb-6">
         <Button asChild variant="ghost">
           <Link href="/dashboard">
@@ -218,7 +218,7 @@ export function ShareView({ cardId }: { cardId: string }) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" className="gap-1.5" asChild>
+          <Button variant="outline" className="gap-1.5 p-5" asChild>
             <Link href={editHref}>
               <HugeiconsIcon icon={Edit02Icon} size={14} />
               Edit

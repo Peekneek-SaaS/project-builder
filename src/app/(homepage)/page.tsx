@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight01Icon,
+  BrushIcon,
   ChartIcon,
   CheckIcon,
   CloudUploadIcon,
@@ -35,6 +36,7 @@ import {
   Share08Icon,
   Shield02Icon,
   SparklesIcon,
+  Time04Icon,
   ZapIcon,
 } from "@hugeicons/core-free-icons";
 import { PricingTable } from "@clerk/nextjs";
@@ -101,12 +103,20 @@ function Hero() {
           </div>
           <div className="flex items-center gap-6 pt-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1">
-              <HugeiconsIcon icon={CheckIcon} className="text-primary" /> No
-              design skills
+              <HugeiconsIcon
+                icon={BrushIcon}
+                className="dark:text-white text-primary"
+                size={18}
+              />{" "}
+              No design skills
             </span>
             <span className="inline-flex items-center gap-1">
-              <HugeiconsIcon icon={CheckIcon} className="text-primary" /> Ready
-              in 60 seconds
+              <HugeiconsIcon
+                icon={Time04Icon}
+                className="dark:text-white text-primary"
+                size={16}
+              />{" "}
+              Ready in 60 seconds
             </span>
           </div>
         </motion.div>

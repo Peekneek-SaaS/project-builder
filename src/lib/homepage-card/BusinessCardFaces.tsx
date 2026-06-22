@@ -74,12 +74,12 @@ function BackFace({ card }: { card: BusinessCardData }) {
           icon={<PhoneIcon color={card.colors.accent} />}
           text={card.phone}
         />
-        {card.phone2 && (
+        {/* {card.phone2 && (
           <Row
             icon={<PhoneIcon color={card.colors.accent} />}
             text={card.phone2}
           />
-        )}
+        )} */}
         {card.website && (
           <Row
             icon={<GlobeIcon color={card.colors.accent} />}

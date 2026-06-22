@@ -1,7 +1,4 @@
-import type {
-  ThemeCategory,
-  ThemePreviewConfig,
-} from "@/lib/theme-categories";
+import type { ThemeCategory, ThemePreviewConfig } from "@/lib/theme-categories";
 
 export type CardLayout =
   | "classic"
@@ -38,8 +35,13 @@ export type CardTheme = {
 };
 
 const base = (
-  theme: Omit<CardTheme, "surface" | "text" | "subtext" | "accent" | "accentText"> &
-    Partial<Pick<CardTheme, "surface" | "text" | "subtext" | "accent" | "accentText">>,
+  theme: Omit<
+    CardTheme,
+    "surface" | "text" | "subtext" | "accent" | "accentText"
+  > &
+    Partial<
+      Pick<CardTheme, "surface" | "text" | "subtext" | "accent" | "accentText">
+    >,
 ): CardTheme => ({
   surface: "bg-slate-900",
   text: "text-white",
@@ -54,7 +56,7 @@ export const cardThemes: CardTheme[] = [
     id: "midnight",
     name: "Midnight",
     description: "Deep ink with a calm blue accent.",
-    category: "dark-mode",
+    category: "dark",
     layout: "classic",
     orientation: "landscape",
     size: "sm",

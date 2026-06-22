@@ -74,7 +74,7 @@ export function AnalyticsOverviewView() {
 
   if (billing && !billing.analyticsEnabled) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mx-auto px-4 py-8 sm:px-6">
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
           <h2 className="text-lg font-semibold">Analytics is a Pro feature</h2>
           <p className="max-w-md text-sm text-muted-foreground">
@@ -91,7 +91,7 @@ export function AnalyticsOverviewView() {
 
   if (!overview) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mx-auto px-4 py-8 sm:px-6">
         <div className="rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
           <HugeiconsIcon
             icon={Chart03Icon}
@@ -112,7 +112,7 @@ export function AnalyticsOverviewView() {
   const paginatedTopCards = paginateItems(overview.topCards, cardsPage);
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-4 py-8 sm:px-6">
+    <div className="mx-auto min-w-0  overflow-x-hidden px-4 py-8 sm:px-6">
       <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>

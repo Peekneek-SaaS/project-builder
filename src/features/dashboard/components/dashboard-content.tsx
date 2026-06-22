@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ import { useDashboardSearch } from "@/features/dashboard/context/dashboard-searc
 import type { AppRouter } from "@/trpc/routers/_app";
 import {
   BubblesIcon,
+  Cancel01Icon,
   Chart03Icon,
   ClipboardIcon,
   Clock01Icon,
@@ -73,8 +75,51 @@ const DashboardContent = () => {
   const publishedCount = cards.filter((card) => card.published).length;
   const totalViews = cards.reduce((sum, card) => sum + card.viewCount, 0);
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const selectedCount = selectedIds.size;
+
+  const moveManyToTrash = useMutation(
+    trpc.card.moveManyToTrash.mutationOptions({
+      onSuccess: (result) => {
+        toast.success(
+          `${result.count} card${result.count === 1 ? "" : "s"} moved to trash.`,
+        );
+        setSelectedIds(new Set());
+        setBulkDeleteOpen(false);
+        void queryClient.invalidateQueries(trpc.card.list.queryFilter());
+        void queryClient.invalidateQueries(trpc.card.listTrash.queryFilter());
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to move cards to trash.");
+      },
+    }),
+  );
+
+  useEffect(() => {
+    setSelectedIds((previous) => {
+      const validIds = new Set(cards.map((card) => card.id));
+      const next = new Set([...previous].filter((id) => validIds.has(id)));
+      return next.size === previous.size ? previous : next;
+    });
+  }, [cards]);
+
+  function toggleCardSelection(cardId: string, checked: boolean) {
+    setSelectedIds((previous) => {
+      const next = new Set(previous);
+      if (checked) {
+        next.add(cardId);
+      } else {
+        next.delete(cardId);
+      }
+      return next;
+    });
+  }
+
   return (
-    <div className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-4 py-8 sm:px-6">
+    <div className="mx-auto min-w-0  overflow-x-hidden px-4 py-8 sm:px-6">
       <FadeIn className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -82,12 +127,34 @@ const DashboardContent = () => {
             Manage, edit, and share your business cards
           </p>
         </div>
-        <Button asChild>
-          <Link href="/create" className="flex items-center gap-2">
-            <HugeiconsIcon icon={PlusSignIcon} />
-            Create new card
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedCount > 0 ? (
+            <>
+              <Button
+                variant="link"
+                onClick={() => setSelectedIds(new Set())}
+                className="text-red-500"
+              >
+                Clear
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex items-center gap-2"
+                onClick={() => setBulkDeleteOpen(true)}
+              >
+                <HugeiconsIcon icon={Delete02Icon} />
+                Move {selectedCount} card{selectedCount === 1 ? "" : "s"} to
+                trash
+              </Button>
+            </>
+          ) : null}
+          <Button asChild>
+            <Link href="/create" className="flex items-center gap-2">
+              <HugeiconsIcon icon={PlusSignIcon} />
+              Create new card
+            </Link>
+          </Button>
+        </div>
       </FadeIn>
 
       <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -159,9 +226,16 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+            <div className="grid  gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
               {visibleCards.map((card) => (
-                <CardTile key={card.id} card={card} />
+                <CardTile
+                  key={card.id}
+                  card={card}
+                  selected={selectedIds.has(card.id)}
+                  onSelectedChange={(checked) =>
+                    toggleCardSelection(card.id, checked)
+                  }
+                />
               ))}
             </div>
             {hasMore ? (
@@ -189,6 +263,16 @@ const DashboardContent = () => {
           </>
         )}
       </div>
+
+      <DeleteCardDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        title="Move selected cards to trash?"
+        description={`${selectedCount} card${selectedCount === 1 ? "" : "s"} will be moved to trash. You can recover them within 30 days before they're permanently deleted.`}
+        confirmLabel={`Move ${selectedCount} to trash`}
+        loading={moveManyToTrash.isPending}
+        onConfirm={() => moveManyToTrash.mutate({ ids: [...selectedIds] })}
+      />
     </div>
   );
 };
@@ -248,7 +332,15 @@ function StatDecoration({ variant }: { variant: StatVariant }) {
   }
 }
 
-function CardTile({ card }: { card: DashboardCard }) {
+function CardTile({
+  card,
+  selected,
+  onSelectedChange,
+}: {
+  card: DashboardCard;
+  selected: boolean;
+  onSelectedChange: (checked: boolean) => void;
+}) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -257,6 +349,7 @@ function CardTile({ card }: { card: DashboardCard }) {
   const theme = getTheme(card.themeId);
   const styles = getThemeStyleClasses(theme.id);
   const builderHref = `/builder/${card.resumeId}?cards=${card.id}`;
+  const shareHref = `/share/${card.id}`;
   const title = card.cardData.name || theme.name;
 
   const moveToTrash = useMutation(
@@ -281,7 +374,7 @@ function CardTile({ card }: { card: DashboardCard }) {
         whileHover={{ y: -2 }}
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Link href={builderHref} className="block">
+        <Link href={shareHref} className="block">
           <div
             className={cn(
               "relative flex h-28 items-center justify-center overflow-hidden sm:h-36 md:h-44",
@@ -297,9 +390,7 @@ function CardTile({ card }: { card: DashboardCard }) {
             />
 
             <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              {/* <p className="text-sm font-semibold text-white">{title}</p> */}
               <div className="space-y-1 space-x-2 text-xs text-white/80">
-                {/* <span>{card.cardData.title || theme.name}</span> */}
                 <span className="flex items-center gap-1">
                   <HugeiconsIcon icon={Clock01Icon} size={12} />
                   Updated{" "}
@@ -309,6 +400,14 @@ function CardTile({ card }: { card: DashboardCard }) {
             </div>
           </div>
         </Link>
+
+        <div className="absolute top-2 right-2 z-10">
+          <Checkbox
+            checked={selected}
+            onCheckedChange={(value) => onSelectedChange(value === true)}
+            aria-label={`Select ${title}`}
+          />
+        </div>
 
         <div className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:p-4">
           <div className="min-w-0 flex-1">

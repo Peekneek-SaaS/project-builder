@@ -6,6 +6,7 @@ import Logo from "../../public/Logo/Logo";
 import { Show } from "@clerk/nextjs";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DashboardSquare01Icon } from "@hugeicons/core-free-icons";
+import { ModeToggle } from "./mode-toggle";
 
 export function MarketingNav() {
   const links = [
@@ -37,6 +38,7 @@ export function MarketingNav() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <ModeToggle />
           <Show
             fallback={
               <Button asChild>

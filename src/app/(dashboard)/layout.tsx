@@ -15,6 +15,7 @@ import Logo from "../../../public/Logo/Logo";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
   prefetch(trpc.card.list.queryOptions());
@@ -43,7 +44,8 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
                 <Logo className="flex md:hidden" />
                 <DashboardCardSearch className="hidden md:flex" />
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <ModeToggle />
                 <UserButton />
               </div>
             </header>

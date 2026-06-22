@@ -247,7 +247,7 @@ export default function BuilderView() {
             </Link>
           </Button>
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <Logo />
+            <Logo href="/dashboard" />
             <span className="text-muted-foreground">/</span>
             <EditableCardName
               key={activeCard.id}
