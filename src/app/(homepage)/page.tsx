@@ -455,9 +455,9 @@ function FAQ() {
 
 function CTA() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <section className="mx-auto">
       <motion.div
-        className="relative overflow-hidden rounded-3xl border border-border bg-foreground px-6 py-16 text-center text-background sm:px-12"
+        className="relative overflow-hidden bg-primary/10 px-6 py-16 text-center sm:px-12"
         initial="hidden"
         whileInView="visible"
         viewport={viewportOnce}
@@ -469,11 +469,11 @@ function CTA() {
         <h2 className="mx-auto mt-4 max-w-xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
           Make a first impression that lasts
         </h2>
-        <p className="mx-auto mt-3 max-w-md text-pretty text-background/70">
-          Build your digital business card from your resume today — it only
-          takes a minute.
+        <p className="mx-auto mt-3 max-w-md text-pretty ">
+          Build your business card from your resume today — it only takes a
+          minute.
         </p>
-        <Button asChild size="lg" variant="secondary" className="mt-8">
+        <Button asChild size="lg" className="mt-8">
           <Link href="/create">
             Get started free
             <HugeiconsIcon icon={ArrowRight01Icon} />
