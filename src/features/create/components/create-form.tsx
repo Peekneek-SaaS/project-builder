@@ -22,6 +22,7 @@ import {
   File01Icon,
   GoogleDocIcon,
   Loading03Icon,
+  PaintBoardIcon,
   SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
@@ -285,7 +286,7 @@ const CreateForm = ({ className }: { className: string }) => {
             index={2}
             current={step}
             label="Choose theme"
-            icon={CursorMagicSelection03Icon}
+            icon={PaintBoardIcon}
           />
         </Wrapper>
       </div>
@@ -360,10 +361,17 @@ const CreateForm = ({ className }: { className: string }) => {
               className="shrink-0 gap-1.5 text-xs"
               onClick={() => void handleBuild()}
             >
-              {createCards.isPending
-                ? "Creating…"
-                : `Build ${selected.length > 1 ? "cards" : "card"}`}
-              <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+              {createCards.isPending ? (
+                <span className="flex items-center gap-1">
+                  <HugeiconsIcon icon={Loading03Icon} />
+                  Creating
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  {`Build ${selected.length > 1 ? "cards" : "card"}`}
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                </span>
+              )}
             </Button>
           )}
         </div>
@@ -653,6 +661,7 @@ function StepTheme({
   onToggle: (theme: CardTheme) => void;
   isProPlan: boolean;
 }) {
+  const [themeSearch, setThemeSearch] = useState("");
   const previewName = extractedData?.name ?? "Jordan Avery";
   const previewInitials = previewName
     .split(" ")
@@ -690,11 +699,14 @@ function StepTheme({
       </div>
 
       <ThemePickerGrid
+        className="min-h-0 flex-1"
         themes={cardThemes}
         previewName={previewName}
         previewInitials={previewInitials}
         selected={selected}
         onToggle={onToggle}
+        searchQuery={themeSearch}
+        onSearchQueryChange={setThemeSearch}
       />
 
       {!isProPlan ? (

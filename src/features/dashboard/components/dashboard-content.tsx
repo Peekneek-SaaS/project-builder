@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import { getTheme } from "@/lib/card-themes";
@@ -350,7 +351,7 @@ function CardTile({
   const styles = getThemeStyleClasses(theme.id);
   const builderHref = `/builder/${card.resumeId}?cards=${card.id}`;
   const shareHref = `/share/${card.id}`;
-  const title = card.cardData.name || theme.name;
+  const title = getCardBuilderLabel(card.cardData) || theme.name;
 
   const moveToTrash = useMutation(
     trpc.card.moveToTrash.mutationOptions({

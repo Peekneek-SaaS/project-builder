@@ -15,59 +15,44 @@ import {
   isFieldEnabled,
 } from "@/lib/card-field-utils";
 import { FieldText } from "@/features/builder/components/field-text";
+import { DecorativeQrPlaceholder } from "@/features/builder/components/card-layout-marks";
+import {
+  CardBrandMark,
+  CardLogo,
+  CardWatermarkLogo,
+} from "@/features/builder/components/card-brand-elements";
+
+export { CardLogo };
+import {
+  JobCardBack,
+  JobCardFront,
+  isJobLayout,
+} from "@/features/builder/components/card-job-layouts";
+import {
+  ModernCardBack,
+  ModernCardFront,
+  isModernLayout,
+} from "@/features/builder/components/card-modern-layouts";
 import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
 import { cn } from "@/lib/utils";
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-export function CardLogo({
-  data,
-  styles,
-  compact,
-}: {
-  data: CardData;
-  styles: ThemeStyleClasses;
-  compact?: boolean;
-}) {
-  if (!isFieldEnabled(data, "logo")) return null;
-
-  const size = compact ? "size-8 text-[9px]" : "size-16 text-lg";
-
-  if (data.logoUrl) {
-    return (
-      <img
-        src={data.logoUrl}
-        alt={data.company || data.name}
-        className={cn(
-          "object-contain",
-          compact ? "h-8 max-w-[72px]" : "h-16 max-w-[140px]",
-        )}
-      />
-    );
-  }
-
+function SideDotDecorations() {
   return (
-    <div
-      className={cn(
-        "grid shrink-0 place-items-center rounded-full font-semibold",
-        size,
-        styles.accent,
-        styles.initialsText,
-      )}
-    >
-      {getInitials(data.name) || "?"}
-    </div>
+    <>
+      <div className="absolute top-1/2 left-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="size-1 rounded-full bg-current" />
+        ))}
+      </div>
+      <div className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="size-1 rounded-full bg-current" />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -167,6 +152,30 @@ export function CardFront({
     sizeClass,
   );
 
+  if (isModernLayout(theme.layout)) {
+    return (
+      <ModernCardFront
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
+
+  if (isJobLayout(theme.layout)) {
+    return (
+      <JobCardFront
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
+
   switch (theme.layout) {
     case "brand-bar":
       return (
@@ -204,16 +213,7 @@ export function CardFront({
     case "minimal-dark":
       return (
         <div className={shell}>
-          <div className="absolute top-1/2 left-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="size-1 rounded-full bg-current" />
-            ))}
-          </div>
-          <div className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="size-1 rounded-full bg-current" />
-            ))}
-          </div>
+          <SideDotDecorations />
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <CardLogo data={data} styles={styles} compact={compact} />
             <BrandingName
@@ -225,6 +225,91 @@ export function CardFront({
               data={data}
               compact={compact}
               className="uppercase tracking-widest opacity-70"
+            />
+          </div>
+        </div>
+      );
+
+    case "minimal-hatch":
+      return (
+        <div className={shell}>
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent" />
+          <div className="relative flex flex-1 items-center justify-center p-6">
+            <CardBrandMark
+              data={data}
+              theme={theme}
+              styles={styles}
+              compact={compact}
+              markSize={compact ? "sm" : "lg"}
+            />
+          </div>
+        </div>
+      );
+
+    case "minimal-botanical":
+      return (
+        <div className={shell}>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 pb-10 pt-6 text-center">
+            <CardBrandMark
+              data={data}
+              theme={theme}
+              styles={styles}
+              compact={compact}
+              markSize={compact ? "sm" : "md"}
+            />
+            <div>
+              <FieldText
+                data={data}
+                fieldKey="name"
+                as="p"
+                className={cn(
+                  "font-medium",
+                  compact ? "text-[10px]" : "text-base",
+                  styles.frontText,
+                )}
+              >
+                {data.name}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="title"
+                as="p"
+                className={cn(
+                  "mt-1 uppercase tracking-[0.25em]",
+                  compact ? "text-[7px]" : "text-[10px]",
+                  styles.frontText,
+                  "opacity-90",
+                )}
+              >
+                {data.title}
+              </FieldText>
+            </div>
+          </div>
+          <div className={cn("absolute inset-x-8 bottom-6 h-px", styles.accent)} />
+        </div>
+      );
+
+    case "minimal-studio":
+      return (
+        <div className={shell}>
+          <SideDotDecorations />
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+            <CardBrandMark
+              data={data}
+              theme={theme}
+              styles={styles}
+              compact={compact}
+              markSize={compact ? "sm" : "md"}
+            />
+            <BrandingName
+              data={data}
+              compact={compact}
+              className="tracking-[0.18em]"
+            />
+            <BrandingTagline
+              data={data}
+              compact={compact}
+              className="uppercase tracking-[0.22em] opacity-70"
             />
           </div>
         </div>
@@ -311,6 +396,34 @@ export function CardBack({
     className,
     sizeClass,
   );
+
+  if (isModernLayout(theme.layout)) {
+    return (
+      <ModernCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+        interactive={interactive}
+        onLinkClick={onLinkClick}
+      />
+    );
+  }
+
+  if (isJobLayout(theme.layout)) {
+    return (
+      <JobCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+        interactive={interactive}
+        onLinkClick={onLinkClick}
+      />
+    );
+  }
 
   switch (theme.layout) {
     case "split-sidebar":
@@ -459,8 +572,12 @@ export function CardBack({
     case "watermark":
       return (
         <div className={shell}>
-          <div className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2 opacity-[0.07]">
-            <CardLogo data={data} styles={styles} compact={false} />
+          <div className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2">
+            <CardWatermarkLogo
+              data={data}
+              theme={theme}
+              opacity={0.07}
+            />
           </div>
           <div className="relative flex flex-1 flex-col justify-between p-4">
             <div>
@@ -533,6 +650,167 @@ export function CardBack({
                 fieldKey="title"
                 as="p"
                 className={cn("uppercase", styles.subtext, compact ? "text-[7px]" : "text-[10px]")}
+              >
+                {data.title}
+              </FieldText>
+            </div>
+            <ContactList
+              data={data}
+              styles={styles}
+              compact={compact}
+              interactive={interactive}
+              onLinkClick={onLinkClick}
+            />
+          </div>
+        </div>
+      );
+
+    case "minimal-hatch":
+      return (
+        <div className={shell}>
+          <div className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2">
+            <CardWatermarkLogo
+              data={data}
+              theme={theme}
+              className="text-neutral-900"
+              opacity={0.08}
+            />
+          </div>
+          <div className="relative flex flex-1 flex-col justify-between p-5">
+            <div>
+              <FieldText
+                data={data}
+                fieldKey="name"
+                as="p"
+                className={cn(
+                  "font-bold uppercase tracking-wide",
+                  compact ? "text-[10px]" : "text-lg",
+                )}
+              >
+                {data.name}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="title"
+                as="p"
+                className={cn(
+                  "mt-1 uppercase tracking-[0.2em]",
+                  styles.subtext,
+                  compact ? "text-[7px]" : "text-[11px]",
+                )}
+              >
+                {data.title}
+              </FieldText>
+            </div>
+            <div className="flex items-end justify-between gap-4">
+              <div className={cn("space-y-0.5", compact ? "text-[7px]" : "text-[10px]", styles.subtext)}>
+                {isFieldEnabled(data, "location") && data.location ? (
+                  <FieldText data={data} fieldKey="location" as="p">
+                    {data.location}
+                  </FieldText>
+                ) : null}
+              </div>
+              <div
+                className={cn(
+                  "space-y-0.5 text-right lowercase",
+                  compact ? "text-[7px]" : "text-[10px]",
+                  styles.subtext,
+                )}
+              >
+                {isFieldEnabled(data, "email") && data.email ? (
+                  <FieldText data={data} fieldKey="email" as="p">
+                    {data.email}
+                  </FieldText>
+                ) : null}
+                {isFieldEnabled(data, "website") && data.website ? (
+                  <FieldText data={data} fieldKey="website" as="p">
+                    {data.website}
+                  </FieldText>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+    case "minimal-botanical":
+      return (
+        <div className={shell}>
+          <div className="pointer-events-none absolute -right-8 bottom-0 top-6">
+            <CardWatermarkLogo
+              data={data}
+              theme={theme}
+              className="text-lime-900"
+              opacity={0.07}
+            />
+          </div>
+          <div className="relative flex flex-1 flex-col justify-between p-4">
+            <div>
+              <FieldText
+                data={data}
+                fieldKey="name"
+                as="p"
+                className={cn("font-semibold", compact ? "text-[10px]" : "text-base")}
+              >
+                {data.name}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="title"
+                as="p"
+                className={cn(
+                  "mt-0.5 uppercase tracking-[0.18em]",
+                  styles.subtext,
+                  compact ? "text-[7px]" : "text-[10px]",
+                )}
+              >
+                {data.title}
+              </FieldText>
+            </div>
+            <div className="flex items-end justify-between gap-3">
+              <BotanicalContactList
+                data={data}
+                styles={styles}
+                compact={compact}
+                interactive={interactive}
+                onLinkClick={onLinkClick}
+              />
+              {!compact ? (
+                <DecorativeQrPlaceholder className="size-14 text-stone-800" />
+              ) : null}
+            </div>
+          </div>
+        </div>
+      );
+
+    case "minimal-studio":
+      return (
+        <div className={cn(shell, "flex-row")}>
+          <div className="flex w-[32%] items-center justify-center border-r border-neutral-900 p-4">
+            <CardBrandMark
+              data={data}
+              theme={theme}
+              styles={styles}
+              compact={compact}
+              markSize={compact ? "sm" : "lg"}
+              className={styles.text}
+            />
+          </div>
+          <div className="flex flex-1 flex-col justify-center gap-2 p-4">
+            <div>
+              <FieldText
+                data={data}
+                fieldKey="name"
+                as="p"
+                className={cn("font-bold uppercase", compact ? "text-[10px]" : "text-lg")}
+              >
+                {data.name}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="title"
+                as="p"
+                className={cn(styles.subtext, compact ? "text-[8px]" : "text-xs")}
               >
                 {data.title}
               </FieldText>
@@ -683,7 +961,89 @@ export function CardBack({
   }
 }
 
-function ContactList({
+function BotanicalContactList({
+  data,
+  styles,
+  compact,
+  interactive = false,
+  onLinkClick,
+}: {
+  data: CardData;
+  styles: ThemeStyleClasses;
+  compact?: boolean;
+  interactive?: boolean;
+  onLinkClick?: (payload: LinkClickPayload) => void;
+}) {
+  const rows = (
+    [
+      ["phone", CallIcon, data.phone, "Phone"] as const,
+      ["email", Mail01Icon, data.email, "Email"] as const,
+      ["website", Globe02Icon, data.website, "Website"] as const,
+    ] satisfies readonly [
+      "phone" | "email" | "website",
+      IconSvgElement,
+      string,
+      string,
+    ][]
+  ).filter(([key, , value]) => isFieldEnabled(data, key) && value);
+
+  if (rows.length === 0) return null;
+
+  function getHref(key: (typeof rows)[number][0], value: string) {
+    if (key === "email") return `mailto:${value}`;
+    if (key === "phone") return `tel:${value}`;
+    if (key === "website") {
+      return value.startsWith("http") ? value : `https://${value}`;
+    }
+    return undefined;
+  }
+
+  return (
+    <div className={cn("grid gap-2", compact ? "text-[7px]" : "text-[10px]", styles.subtext)}>
+      {rows.map(([key, icon, value, label]) => {
+        const href = getHref(key, value);
+        const content = (
+          <>
+            <span
+              className={cn(
+                "grid shrink-0 place-items-center rounded-full bg-stone-800 text-white",
+                compact ? "size-3.5" : "size-4",
+              )}
+            >
+              <HugeiconsIcon icon={icon} size={compact ? 8 : 10} />
+            </span>
+            <FieldText data={data} fieldKey={key} className="truncate">
+              {value}
+            </FieldText>
+          </>
+        );
+
+        if (interactive && href) {
+          return (
+            <a
+              key={value}
+              href={href}
+              target={key === "website" ? "_blank" : undefined}
+              rel={key === "website" ? "noreferrer" : undefined}
+              className="flex items-center gap-2 transition-opacity hover:opacity-80"
+              onClick={() => onLinkClick?.({ label, href: value })}
+            >
+              {content}
+            </a>
+          );
+        }
+
+        return (
+          <div key={value} className="flex items-center gap-2">
+            {content}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function ContactList({
   data,
   styles,
   compact,

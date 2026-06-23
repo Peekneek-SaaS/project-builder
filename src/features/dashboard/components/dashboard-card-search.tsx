@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { Input } from "@/components/ui/input";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
 import { getTheme } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
@@ -108,7 +109,7 @@ export function DashboardCardSearch({ className }: { className?: string }) {
             <ul className="max-h-72 overflow-y-auto py-1">
               {results.map((card) => {
                 const theme = getTheme(card.themeId);
-                const name = card.cardData.name || theme.name;
+                const name = getCardBuilderLabel(card.cardData) || theme.name;
 
                 return (
                   <li key={card.id}>

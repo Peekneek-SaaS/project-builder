@@ -6,7 +6,13 @@ import {
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
 import { cn } from "@/lib/utils";
-import { CardLogo } from "@/features/builder/components/card-layouts";
+import {
+  CardBrandMark,
+  CardLogo,
+  CardWatermarkLogo,
+} from "@/features/builder/components/card-brand-elements";
+import { isJobLayout } from "@/features/builder/components/card-job-layouts";
+import { isModernLayout } from "@/features/builder/components/card-modern-layouts";
 
 export function SkeletonBar({
   className,
@@ -67,6 +73,24 @@ export function CardFrontSkeleton({
     sizeClass,
   );
 
+  if (isJobLayout(theme.layout) || isModernLayout(theme.layout)) {
+    return (
+      <div className={shell}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+          <CardBrandMark
+            data={data}
+            theme={theme}
+            styles={styles}
+            markSize="md"
+            className={styles.frontText}
+          />
+          <SkeletonBar className="h-2.5 w-24" />
+          <SkeletonBar className="h-1.5 w-28 opacity-20" />
+        </div>
+      </div>
+    );
+  }
+
   if (theme.layout === "brand-bar") {
     return (
       <div className={shell}>
@@ -99,6 +123,54 @@ export function CardFrontSkeleton({
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
           <CardLogo data={data} styles={styles} />
+          <SkeletonBar className="h-2 w-20" />
+          <SkeletonBar className="h-1.5 w-28 opacity-20" />
+        </div>
+      </div>
+    );
+  }
+
+  if (theme.layout === "minimal-hatch") {
+    return (
+      <div className={shell}>
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent" />
+        <div className="relative flex flex-1 items-center justify-center p-6">
+          <CardBrandMark data={data} theme={theme} styles={styles} markSize="lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (theme.layout === "minimal-botanical") {
+    return (
+      <div className={shell}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 pb-10 pt-6 text-center">
+          <CardBrandMark data={data} theme={theme} styles={styles} markSize="md" />
+          <div className="flex w-full max-w-[140px] flex-col items-center gap-2">
+            <SkeletonBar className="h-2.5 w-24" />
+            <SkeletonBar className="h-1.5 w-28 opacity-20" />
+          </div>
+        </div>
+        <div className={cn("absolute inset-x-8 bottom-6 h-px", styles.accent)} />
+      </div>
+    );
+  }
+
+  if (theme.layout === "minimal-studio") {
+    return (
+      <div className={shell}>
+        <div className="absolute top-1/2 left-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="size-1 rounded-full bg-current" />
+          ))}
+        </div>
+        <div className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1.5 opacity-40">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="size-1 rounded-full bg-current" />
+          ))}
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+          <CardBrandMark data={data} theme={theme} styles={styles} markSize="md" />
           <SkeletonBar className="h-2 w-20" />
           <SkeletonBar className="h-1.5 w-28 opacity-20" />
         </div>
@@ -169,6 +241,18 @@ export function CardBackSkeleton({
     className,
     sizeClass,
   );
+
+  if (isJobLayout(theme.layout) || isModernLayout(theme.layout)) {
+    return (
+      <div className={shell}>
+        <div className="flex flex-1 flex-col justify-center gap-3 p-6">
+          <SkeletonBar className="h-3 w-32" />
+          <SkeletonBar className="h-2 w-24 opacity-20" />
+          <SkeletonContactList styles={styles} count={3} />
+        </div>
+      </div>
+    );
+  }
 
   if (theme.layout === "split-sidebar") {
     return (
@@ -286,6 +370,82 @@ export function CardBackSkeleton({
     );
   }
 
+  if (theme.layout === "minimal-hatch") {
+    return (
+      <div className={shell}>
+        <div className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 text-neutral-900 opacity-[0.08]">
+          <CardWatermarkLogo
+            data={data}
+            theme={theme}
+            className="text-neutral-900"
+            opacity={0.08}
+          />
+        </div>
+        <div className="relative flex flex-1 flex-col justify-between p-5">
+          <div>
+            <p className="text-lg font-bold uppercase">{data.name}</p>
+            <SkeletonBar className="mt-1.5 h-2 w-20 opacity-20" />
+          </div>
+          <div className="flex items-end justify-between gap-4">
+            <SkeletonBar className="h-1.5 w-24 opacity-20" />
+            <div className="flex flex-col items-end gap-1.5">
+              <SkeletonBar className="h-1.5 w-24 opacity-20" />
+              <SkeletonBar className="h-1.5 w-20 opacity-20" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (theme.layout === "minimal-botanical") {
+    return (
+      <div className={shell}>
+        <div className="pointer-events-none absolute -right-8 bottom-0 top-6 text-lime-900 opacity-[0.07]">
+          <CardWatermarkLogo
+            data={data}
+            theme={theme}
+            className="text-lime-900"
+            opacity={0.07}
+          />
+        </div>
+        <div className="relative flex flex-1 flex-col justify-between gap-4 p-4">
+          <div>
+            <p className="text-base font-semibold">{data.name}</p>
+            <SkeletonBar className="mt-1.5 h-2 w-28 opacity-20" />
+          </div>
+          <div className="flex items-end justify-between gap-3">
+            <SkeletonContactList styles={styles} count={3} />
+            <SkeletonBar className="size-14 rounded-sm opacity-15" opacity="" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (theme.layout === "minimal-studio") {
+    return (
+      <div className={cn(shell, "flex-row")}>
+        <div className="flex w-[32%] items-center justify-center border-r border-neutral-900 p-4">
+          <CardBrandMark
+            data={data}
+            theme={theme}
+            styles={styles}
+            markSize="lg"
+            className={styles.text}
+          />
+        </div>
+        <div className="flex flex-1 flex-col justify-center gap-3 p-4">
+          <div>
+            <p className="text-lg font-bold uppercase">{data.name}</p>
+            <SkeletonBar className="mt-1.5 h-2 w-28 opacity-20" />
+          </div>
+          <SkeletonContactList styles={styles} count={4} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={shell}>
       <div className="flex flex-1 flex-col gap-4 p-6">
@@ -322,6 +482,7 @@ export function CardBackSkeleton({
 export function skeletonPreviewData(name: string): CardData {
   return {
     name,
+    builderLabel: "",
     title: "",
     company: "",
     tagline: "",

@@ -156,3 +156,21 @@ export function groupThemesByCategory(
 
   return grouped;
 }
+
+export function filterThemesByQuery(
+  themes: CardTheme[],
+  query: string,
+): CardTheme[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return themes;
+
+  return themes.filter((theme) => {
+    const categoryLabel = CATEGORY_LABELS[theme.category].toLowerCase();
+    return (
+      theme.name.toLowerCase().includes(normalized) ||
+      theme.description.toLowerCase().includes(normalized) ||
+      theme.id.toLowerCase().includes(normalized) ||
+      categoryLabel.includes(normalized)
+    );
+  });
+}

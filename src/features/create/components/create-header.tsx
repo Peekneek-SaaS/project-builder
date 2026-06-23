@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import CreateForm from "./create-form";
 import { UserButton } from "@clerk/nextjs";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const CreateHeader = () => {
   return (
@@ -20,6 +21,7 @@ const CreateHeader = () => {
               <span className="hidden sm:inline">Exit</span>
             </Link>
           </Button>
+          <ModeToggle />
           <UserButton afterSwitchSessionUrl="/" />
         </div>
       </Wrapper>

@@ -1,3 +1,5 @@
+import type { CardData } from "@/lib/card-data";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { getTheme } from "@/lib/card-themes";
 
 export type SearchableCard = {
@@ -5,11 +7,7 @@ export type SearchableCard = {
   resumeId: string;
   cardSetId: string;
   themeId: string;
-  cardData: {
-    name: string;
-    title: string;
-    company: string;
-  };
+  cardData: Pick<CardData, "name" | "builderLabel" | "title" | "company">;
 };
 
 export function cardMatchesQuery(card: SearchableCard, query: string): boolean {
@@ -18,6 +16,7 @@ export function cardMatchesQuery(card: SearchableCard, query: string): boolean {
 
   const theme = getTheme(card.themeId);
   const haystack = [
+    getCardBuilderLabel(card.cardData),
     card.cardData.name,
     card.cardData.title,
     card.cardData.company,

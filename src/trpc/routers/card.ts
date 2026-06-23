@@ -8,7 +8,8 @@ import {
   type CardDisplayMode,
 } from "@/lib/card-data";
 import { cardDataSchema, cardDisplayModeSchema } from "@/lib/card-schema";
-import { generateCardSlug, generateQrCodeId } from "@/lib/card-slug";
+import { generateQrCodeId } from "@/lib/card-slug";
+import { uniqueCardSlug } from "@/lib/card-publish";
 import { TRASH_RETENTION_MS } from "@/lib/card-trash";
 import { prisma } from "@/lib/db";
 import { recordCardLinkClick, recordCardView } from "@/lib/card-analytics-server";
@@ -76,15 +77,7 @@ function parseCardRecord(card: {
 }
 
 async function uniqueSlug(name: string): Promise<string> {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const slug = generateCardSlug(name);
-    const existing = await prisma.card.findFirst({
-      where: { slug, deletedAt: null },
-    });
-    if (!existing) return slug;
-  }
-
-  return `${generateCardSlug(name)}-${Date.now().toString(36)}`;
+  return uniqueCardSlug(name);
 }
 
 async function ensureQrCodeId(card: { id: string; qrCodeId: string | null }) {
@@ -392,6 +385,7 @@ export const cardRouter = createTRPCRouter({
       for (const card of cardsToPublish) {
         const cardData = cardDataSchema.parse(card.cardData);
         const slug = card.slug ?? (await uniqueSlug(cardData.name));
+        await ensureQrCodeId(card);
 
         const updated = await prisma.card.update({
           where: { id: card.id },
@@ -420,6 +414,10 @@ export const cardRouter = createTRPCRouter({
       if (input.published && !slug) {
         const cardData = cardDataSchema.parse(existing.cardData);
         slug = await uniqueSlug(cardData.name);
+      }
+
+      if (input.published) {
+        await ensureQrCodeId(existing);
       }
 
       const card = await prisma.card.update({

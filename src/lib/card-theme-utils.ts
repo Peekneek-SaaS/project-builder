@@ -15,7 +15,7 @@ export type ThemeStyleClasses = {
   isLightSurface: boolean;
 };
 
-const FALLBACK_STYLES: ThemeStyleClasses = THEME_STYLES.midnight;
+const FALLBACK_STYLES: ThemeStyleClasses = THEME_STYLES["rob-hatch"];
 
 export function getThemeStyleClasses(themeId: string): ThemeStyleClasses {
   return THEME_STYLES[themeId] ?? FALLBACK_STYLES;

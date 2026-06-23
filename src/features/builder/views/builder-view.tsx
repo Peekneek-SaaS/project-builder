@@ -24,14 +24,17 @@ import { Input } from "@/components/ui/input";
 import {
   buildThemePreviewData,
   cloneCardData,
+  getCardBuilderLabel,
   type BuilderCard,
   type CardData,
   type CardDisplayMode,
 } from "@/lib/card-data";
-import { getTheme } from "@/lib/card-themes";
+import { cardThemes, getTheme } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import Logo from "../../../../public/Logo/Logo";
+import { ModeToggle } from "@/components/mode-toggle";
+import { UserButton } from "@clerk/nextjs";
 
 const SAVE_DEBOUNCE_MS = 500;
 
@@ -117,7 +120,7 @@ export default function BuilderView() {
   const activeCard = cards[activeIndex];
   const activeTheme = activeCard
     ? getTheme(activeCard.themeId)
-    : getTheme("midnight");
+    : getTheme(cardThemes[0]?.id ?? "rob-hatch");
   const isMulti = cards.length > 1;
   const displayMode = activeCard?.displayMode ?? "pair";
 
@@ -251,8 +254,10 @@ export default function BuilderView() {
             <span className="text-muted-foreground">/</span>
             <EditableCardName
               key={activeCard.id}
-              name={activeCard.data.name}
-              onSave={(name) => updateActiveCard({ ...activeCard.data, name })}
+              name={getCardBuilderLabel(activeCard.data)}
+              onSave={(label) =>
+                updateActiveCard({ ...activeCard.data, builderLabel: label })
+              }
             />
           </div>
         </div>
@@ -291,6 +296,8 @@ export default function BuilderView() {
                 ? "Publish all & share"
                 : "Publish & share"}
           </Button>
+          <ModeToggle />
+          <UserButton />
         </div>
       </header>
 

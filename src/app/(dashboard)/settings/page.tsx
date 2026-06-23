@@ -268,7 +268,7 @@ export default function SettingsPage() {
                 Upgrade to Pro for unlimited cards, all themes, analytics, and
                 embed branding removal.
               </p>
-              <div className="mt-4 bg-card p-4 sm:p-6">
+              <div className="mt-4 rounded-xl border border-border bg-card p-4 sm:p-6">
                 <PricingTable newSubscriptionRedirectUrl="/dashboard" />
               </div>
             </div>

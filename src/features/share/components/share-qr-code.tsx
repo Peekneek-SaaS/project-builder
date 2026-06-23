@@ -11,9 +11,16 @@ import { HugeiconsIcon } from "@hugeicons/react";
 type ShareQrCodeProps = {
   qrCodeId: string;
   downloadName: string;
+  published: boolean;
+  onEnsurePublished?: () => void;
 };
 
-export function ShareQrCode({ qrCodeId, downloadName }: ShareQrCodeProps) {
+export function ShareQrCode({
+  qrCodeId,
+  downloadName,
+  published,
+  onEnsurePublished,
+}: ShareQrCodeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -34,6 +41,10 @@ export function ShareQrCode({ qrCodeId, downloadName }: ShareQrCodeProps) {
   }, [qrUrl]);
 
   async function handleDownload() {
+    if (!published) {
+      onEnsurePublished?.();
+    }
+
     try {
       setDownloading(true);
       const dataUrl = await QRCode.toDataURL(qrUrl, {

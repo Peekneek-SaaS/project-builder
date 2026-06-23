@@ -422,8 +422,8 @@ export function ShareView({ cardId }: { cardId: string }) {
             </p>
             {!card.published ? (
               <p className="mt-4 text-sm text-muted-foreground">
-                Publish your card so scans open your live page. The QR code is
-                already assigned to this card.
+                Your card will be published automatically so QR scans open your
+                live page.
               </p>
             ) : null}
             {card.qrCodeId ? (
@@ -431,6 +431,12 @@ export function ShareView({ cardId }: { cardId: string }) {
                 <ShareQrCode
                   qrCodeId={card.qrCodeId}
                   downloadName={downloadName}
+                  published={card.published}
+                  onEnsurePublished={() => {
+                    if (!card.published && !setPublished.isPending) {
+                      setPublished.mutate({ id: card.id, published: true });
+                    }
+                  }}
                 />
               </div>
             ) : (

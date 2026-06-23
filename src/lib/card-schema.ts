@@ -23,6 +23,7 @@ export const cardLinkSchema = z.object({
 
 export const cardDataSchema = z.object({
   name: z.string(),
+  builderLabel: z.string().optional().default(""),
   title: z.string(),
   company: z.string(),
   tagline: z.string(),

@@ -16,6 +16,8 @@ export type CardDisplayMode = "pair" | "front" | "back";
 
 export type CardData = {
   name: string;
+  /** Builder-only display name (breadcrumb/tab). Does not appear on the card. */
+  builderLabel: string;
   title: string;
   company: string;
   tagline: string;
@@ -45,6 +47,7 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
 
   return {
     name: extracted.name,
+    builderLabel: "",
     title: extracted.title,
     company: extracted.company,
     tagline: "",
@@ -58,6 +61,16 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
     links,
     fieldSettings: createDefaultFieldSettings(),
   };
+}
+
+export function getCardBuilderLabel(
+  data: Pick<CardData, "name" | "builderLabel">,
+): string {
+  const label = data.builderLabel?.trim();
+  if (label) return label;
+  const name = data.name.trim();
+  if (name) return name;
+  return "Design";
 }
 
 export function cloneCardData(data: CardData): CardData {
@@ -80,6 +93,7 @@ export function buildThemePreviewData(
   if (!extracted) {
     return {
       name: "Jordan Avery",
+      builderLabel: "",
       title: "Senior Product Designer",
       company: "Northwind Studio",
       tagline: "Design that defines you",

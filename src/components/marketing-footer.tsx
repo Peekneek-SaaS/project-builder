@@ -38,7 +38,7 @@ export function MarketingFooter() {
   ];
   return (
     <motion.footer
-      className="border-t border-border"
+      className="border-t border-border bg-background"
       initial="hidden"
       whileInView="visible"
       viewport={viewportOnce}
@@ -50,8 +50,8 @@ export function MarketingFooter() {
           <div className="space-y-4">
             <Logo />
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Turn your resume into a beautiful, shareable business card in
-              seconds.
+              Turn your resume into a beautiful, shareable digital business card
+              in seconds.
             </p>
           </div>
           {cols.map((col) => (

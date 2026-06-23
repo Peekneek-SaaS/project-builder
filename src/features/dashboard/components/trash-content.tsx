@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import {
   TRASH_RETENTION_DAYS,
@@ -159,7 +160,7 @@ function TrashCardTile({ card }: { card: TrashedCard }) {
 
   const theme = getTheme(card.themeId);
   const styles = getThemeStyleClasses(theme.id);
-  const title = card.cardData.name || theme.name;
+  const title = getCardBuilderLabel(card.cardData) || theme.name;
   const deletedAt = toDate(card.deletedAt) ?? new Date();
   const daysRemaining = getTrashDaysRemaining(deletedAt);
 

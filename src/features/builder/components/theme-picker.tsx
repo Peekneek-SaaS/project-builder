@@ -1,9 +1,10 @@
 "use client";
 
-import { CheckIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
+import { CheckIcon, LockPasswordIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import type { CardTheme } from "@/lib/card-themes";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
@@ -13,6 +14,7 @@ import {
   THEME_CATEGORY_ORDER,
   getThemePreviewConfig,
   groupThemesByCategory,
+  filterThemesByQuery,
   type ThemePreviewField,
   type ThemePreviewLayout,
 } from "@/lib/theme-categories";
@@ -470,46 +472,83 @@ export function ThemePickerGrid({
   previewInitials,
   selected,
   onToggle,
+  searchQuery = "",
+  onSearchQueryChange,
+  className,
 }: {
   themes: CardTheme[];
   previewName: string;
   previewInitials: string;
   selected: string[];
   onToggle: (theme: CardTheme) => void;
+  searchQuery?: string;
+  onSearchQueryChange?: (query: string) => void;
+  className?: string;
 }) {
-  const grouped = groupThemesByCategory(themes);
+  const filteredThemes = filterThemesByQuery(themes, searchQuery);
+  const grouped = groupThemesByCategory(filteredThemes);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overflow-x-hidden">
-      {THEME_CATEGORY_ORDER.map((category) => {
-        const categoryThemes = grouped[category];
-        if (!categoryThemes?.length) return null;
+    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 pb-4 pt-1 backdrop-blur-sm">
+        <div className="flex items-center justify-end gap-3">
+          <div className="relative w-full max-w-xs">
+            <HugeiconsIcon
+              icon={Search01Icon}
+              size={16}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange?.(event.target.value)}
+              placeholder="Search themes..."
+              className="h-9 pl-9"
+              aria-label="Search card themes"
+            />
+          </div>
+        </div>
+      </div>
 
-        return (
-          <section key={category} className="w-full min-w-0 shrink-0">
-            <div className="mb-4 space-y-1">
-              <h2 className="text-base font-semibold tracking-tight">
-                {CATEGORY_LABELS[category]}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {CATEGORY_DESCRIPTIONS[category]}
-              </p>
-            </div>
-            <div className="grid w-full min-w-0 grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
-              {categoryThemes.map((theme) => (
-                <ThemePickerCard
-                  key={theme.id}
-                  theme={theme}
-                  previewName={previewName}
-                  previewInitials={previewInitials}
-                  selected={selected.includes(theme.id)}
-                  onSelect={() => onToggle(theme)}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pt-6">
+        {filteredThemes.length === 0 ? (
+          <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            No themes match &ldquo;{searchQuery}&rdquo;. Try a different name or category.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-10 pb-4">
+            {THEME_CATEGORY_ORDER.map((category) => {
+              const categoryThemes = grouped[category];
+              if (!categoryThemes?.length) return null;
+
+              return (
+                <section key={category} className="w-full min-w-0 shrink-0">
+                  <div className="mb-4 space-y-1">
+                    <h2 className="text-base font-semibold tracking-tight">
+                      {CATEGORY_LABELS[category]}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {CATEGORY_DESCRIPTIONS[category]}
+                    </p>
+                  </div>
+                  <div className="grid w-full min-w-0 grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+                    {categoryThemes.map((theme) => (
+                      <ThemePickerCard
+                        key={theme.id}
+                        theme={theme}
+                        previewName={previewName}
+                        previewInitials={previewInitials}
+                        selected={selected.includes(theme.id)}
+                        onSelect={() => onToggle(theme)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

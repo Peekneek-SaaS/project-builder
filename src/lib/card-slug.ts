@@ -18,10 +18,19 @@ export function generateQrCodeId(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 }
 
-function appOrigin() {
-  return typeof window !== "undefined"
-    ? window.location.origin
-    : process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+export function appOrigin() {
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (configured) return configured;
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "http://localhost:3000";
 }
 
 export function getPublicCardUrl(slug: string, utmSource?: string): string {

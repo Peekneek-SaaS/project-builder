@@ -78,7 +78,7 @@ function Hero() {
             <HugeiconsIcon
               icon={SparklesIcon}
               size="14"
-              className="text-primary"
+              className="text-primary dark:text-white"
             />
             AI-powered · Resume to Business Card
           </span>
@@ -104,9 +104,9 @@ function Hero() {
           <div className="flex items-center gap-6 pt-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <HugeiconsIcon
-                icon={BrushIcon}
+                icon={PaintBoardIcon}
                 className="dark:text-white text-primary"
-                size={18}
+                size={16}
               />{" "}
               No design skills
             </span>
@@ -214,7 +214,9 @@ function HowItWorks() {
             variants={staggerItem}
             className="relative rounded-xl border border-border bg-card p-6"
           >
-            <span className="text-sm font-medium text-primary">0{i + 1}</span>
+            <span className="text-sm font-medium text-primary dark:text-white">
+              0{i + 1}
+            </span>
             <div className="mt-4 grid size-11 place-items-center rounded-lg bg-primary/10 text-primary">
               <HugeiconsIcon icon={s.icon} />
             </div>
@@ -457,7 +459,7 @@ function CTA() {
   return (
     <section className="mx-auto">
       <motion.div
-        className="relative overflow-hidden bg-primary/10 px-6 py-16 text-center sm:px-12"
+        className="relative overflow-hidden bg-card-foreground px-6 py-16 text-center text-background sm:px-12"
         initial="hidden"
         whileInView="visible"
         viewport={viewportOnce}
@@ -469,11 +471,11 @@ function CTA() {
         <h2 className="mx-auto mt-4 max-w-xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
           Make a first impression that lasts
         </h2>
-        <p className="mx-auto mt-3 max-w-md text-pretty ">
-          Build your business card from your resume today — it only takes a
-          minute.
+        <p className="mx-auto mt-3 max-w-md text-pretty text-background/70">
+          Build your digital business card from your resume today — it only
+          takes a minute.
         </p>
-        <Button asChild size="lg" className="mt-8">
+        <Button asChild size="lg" variant="secondary" className="mt-8">
           <Link href="/create">
             Get started free
             <HugeiconsIcon icon={ArrowRight01Icon} />
