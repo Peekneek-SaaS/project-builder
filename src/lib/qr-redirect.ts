@@ -5,6 +5,7 @@ export type QrRedirectResult =
   | { status: "redirect"; slug: string }
   | { status: "not_found" };
 
+/** @deprecated Use loadPublicCardByQrCodeId — kept for tests/tools. */
 export async function resolveQrRedirect(
   qrCodeId: string,
 ): Promise<QrRedirectResult> {

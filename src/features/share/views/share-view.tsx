@@ -417,22 +417,17 @@ export function ShareView({ cardId }: { cardId: string }) {
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="text-sm font-semibold">QR code</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each card has a permanent QR code. Once generated, the encoded
-              link never changes — even if you edit the card.
+              Each card has a permanent QR link. Publish first, then download
+              or scan — the encoded URL stays the same.
             </p>
-            {!card.published ? (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Your card will be published automatically so QR scans open your
-                live page.
-              </p>
-            ) : null}
             {card.qrCodeId ? (
               <div className="mt-6">
                 <ShareQrCode
                   qrCodeId={card.qrCodeId}
                   downloadName={downloadName}
                   published={card.published}
-                  onEnsurePublished={() => {
+                  publishPending={setPublished.isPending}
+                  onPublish={() => {
                     if (!card.published && !setPublished.isPending) {
                       setPublished.mutate({ id: card.id, published: true });
                     }

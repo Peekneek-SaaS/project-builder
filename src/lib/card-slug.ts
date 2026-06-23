@@ -19,12 +19,12 @@ export function generateQrCodeId(): string {
 }
 
 export function appOrigin() {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (configured) return configured;
+
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
-
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-  if (configured) return configured;
 
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;

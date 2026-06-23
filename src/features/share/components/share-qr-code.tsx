@@ -12,14 +12,16 @@ type ShareQrCodeProps = {
   qrCodeId: string;
   downloadName: string;
   published: boolean;
-  onEnsurePublished?: () => void;
+  publishPending?: boolean;
+  onPublish?: () => void;
 };
 
 export function ShareQrCode({
   qrCodeId,
   downloadName,
   published,
-  onEnsurePublished,
+  publishPending = false,
+  onPublish,
 }: ShareQrCodeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,11 @@ export function ShareQrCode({
   const qrUrl = getQrCardUrl(qrCodeId);
 
   useEffect(() => {
+    if (!published) {
+      setLoading(false);
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -38,11 +45,12 @@ export function ShareQrCode({
     })
       .catch(() => undefined)
       .finally(() => setLoading(false));
-  }, [qrUrl]);
+  }, [published, qrUrl]);
 
   async function handleDownload() {
     if (!published) {
-      onEnsurePublished?.();
+      onPublish?.();
+      return;
     }
 
     try {
@@ -62,6 +70,31 @@ export function ShareQrCode({
     }
   }
 
+  if (!published) {
+    return (
+      <div className="mt-6 flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Publish your card first to activate the QR code. The link is permanent
+          once generated — publishing does not change the encoded URL.
+        </p>
+        <Button
+          type="button"
+          disabled={publishPending}
+          onClick={() => onPublish?.()}
+        >
+          {publishPending ? (
+            <>
+              <HugeiconsIcon icon={Loading03Icon} size={14} className="animate-spin" />
+              Publishing…
+            </>
+          ) : (
+            "Publish & show QR code"
+          )}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative rounded-xl border border-border bg-white p-4 shadow-sm">
@@ -78,6 +111,10 @@ export function ShareQrCode({
       </div>
       <p className="max-w-sm text-center font-mono text-xs text-muted-foreground break-all">
         {qrUrl}
+      </p>
+      <p className="max-w-sm text-center text-xs text-muted-foreground">
+        Scan this URL on your phone before printing — it must match your live
+        site (not localhost).
       </p>
       <Button
         type="button"
