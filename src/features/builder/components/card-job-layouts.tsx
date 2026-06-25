@@ -244,10 +244,10 @@ export function JobCardFront({
             data={data}
             theme={theme}
             fallbackText={letters}
-            className="absolute -right-4 -top-2"
+            className="absolute right-0 top-0"
             textClassName={cn(
               "bg-linear-to-b from-orange-500 to-red-600 bg-clip-text text-transparent",
-              tx(compact, "text-[72px]", "text-[120px]"),
+              tx(compact, "text-[64px]", "text-[100px]"),
             )}
             opacity={0.28}
           />
@@ -255,10 +255,10 @@ export function JobCardFront({
             data={data}
             theme={theme}
             fallbackText="NG"
-            className="absolute -bottom-6 -left-2"
+            className="absolute bottom-0 left-0"
             textClassName={cn(
               "bg-linear-to-b from-orange-500 to-red-600 bg-clip-text text-transparent",
-              tx(compact, "text-[60px]", "text-[100px]"),
+              tx(compact, "text-[52px]", "text-[84px]"),
             )}
             opacity={0.28}
           />
@@ -290,8 +290,8 @@ export function JobCardFront({
             data={data}
             theme={theme}
             fallbackText={initial}
-            className="absolute -left-3 top-1/2 -translate-y-1/2"
-            textClassName={tx(compact, "text-[80px]", "text-[160px]")}
+            className="absolute left-0 top-1/2 -translate-y-1/2"
+            textClassName={tx(compact, "text-[72px]", "text-[132px]")}
             opacity={0.22}
           />
           <div className="relative flex flex-1 items-end justify-end p-6">
@@ -428,7 +428,7 @@ export function JobCardFront({
               data={data}
               fieldKey="name"
               className={cn(
-                "font-black uppercase leading-none tracking-tighter opacity-25",
+                "font-black uppercase leading-none tracking-tighter opacity-20",
                 tx(compact, "text-lg", "text-3xl"),
               )}
             >
@@ -438,8 +438,8 @@ export function JobCardFront({
               data={data}
               fieldKey="name"
               className={cn(
-                "-mt-5 font-black uppercase leading-none tracking-tighter",
-                tx(compact, "text-lg", "text-3xl"),
+                "-mt-4 font-black uppercase leading-none tracking-tighter",
+                tx(compact, "text-xl", "text-4xl"),
               )}
             >
               {data.name}
@@ -536,9 +536,9 @@ export function JobCardFront({
             data={data}
             theme={theme}
             fallbackText={data.company?.slice(0, 4).toUpperCase() || "TERA"}
-            className="absolute right-2 top-1/2 -translate-y-1/2"
-            textClassName={tx(compact, "text-[64px]", "text-[80px]")}
-            opacity={0.1}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+            textClassName={tx(compact, "text-[56px]", "text-[72px]")}
+            opacity={0.12}
           />
           <div className="relative flex flex-1 flex-col justify-between p-6">
             <div>

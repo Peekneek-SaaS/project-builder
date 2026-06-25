@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft01Icon,
+  Delete02Icon,
   Edit02Icon,
   Loading03Icon,
   Share01Icon,
@@ -35,6 +36,7 @@ import { useTRPC } from "@/trpc/client";
 import Logo from "../../../../public/Logo/Logo";
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserButton } from "@clerk/nextjs";
+import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 
 const SAVE_DEBOUNCE_MS = 500;
 
@@ -68,6 +70,7 @@ export default function BuilderView() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [mobileEditOpen, setMobileEditOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<BuilderCard | null>(null);
   const saveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
@@ -86,6 +89,9 @@ export default function BuilderView() {
         toast.error(error.message || "Failed to publish card.");
       },
     }),
+  );
+  const removeCardMutation = useMutation(
+    trpc.card.moveToTrash.mutationOptions(),
   );
 
   useEffect(() => {
@@ -181,6 +187,60 @@ export default function BuilderView() {
     router.replace(`/builder/${resumeId}?${params.toString()}`, {
       scroll: false,
     });
+  }
+
+  function confirmRemoveCard() {
+    if (!removeTarget) return;
+
+    const removedId = removeTarget.id;
+    const removeIndex = cards.findIndex((card) => card.id === removedId);
+    const nextCards = cards.filter((card) => card.id !== removedId);
+
+    removeCardMutation.mutate(
+      { id: removedId },
+      {
+        onSuccess: () => {
+          const pendingSave = saveTimersRef.current.get(removedId);
+          if (pendingSave) {
+            clearTimeout(pendingSave);
+            saveTimersRef.current.delete(removedId);
+          }
+
+          setCards(nextCards);
+
+          let nextIndex = activeIndex;
+          if (removeIndex >= 0) {
+            if (removeIndex < activeIndex) {
+              nextIndex = activeIndex - 1;
+            } else if (removeIndex === activeIndex) {
+              nextIndex = Math.min(activeIndex, nextCards.length - 1);
+            }
+          }
+          nextIndex = Math.max(0, nextIndex);
+          setActiveIndex(nextIndex);
+
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("cards", nextCards.map((card) => card.id).join(","));
+          const nextActive = nextCards[nextIndex];
+          if (nextActive) {
+            params.set("active", nextActive.id);
+          } else {
+            params.delete("active");
+          }
+          router.replace(`/builder/${resumeId}?${params.toString()}`, {
+            scroll: false,
+          });
+
+          toast.success("Card removed.");
+          setRemoveTarget(null);
+          void queryClient.invalidateQueries(trpc.card.list.queryFilter());
+          void queryClient.invalidateQueries(trpc.card.listTrash.queryFilter());
+        },
+        onError: (error) => {
+          toast.error(error.message || "Failed to remove card.");
+        },
+      },
+    );
   }
 
   const isLoading = resumeLoading || cardsLoading || (dbCards && !initialized);
@@ -280,7 +340,7 @@ export default function BuilderView() {
             trigger={
               <Button variant="outline" size="sm" className="gap-2 lg:hidden">
                 <HugeiconsIcon icon={Edit02Icon} size={16} />
-                Edit details
+                <span className="hidden md:flex">Edit details</span>
               </Button>
             }
           />
@@ -320,45 +380,65 @@ export default function BuilderView() {
                   const theme = getTheme(card.themeId);
                   const selected = index === activeIndex;
                   const thumbData = withPreviewFallback(card.data);
+                  const cardLabel =
+                    getCardBuilderLabel(card.data) || theme.name;
 
                   return (
-                    <Button
+                    <div
                       key={card.id}
-                      type="button"
-                      variant="ghost"
-                      onClick={() => selectCard(index)}
                       className={cn(
-                        "relative h-auto shrink-0 flex-col gap-2 rounded-xl border-2 p-2.5 transition-all lg:w-full",
+                        "relative shrink-0 rounded-xl border-2 transition-all lg:w-full",
                         selected
                           ? "border-primary ring-2 ring-primary/20 bg-primary/5"
                           : "border-border bg-card hover:border-primary/30",
                       )}
                     >
-                      <span
-                        className={cn(
-                          "absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums",
-                          selected
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground",
-                        )}
+                      <button
+                        type="button"
+                        onClick={() => selectCard(index)}
+                        className="flex w-full flex-col gap-2 rounded-[10px] p-2.5 text-left"
                       >
-                        {index + 1}
-                      </span>
-                      <div className="overflow-hidden rounded-lg">
-                        <BusinessCard
-                          data={{
-                            ...thumbData,
-                            bio: "",
-                            skills: [],
-                            links: [],
-                          }}
-                          theme={theme}
-                          compact
-                          displayMode="front"
-                          className="pointer-events-none shadow-none ring-0"
-                        />
-                      </div>
-                    </Button>
+                        <span
+                          className={cn(
+                            "absolute left-2 top-2 z-10 flex size-5 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums",
+                            selected
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <div className="overflow-hidden rounded-lg">
+                          <BusinessCard
+                            data={{
+                              ...thumbData,
+                              bio: "",
+                              skills: [],
+                              links: [],
+                            }}
+                            theme={theme}
+                            compact
+                            displayMode="front"
+                            className="pointer-events-none shadow-none ring-0"
+                          />
+                        </div>
+                        {/* <span className="truncate px-0.5 text-center text-[11px] font-medium text-muted-foreground">
+                          {cardLabel}
+                        </span> */}
+                      </button>
+                      {cards.length > 1 ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Remove ${cardLabel}`}
+                          className="absolute right-1.5 top-1.5 z-20 size-6 bg-destructive shadow-sm hover:bg-destructive"
+                          onClick={() => setRemoveTarget(card)}
+                        >
+                          <HugeiconsIcon icon={Delete02Icon} size={10} />
+                        </Button>
+                      ) : null}
+                    </div>
                   );
                 })}
               </div>
@@ -381,7 +461,19 @@ export default function BuilderView() {
                   </span>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {isMulti && cards.length > 1 ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={() => setRemoveTarget(activeCard)}
+                  >
+                    <HugeiconsIcon icon={Delete02Icon} size={14} />
+                    Remove card
+                  </Button>
+                ) : null}
                 {(
                   [
                     ["pair", "Both"],
@@ -441,6 +533,22 @@ export default function BuilderView() {
           </aside>
         </div>
       </div>
+
+      <DeleteCardDialog
+        open={removeTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoveTarget(null);
+        }}
+        title="Remove this card?"
+        description={
+          removeTarget
+            ? `"${getCardBuilderLabel(removeTarget.data) || getTheme(removeTarget.themeId).name}" will be moved to trash. You can recover it within 30 days.`
+            : ""
+        }
+        confirmLabel="Remove"
+        loading={removeCardMutation.isPending}
+        onConfirm={confirmRemoveCard}
+      />
     </div>
   );
 }

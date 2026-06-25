@@ -30,11 +30,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TRPCClientError } from "@trpc/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { cardThemes, type CardTheme } from "@/lib/card-themes";
 import { canUseTheme } from "@/lib/plan";
 import { ThemePickerGrid } from "@/features/builder/components/theme-picker";
+import { buildThemePreviewData } from "@/lib/card-data";
 import {
   Combobox,
   ComboboxContent,
@@ -415,14 +416,14 @@ function StepUpload({
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 min-h-0">
-      <div className="shrink-0 text-center">
+      {/* <div className="shrink-0 text-center">
         <h1 className="text-3xl font-semibold tracking-tight">
           Upload your resume
         </h1>
         <p className="text-sm text-muted-foreground">
           We'll read it with AI and pull out everything we need for your card.
         </p>
-      </div>
+      </div> */}
 
       {!fileName ? (
         <>
@@ -662,18 +663,14 @@ function StepTheme({
   isProPlan: boolean;
 }) {
   const [themeSearch, setThemeSearch] = useState("");
-  const previewName = extractedData?.name ?? "Jordan Avery";
-  const previewInitials = previewName
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const previewData = useMemo(
+    () => buildThemePreviewData(extractedData),
+    [extractedData],
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
-      <div className="shrink-0 space-y-2 text-center">
+      {/* <div className="shrink-0 space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Choose a theme
         </h1>
@@ -696,17 +693,21 @@ function StepTheme({
             </>
           )}
         </p>
-      </div>
+        <p className="text-xs text-muted-foreground">
+          Previews use your details with sample placeholders where needed. Use
+          the arrows to switch between front and back.
+        </p>
+      </div> */}
 
       <ThemePickerGrid
         className="min-h-0 flex-1"
         themes={cardThemes}
-        previewName={previewName}
-        previewInitials={previewInitials}
+        previewData={previewData}
         selected={selected}
         onToggle={onToggle}
         searchQuery={themeSearch}
         onSearchQueryChange={setThemeSearch}
+        isProPlan={isProPlan}
       />
 
       {!isProPlan ? (

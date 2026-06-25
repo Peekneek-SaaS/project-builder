@@ -51,7 +51,7 @@ export default function HomePage() {
       <MarketingNav />
       <main>
         <Hero />
-        <LogoCloud />
+        {/* <LogoCloud /> */}
         <HowItWorks />
         <Features />
         <Pricing />
@@ -121,7 +121,7 @@ function Hero() {
           </div>
         </motion.div>
         <motion.div
-          className="relative flex justify-center lg:justify-end"
+          className="relative flex justify-center lg:justify-end py-4"
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ ...defaultTransition, delay: 0.12 }}
@@ -195,7 +195,7 @@ function HowItWorks() {
     },
   ];
   return (
-    <section id="how" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <section id="how" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SectionHeading
         eyebrow="How it works"
         title="From resume to ready-to-share in three steps"

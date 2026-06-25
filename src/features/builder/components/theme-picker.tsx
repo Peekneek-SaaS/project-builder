@@ -1,10 +1,25 @@
 "use client";
 
-import { CheckIcon, LockPasswordIcon, Search01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  CheckIcon,
+  LockPasswordIcon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { BusinessCard } from "@/features/builder/components/business-card";
+import type { CardData, CardDisplayMode } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
@@ -399,50 +414,170 @@ function ThemePreviewContent({
   }
 }
 
+const PREVIEW_LANDSCAPE_SIZE: CardTheme["size"] = "md";
+
+function themeForPickerPreview(theme: CardTheme): CardTheme {
+  if (theme.orientation === "landscape" && theme.size === "lg") {
+    return { ...theme, size: PREVIEW_LANDSCAPE_SIZE };
+  }
+  return theme;
+}
+
+function ThemePickerCardPreview({
+  theme,
+  previewData,
+  side,
+}: {
+  theme: CardTheme;
+  previewData: CardData;
+  side: CardDisplayMode;
+}) {
+  const previewTheme = useMemo(() => themeForPickerPreview(theme), [theme]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState({
+    scale: 1,
+    width: 0,
+    height: 0,
+    naturalWidth: 0,
+  });
+
+  useLayoutEffect(() => {
+    const updateLayout = () => {
+      const container = containerRef.current;
+      const card = cardRef.current;
+      if (!container || !card) return;
+
+      const naturalWidth = card.offsetWidth;
+      const naturalHeight = card.offsetHeight;
+      if (!naturalWidth || !naturalHeight) return;
+
+      const padding = 32;
+      const availableWidth = Math.max(0, container.clientWidth - padding);
+      const scale = Math.min(1, availableWidth / naturalWidth);
+
+      setLayout({
+        scale,
+        width: naturalWidth * scale,
+        height: naturalHeight * scale,
+        naturalWidth,
+      });
+    };
+
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [previewTheme.id, side, previewData]);
+
+  return (
+    <div ref={containerRef} className="flex w-full justify-center px-4 py-4">
+      <div
+        className="overflow-hidden"
+        style={{
+          width: layout.width > 0 ? layout.width : undefined,
+          height: layout.height > 0 ? layout.height : undefined,
+        }}
+      >
+        <div
+          ref={cardRef}
+          style={{
+            width: layout.naturalWidth > 0 ? layout.naturalWidth : undefined,
+            transform: layout.scale < 1 ? `scale(${layout.scale})` : undefined,
+            transformOrigin: "top left",
+          }}
+        >
+          <BusinessCard
+            data={previewData}
+            theme={previewTheme}
+            displayMode={side}
+            showSideLabels={false}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ThemePickerCard({
   theme,
-  previewName,
-  previewInitials,
+  previewData,
   selected,
   onSelect,
 }: {
   theme: CardTheme;
-  previewName: string;
-  previewInitials: string;
+  previewData: CardData;
   selected: boolean;
   onSelect: () => void;
 }) {
-  const styles = getThemeStyleClasses(theme.id);
+  const [side, setSide] = useState<CardDisplayMode>("front");
+
+  function showSide(next: CardDisplayMode, event: MouseEvent) {
+    event.stopPropagation();
+    setSide(next);
+  }
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
+      role="button"
+      tabIndex={0}
       aria-pressed={selected}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-xl border-2 text-left transition-all",
+        "flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border-2 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
         selected
           ? "border-primary ring-2 ring-primary/20"
           : "border-border hover:border-primary/40",
       )}
     >
-      <div
-        className={cn(
-          "relative min-h-[108px] overflow-hidden px-4 pb-4 pt-4",
-          styles.frontSurface,
-          styles.frontText,
-          styles.isLightFront && "ring-1 ring-inset ring-black/10",
-        )}
-      >
-        <ThemePreviewContent
-          theme={theme}
-          previewName={previewName}
-          previewInitials={previewInitials}
-          styles={styles}
-        />
+      <div className="relative bg-muted/15 pb-11">
+        <div className="pointer-events-none">
+          <ThemePickerCardPreview
+            theme={theme}
+            previewData={previewData}
+            side={side}
+          />
+        </div>
+
+        <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
+          <button
+            type="button"
+            aria-label={`Show front of ${theme.name}`}
+            aria-pressed={side === "front"}
+            onClick={(event) => showSide("front", event)}
+            className={cn(
+              "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+              side === "front"
+                ? "border-primary/40 text-primary"
+                : "border-border/80 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+          </button>
+          <button
+            type="button"
+            aria-label={`Show back of ${theme.name}`}
+            aria-pressed={side === "back"}
+            onClick={(event) => showSide("back", event)}
+            className={cn(
+              "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+              side === "back"
+                ? "border-primary/40 text-primary"
+                : "border-border/80 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+          </button>
+        </div>
 
         {selected ? (
-          <span className="absolute right-2.5 top-2.5 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm">
+          <span className="pointer-events-none absolute right-2.5 top-2.5 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm">
             <HugeiconsIcon icon={CheckIcon} size={14} />
           </span>
         ) : null}
@@ -462,36 +597,57 @@ export function ThemePickerCard({
           </Badge>
         ) : null}
       </div>
-    </button>
+    </div>
   );
 }
 
 export function ThemePickerGrid({
   themes,
-  previewName,
-  previewInitials,
+  previewData,
   selected,
   onToggle,
   searchQuery = "",
   onSearchQueryChange,
   className,
+  isProPlan,
 }: {
   themes: CardTheme[];
-  previewName: string;
-  previewInitials: string;
+  previewData: CardData;
   selected: string[];
   onToggle: (theme: CardTheme) => void;
   searchQuery?: string;
   onSearchQueryChange?: (query: string) => void;
   className?: string;
+  isProPlan: boolean;
 }) {
   const filteredThemes = filterThemesByQuery(themes, searchQuery);
   const grouped = groupThemesByCategory(filteredThemes);
 
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
+    <div
+      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}
+    >
       <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 pb-4 pt-1 backdrop-blur-sm">
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center flex-col md:flex-row justify-end gap-3">
+          <p className="text-sm text-muted-foreground">
+            {isProPlan ? (
+              <>
+                Select one or more themes.{" "}
+                <span className="font-medium text-foreground">
+                  {selected.length} selected
+                </span>
+              </>
+            ) : (
+              <>
+                Pick a look for your card.{" "}
+                <span className="font-medium text-foreground">
+                  {selected.length} selected
+                </span>
+                . Select multiple themes with{" "}
+                <span className="font-medium text-foreground">Pro</span>.
+              </>
+            )}
+          </p>
           <div className="relative w-full max-w-xs">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -502,8 +658,8 @@ export function ThemePickerGrid({
               type="search"
               value={searchQuery}
               onChange={(event) => onSearchQueryChange?.(event.target.value)}
-              placeholder="Search themes..."
-              className="h-9 pl-9"
+              placeholder="Search card themes"
+              className="h-8 pl-9"
               aria-label="Search card themes"
             />
           </div>
@@ -513,7 +669,8 @@ export function ThemePickerGrid({
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pt-6">
         {filteredThemes.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            No themes match &ldquo;{searchQuery}&rdquo;. Try a different name or category.
+            No themes match &ldquo;{searchQuery}&rdquo;. Try a different name or
+            category.
           </div>
         ) : (
           <div className="flex flex-col gap-10 pb-4">
@@ -531,13 +688,12 @@ export function ThemePickerGrid({
                       {CATEGORY_DESCRIPTIONS[category]}
                     </p>
                   </div>
-                  <div className="grid w-full min-w-0 grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+                  <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {categoryThemes.map((theme) => (
                       <ThemePickerCard
                         key={theme.id}
                         theme={theme}
-                        previewName={previewName}
-                        previewInitials={previewInitials}
+                        previewData={previewData}
                         selected={selected.includes(theme.id)}
                         onSelect={() => onToggle(theme)}
                       />

@@ -96,7 +96,7 @@ export function AnalyticsView({ cardId }: { cardId: string }) {
 
   if (billing && !billing.analyticsEnabled) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mx-auto px-4 py-8 sm:px-6">
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
           <h2 className="text-lg font-semibold">Analytics is a Pro feature</h2>
           <p className="max-w-md text-sm text-muted-foreground">
@@ -134,7 +134,7 @@ export function AnalyticsView({ cardId }: { cardId: string }) {
   const theme = getTheme(displayAnalytics.card.themeId);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto px-4 py-8 sm:px-6">
       <div className="mb-6">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/analytics?period=${period}`}>
