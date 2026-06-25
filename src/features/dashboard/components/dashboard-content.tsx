@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
-import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
 import { getCardBuilderLabel } from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
@@ -350,6 +349,8 @@ function CardTile({
 
   const theme = getTheme(card.themeId);
   const styles = getThemeStyleClasses(theme.id);
+  const compactCardWidth = theme.orientation === "landscape" ? 148 : 100;
+  const compactCardHeight = theme.orientation === "landscape" ? 92 : 160;
   const builderHref = `/builder/${card.resumeId}?cards=${card.id}`;
   const shareHref = `/share/${card.id}`;
   const title = getCardBuilderLabel(card.cardData);
@@ -377,24 +378,22 @@ function CardTile({
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <Link href={shareHref} className="block">
-          <div
-            className={cn(
-              "relative overflow-hidden",
-              styles.frontSurface,
-            )}
-          >
-            <CardPreviewScaler
-              className="border-0 bg-transparent p-1.5 sm:p-2"
-              minHeightClass="h-28 sm:h-36 md:h-44"
-            >
-              <BusinessCard
-                data={card.cardData}
-                theme={theme}
-                displayMode="front"
-                compact
-                className="pointer-events-none shadow-none ring-0"
-              />
-            </CardPreviewScaler>
+          <div className={cn("relative overflow-hidden", styles.frontSurface)}>
+            <div className="@container flex h-28 w-full items-center justify-center overflow-hidden sm:h-36 md:h-44">
+              <div
+                className="origin-center"
+                // style={{
+                //   transform: `scale(min(calc(100cqw / ${compactCardWidth}px), calc(100cqh / ${compactCardHeight}px)))`,
+                // }}
+              >
+                <BusinessCard
+                  data={card.cardData}
+                  theme={theme}
+                  displayMode="front"
+                  className="pointer-events-none shadow-none ring-0"
+                />
+              </div>
+            </div>
 
             <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <div className="space-y-1 space-x-2 text-xs text-white/80">
@@ -413,6 +412,7 @@ function CardTile({
             checked={selected}
             onCheckedChange={(value) => onSelectedChange(value === true)}
             aria-label={`Select ${title}`}
+            className="border-primary"
           />
         </div>
 

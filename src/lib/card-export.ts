@@ -8,14 +8,22 @@ export type CardExportSides = {
 
 export type CardDownloadFormat = "png" | "pdf" | "svg";
 
+export type CardOrientation = "landscape" | "portrait";
+
+export type CardDownloadOptions = {
+  orientation?: CardOrientation;
+};
+
 export const CARD_EXPORT_ATTR = "data-card-export";
 
-const EXPORT_PIXEL_RATIO = 4;
-
-const exportOptions = {
-  cacheBust: true,
-  pixelRatio: EXPORT_PIXEL_RATIO,
+/** Standard US business card size (3.5" × 2"). */
+export const PRINT_CARD_SIZE_MM = {
+  landscape: { width: 88.9, height: 50.8 },
+  portrait: { width: 50.8, height: 88.9 },
 } as const;
+
+/** 6× capture ≈ 300+ DPI for typical card layouts. */
+const EXPORT_PIXEL_RATIO = 6;
 
 function triggerDownload(dataUrl: string, filename: string) {
   const link = document.createElement("a");
@@ -33,26 +41,35 @@ function sanitizeFilename(name: string) {
   return base || "business-card";
 }
 
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Failed to prepare image for export."));
-    image.src = dataUrl;
-  });
-}
-
 function filenameForSide(base: string, side: "front" | "back", multiple: boolean) {
   const safe = sanitizeFilename(base);
   return multiple ? `${safe}-${side}` : safe;
 }
 
+function pngOptions() {
+  return {
+    cacheBust: true,
+    pixelRatio: EXPORT_PIXEL_RATIO,
+  } as const;
+}
+
+function svgOptions() {
+  return {
+    cacheBust: true,
+    pixelRatio: EXPORT_PIXEL_RATIO,
+  } as const;
+}
+
 async function renderPng(element: HTMLElement) {
-  return toPng(element, exportOptions);
+  return toPng(element, pngOptions());
 }
 
 async function renderSvg(element: HTMLElement) {
-  return toSvg(element, exportOptions);
+  return toSvg(element, svgOptions());
+}
+
+function pageSizeMm(orientation: CardOrientation) {
+  return PRINT_CARD_SIZE_MM[orientation];
 }
 
 export async function downloadCardAsPng(
@@ -84,50 +101,36 @@ export async function downloadCardAsSvg(
 export async function downloadCardAsPdf(
   targets: { element: HTMLElement; side: "front" | "back" }[],
   filenameBase: string,
+  options: CardDownloadOptions = {},
 ) {
   if (targets.length === 0) return;
+
+  const orientation = options.orientation ?? "landscape";
+  const { width: widthMm, height: heightMm } = pageSizeMm(orientation);
 
   const rendered = await Promise.all(
     targets.map(async ({ element, side }) => {
       const dataUrl = await renderPng(element);
-      const image = await loadImage(dataUrl);
-      return { dataUrl, image, side };
+      return { dataUrl, side };
     }),
   );
 
-  const pageWidth = Math.max(...rendered.map(({ image }) => image.naturalWidth));
-  const pageHeight = Math.max(
-    ...rendered.map(({ image }) => image.naturalHeight),
-  );
-  const orientation = pageWidth >= pageHeight ? "landscape" : "portrait";
-
   const pdf = new jsPDF({
-    orientation,
-    unit: "px",
-    format: [pageWidth, pageHeight],
+    orientation: widthMm >= heightMm ? "landscape" : "portrait",
+    unit: "mm",
+    format: [widthMm, heightMm],
     compress: true,
   });
 
-  rendered.forEach(({ dataUrl, image }, index) => {
+  rendered.forEach(({ dataUrl }, index) => {
     if (index > 0) {
-      pdf.addPage([pageWidth, pageHeight], orientation);
+      pdf.addPage([widthMm, heightMm], widthMm >= heightMm ? "landscape" : "portrait");
     }
 
-    const x = (pageWidth - image.naturalWidth) / 2;
-    const y = (pageHeight - image.naturalHeight) / 2;
-    pdf.addImage(
-      dataUrl,
-      "PNG",
-      x,
-      y,
-      image.naturalWidth,
-      image.naturalHeight,
-      undefined,
-      "FAST",
-    );
+    pdf.addImage(dataUrl, "PNG", 0, 0, widthMm, heightMm, undefined, "SLOW");
   });
 
-  pdf.save(`${sanitizeFilename(filenameBase)}.pdf`);
+  pdf.save(`${sanitizeFilename(filenameBase)}-print.pdf`);
 }
 
 export function resolveExportTargets(
@@ -154,6 +157,7 @@ export async function downloadCard(
   format: CardDownloadFormat,
   filenameBase: string,
   sides: CardExportSides,
+  options: CardDownloadOptions = {},
 ) {
   const targets = resolveExportTargets(root, sides);
 
@@ -169,7 +173,7 @@ export async function downloadCard(
       await downloadCardAsSvg(targets, filenameBase);
       break;
     case "pdf":
-      await downloadCardAsPdf(targets, filenameBase);
+      await downloadCardAsPdf(targets, filenameBase, options);
       break;
   }
 }

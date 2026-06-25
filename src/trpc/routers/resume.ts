@@ -17,7 +17,6 @@ const blankExtractedData = {
   email: "",
   phone: "",
   location: "",
-  skills: [] as string[],
   company: "",
   website: "",
 } satisfies ExtractedCardData;

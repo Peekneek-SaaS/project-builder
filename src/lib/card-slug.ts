@@ -53,16 +53,79 @@ export function getEmbedCardUrl(slug: string): string {
   return `${appOrigin()}/embed/${slug}`;
 }
 
-export function buildEmbedIframeCode(slug: string, title: string): string {
+export type EmbedCodeFormat = "html" | "react" | "vue";
+
+export const EMBED_CODE_FORMAT_LABELS: Record<EmbedCodeFormat, string> = {
+  html: "HTML",
+  react: "React / JSX",
+  vue: "Vue",
+};
+
+function embedTitle(title: string) {
+  return `${title} — Digital business card`;
+}
+
+/** HTML embed — `style` is a string attribute (valid in plain HTML only). */
+export function buildEmbedHtmlCode(slug: string, title: string): string {
   const src = getEmbedCardUrl(slug);
-  const safeTitle = title.replace(/"/g, "&quot;");
+  const safeTitle = embedTitle(title).replace(/"/g, "&quot;");
 
   return `<iframe
   src="${src}"
-  title="${safeTitle} — Digital business card"
+  title="${safeTitle}"
   width="100%"
   height="560"
   style="border:0;border-radius:12px;max-width:960px;min-height:480px;"
   loading="lazy"
 ></iframe>`;
+}
+
+/** React / Next.js — `style` must be an object in JSX. */
+export function buildEmbedReactCode(slug: string, title: string): string {
+  const src = getEmbedCardUrl(slug);
+  const safeTitle = embedTitle(title).replace(/"/g, '\\"');
+
+  return `<iframe
+  src="${src}"
+  title="${safeTitle}"
+  width="100%"
+  height={560}
+  loading="lazy"
+  style={{
+    border: 0,
+    borderRadius: "12px",
+    maxWidth: "960px",
+    minHeight: "480px",
+  }}
+/>`;
+}
+
+/** Vue SFC template — string `style` is fine in Vue templates. */
+export function buildEmbedVueCode(slug: string, title: string): string {
+  const src = getEmbedCardUrl(slug);
+  const safeTitle = embedTitle(title).replace(/"/g, "&quot;");
+
+  return `<iframe
+  src="${src}"
+  title="${safeTitle}"
+  width="100%"
+  height="560"
+  loading="lazy"
+  style="border:0;border-radius:12px;max-width:960px;min-height:480px;"
+/>`;
+}
+
+export function buildEmbedIframeCode(
+  slug: string,
+  title: string,
+  format: EmbedCodeFormat = "html",
+): string {
+  switch (format) {
+    case "react":
+      return buildEmbedReactCode(slug, title);
+    case "vue":
+      return buildEmbedVueCode(slug, title);
+    default:
+      return buildEmbedHtmlCode(slug, title);
+  }
 }

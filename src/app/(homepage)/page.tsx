@@ -1,5 +1,6 @@
 import Link from "next/link";
 import * as motion from "motion/react-client";
+import type { Metadata } from "next";
 import {
   defaultTransition,
   fadeInUp,
@@ -44,6 +45,11 @@ import Logo from "../../../public/Logo/Logo";
 import { getTheme } from "@/lib/card-themes";
 import CardStack from "@/lib/homepage-card/CardStack";
 import { cards } from "@/lib/homepage-card/data";
+
+export const metadata: Metadata = {
+  description:
+    "Upload your resume and let AI extract everything that matters. Pick a theme, refine the details, and share a polished business card by link or QR in seconds.",
+};
 
 export default function HomePage() {
   return (
@@ -227,6 +233,14 @@ function HowItWorks() {
           </motion.div>
         ))}
       </motion.div>
+      {/* <iframe
+        src="http://localhost:3000/embed/miranda-martha-usqrxe"
+        title="MIRANDA — Digital business card"
+        width="100%"
+        height="560"
+        style="border:0;border-radius:12px;max-width:960px;min-height:480px;"
+        loading="lazy"
+      ></iframe> */}
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BusinessCardData } from "./types";
-import { CardFaces } from "./BusinessCardFaces";
+import { CardFaces, useCyclingCardPalettes } from "./BusinessCardFaces";
 
 type Mode = "lift" | "flip" | "lift-flip";
 
@@ -25,6 +25,7 @@ function getRotateY(
 
 export default function CardStack({ cards, mode = "lift" }: CardStackProps) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const facePalettes = useCyclingCardPalettes();
 
   return (
     <div className="relative mx-auto h-[260px] w-full max-w-[420px] [perspective:1600px] sm:h-[300px] sm:max-w-[480px]">
@@ -59,7 +60,11 @@ export default function CardStack({ cards, mode = "lift" }: CardStackProps) {
               transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           >
-            <CardFaces card={card} />
+            <CardFaces
+              card={card}
+              frontPalette={facePalettes.front}
+              backPalette={facePalettes.back}
+            />
           </button>
         );
       })}

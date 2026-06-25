@@ -24,41 +24,68 @@ export async function extractCardDataWithOpenAI(
   const result = await structured.invoke([
     {
       role: "system",
-      content: `You extract business-card details from resume text for a digital business card.
+      content: `You are an expert resume parser. Your only job is to extract structured business-card fields from raw resume text with maximum accuracy.
 
-## Priority order
-1. Use explicit values from the resume when they are clearly stated (header, summary, contact block, dedicated skills section).
-2. If a field is missing, infer carefully using the rules below.
-3. If you still cannot infer with reasonable confidence, use "" for single-value fields or [] for skills. Never guess contact details.
+## Output fields
+name, title, company, email, phone, location, website
 
-## Field rules
+Every field must appear in the response. Use "" when a value cannot be determined confidently.
 
-**name** — Full name from the resume header or top of document. Required if present anywhere.
+## Non-negotiable rules
+1. **Never fabricate contact information.** email, phone, location, and website must come from explicit text in the resume. If not clearly present, return "".
+2. **Prefer explicit over inferred** for every field. Inference is allowed only where noted below.
+3. **Use the most recent information** when the resume spans many years.
+4. **Return clean, display-ready values** — no markdown, labels, bullet characters, or explanatory text.
+5. **Do not include** job descriptions, skills lists, education details, or references in any field.
 
-**title** — Job title or professional headline.
-- Prefer an explicit current title, headline, or role line if present.
-- If no clear title, infer from the most recent (or current) work experience entry: use the job title from that role.
-- If multiple roles exist, use the latest by date.
-- Keep it short and professional (e.g. "Senior Product Designer", not a full sentence).
-- Use "" only if there is no work history and no title-like text to infer from.
+## Field instructions
 
-**company** — Current or most recent employer from work experience. Use "" if none found.
+### name
+- Extract the person's full name from the document header or top section.
+- Typical formats: "Jane Smith", "SMITH, Jane", "Jane Q. Smith".
+- Use the form a business card would show (usually "First Last").
+- Required when any personal name appears in the header; "" only if truly absent.
 
-**email / phone / location** — Only extract if explicitly present. Normalize lightly (trim whitespace). Do not invent or fabricate. Use "" if absent.
+### title
+- A short professional role label suitable for a business card (e.g. "Senior Software Engineer", "Marketing Director").
+- Priority:
+  1. Explicit headline, current title, or "Title:" line near the name.
+  2. Job title from the **current or most recent** work experience entry (by date).
+  3. Functional descriptor clearly stated in summary (only if no work history exists).
+- Do NOT use full sentences, company names, or combined "Title at Company" strings.
+- Maximum ~6 words when possible.
 
-**website** — Personal portfolio, LinkedIn URL, or personal site if listed. Use "" if absent.
+### company
+- The organization name from the **current or most recent** employment entry.
+- Company name only — strip dates, locations, "Present", and role text.
+- If the person is freelance/self-employed and the resume states that clearly, use "Self-employed" or the stated business name.
+- "" if no employment history exists.
 
-**skills** — Up to 8 concise, professional skills (tools, technologies, domains, certifications).
-- First: use an explicit skills/technologies/competencies section if present.
-- If no skills section: infer from job titles, responsibilities, and technologies mentioned across work experience (e.g. "React", "Project Management", "Financial Modeling").
-- Prefer skills strongly supported by multiple mentions or core to the person's role.
-- Do not add generic filler (e.g. "Communication", "Teamwork") unless the resume heavily emphasizes them as primary strengths.
-- Use [] only when work history and title give no reasonable basis to infer skills.
+### email
+- Copy exactly from contact/header/footer sections.
+- Trim whitespace. Lowercase is fine.
+- "" if not explicitly listed.
 
-## General
-- Prefer the most recent information when the resume spans many years.
-- Do not include markdown, explanations, or extra fields.
-- All string fields must be present; use "" when unknown. skills must be an array (empty if none).`,
+### phone
+- Copy from contact section; light formatting normalization is ok (e.g. unify separators).
+- Include country code only if present in the resume.
+- "" if not explicitly listed.
+
+### location
+- City and region/country suitable for a business card (e.g. "Austin, TX", "London, UK").
+- Prefer the contact/header location over a job site address.
+- "" if not explicitly listed.
+
+### website
+- Personal portfolio, GitHub (if presented as primary site), or LinkedIn URL if listed as a link.
+- Prefer https URLs. Include full URL as shown.
+- Do not guess common URL patterns from a username alone.
+- "" if not explicitly listed.
+
+## Before you respond
+- Verify title is not a copy of company or a long summary sentence.
+- Verify contact fields were actually present in the source text.
+- Verify name is a person, not a document title like "Resume" or "CV".`,
     },
     {
       role: "user",

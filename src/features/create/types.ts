@@ -3,28 +3,41 @@ import { z } from "zod";
 // OpenAI structured output requires every property to be required.
 // Use empty strings when a field is not found in the resume.
 export const extractedCardDataSchema = z.object({
-  name: z.string().describe("Full name from resume header"),
+  name: z
+    .string()
+    .describe(
+      "Full legal or professional name from the resume header (first + last). Empty string if not found.",
+    ),
   title: z
     .string()
     .describe(
-      "Current job title or headline; if missing, infer from most recent work experience role",
-    ),
-  email: z.string().describe("Email if explicitly listed, else empty string"),
-  phone: z.string().describe("Phone if explicitly listed, else empty string"),
-  location: z
-    .string()
-    .describe("City/region if explicitly listed, else empty string"),
-  skills: z
-    .array(z.string())
-    .describe(
-      "Up to 8 professional skills; infer from work experience if no skills section, else empty array",
+      "Current professional title or headline — short role label, not a sentence. Infer from most recent job if no explicit headline.",
     ),
   company: z
     .string()
-    .describe("Current or most recent employer from work experience"),
+    .describe(
+      "Current or most recent employer organization name only — no dates or location. Empty string if none.",
+    ),
+  email: z
+    .string()
+    .describe(
+      "Email address exactly as listed in contact section. Empty string if absent — never invent.",
+    ),
+  phone: z
+    .string()
+    .describe(
+      "Phone number as listed (light normalization ok). Empty string if absent — never invent.",
+    ),
+  location: z
+    .string()
+    .describe(
+      "City and region/country from contact or header (e.g. 'San Francisco, CA'). Empty string if absent.",
+    ),
   website: z
     .string()
-    .describe("Portfolio, LinkedIn, or personal URL if listed, else empty string"),
+    .describe(
+      "Personal website, portfolio, or LinkedIn URL if explicitly listed. Empty string if absent.",
+    ),
 });
 
 export type ExtractedCardData = z.infer<typeof extractedCardDataSchema>;

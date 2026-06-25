@@ -57,7 +57,7 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
     location: extracted.location,
     website: extracted.website,
     bio: "",
-    skills: [...extracted.skills],
+    skills: [],
     links,
     fieldSettings: createDefaultFieldSettings(),
   };

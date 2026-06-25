@@ -21,11 +21,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
+import { CardExportSurface } from "@/features/share/components/card-export-surface";
 import { getCardBuilderLabel, type CardDisplayMode } from "@/lib/card-data";
 import { ShareQrCode } from "@/features/share/components/share-qr-code";
 import { downloadCard, type CardDownloadFormat } from "@/lib/card-export";
 import {
   buildEmbedIframeCode,
+  EMBED_CODE_FORMAT_LABELS,
+  type EmbedCodeFormat,
   getPublicCardUrl,
   getTrackableShareUrl,
 } from "@/lib/card-slug";
@@ -40,6 +43,7 @@ import {
   Download01Icon,
   Edit02Icon,
   Loading03Icon,
+  PrinterIcon,
   ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -55,7 +59,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const cardPreviewRef = useRef<HTMLDivElement>(null);
+  const cardExportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
   const [downloading, setDownloading] = useState<CardDownloadFormat | null>(
@@ -64,6 +68,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const [exportFront, setExportFront] = useState(true);
   const [exportBack, setExportBack] = useState(true);
   const [exportSidesInitialized, setExportSidesInitialized] = useState(false);
+  const [embedFormat, setEmbedFormat] = useState<EmbedCodeFormat>("html");
 
   const {
     data: card,
@@ -88,6 +93,10 @@ export function ShareView({ cardId }: { cardId: string }) {
   useEffect(() => {
     setExportSidesInitialized(false);
   }, [cardId]);
+
+  useEffect(() => {
+    setCopiedIframe(false);
+  }, [embedFormat]);
 
   useEffect(() => {
     if (!card || exportSidesInitialized) return;
@@ -133,7 +142,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const cardUrl = card.slug ? getTrackableShareUrl(card.slug) : "";
   const publicCardUrl = card.slug ? getPublicCardUrl(card.slug) : "";
   const embedCode = card.slug
-    ? buildEmbedIframeCode(card.slug, cardTitle)
+    ? buildEmbedIframeCode(card.slug, cardTitle, embedFormat)
     : "";
 
   const bundleIndex = cardSetCards.findIndex((item) => item.id === card.id);
@@ -148,9 +157,9 @@ export function ShareView({ cardId }: { cardId: string }) {
   const downloadName = cardTitle;
 
   async function handleDownload(format: CardDownloadFormat) {
-    const element = cardPreviewRef.current;
+    const element = cardExportRef.current;
     if (!element) {
-      toast.error("Card preview is not ready yet.");
+      toast.error("Card export is not ready yet. Please wait a moment.");
       return;
     }
 
@@ -161,11 +170,24 @@ export function ShareView({ cardId }: { cardId: string }) {
 
     try {
       setDownloading(format);
-      await downloadCard(element, format, downloadName, {
-        front: exportFront,
-        back: exportBack,
-      });
-      toast.success(`Downloaded ${format.toUpperCase()}`);
+      toast.message("Preparing high-quality export…");
+      await downloadCard(
+        element,
+        format,
+        downloadName,
+        {
+          front: exportFront,
+          back: exportBack,
+        },
+        {
+          orientation: theme.orientation,
+        },
+      );
+      toast.success(
+        format === "pdf"
+          ? "Print-ready PDF downloaded"
+          : `Downloaded ${format.toUpperCase()}`,
+      );
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to download card.",
@@ -249,65 +271,7 @@ export function ShareView({ cardId }: { cardId: string }) {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Download sides
-        </p>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
-          <Checkbox
-            checked={exportFront}
-            onCheckedChange={(checked) => setExportFront(checked === true)}
-          />
-          Front
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
-          <Checkbox
-            checked={exportBack}
-            onCheckedChange={(checked) => setExportBack(checked === true)}
-          />
-          Back
-        </label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              disabled={downloading !== null || (!exportFront && !exportBack)}
-            >
-              {downloading ? (
-                <HugeiconsIcon
-                  icon={Loading03Icon}
-                  size={14}
-                  className="animate-spin"
-                />
-              ) : (
-                <HugeiconsIcon icon={Download01Icon} size={14} />
-              )}
-              {downloading
-                ? `Downloading ${downloading.toUpperCase()}…`
-                : "Download"}
-              <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => void handleDownload("png")}>
-              Download as PNG
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => void handleDownload("pdf")}>
-              Download as PDF
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => void handleDownload("svg")}>
-              Download as SVG
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <p className="text-xs text-muted-foreground">
-          Transparent background · 4× quality · PDF puts each side on its own
-          page in one file
-        </p>
-      </div>
-
-      <div ref={cardPreviewRef} className="mt-6">
+      <div className="mt-6">
         {isBundle ? (
           <div className="mb-4 flex items-center justify-center gap-3">
             <Button
@@ -336,18 +300,128 @@ export function ShareView({ cardId }: { cardId: string }) {
           </div>
         ) : null}
         <CardPreviewScaler
-          className="mt-2 min-w-0 max-w-full border-0 bg-transparent"
-          minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[calc(100vh-18rem)]"
+          className="min-w-0 max-w-full rounded-xl border border-border bg-muted/30"
+          minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[min(480px,55vh)]"
         >
           <BusinessCard
             data={card.cardData}
             theme={theme}
             displayMode="pair"
             showSideLabels={false}
-            className="flex-col items-center justify-center gap-8 md:gap-12"
+            className="flex-col md:flex-row items-center justify-center gap-8 md:gap-12"
           />
         </CardPreviewScaler>
       </div>
+
+      <section className="mt-8 rounded-xl border border-border bg-card p-5 sm:p-6">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight">
+              Print &amp; download
+            </h2>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              Export at full resolution for home or professional printing. PDFs
+              are sized to standard business cards (3.5&quot; × 2&quot;) with
+              one side per page.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Sides
+          </p>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <Checkbox
+              checked={exportFront}
+              onCheckedChange={(checked) => setExportFront(checked === true)}
+            />
+            Front
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <Checkbox
+              checked={exportBack}
+              onCheckedChange={(checked) => setExportBack(checked === true)}
+            />
+            Back
+          </label>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button
+            className="gap-2"
+            disabled={downloading !== null || (!exportFront && !exportBack)}
+            onClick={() => void handleDownload("pdf")}
+          >
+            {downloading === "pdf" ? (
+              <HugeiconsIcon
+                icon={Loading03Icon}
+                size={16}
+                className="animate-spin"
+              />
+            ) : (
+              <HugeiconsIcon icon={PrinterIcon} size={16} />
+            )}
+            {downloading === "pdf"
+              ? "Preparing PDF…"
+              : "Download print-ready PDF"}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-1.5"
+                disabled={downloading !== null || (!exportFront && !exportBack)}
+              >
+                {downloading && downloading !== "pdf" ? (
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    size={14}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <HugeiconsIcon icon={Download01Icon} size={14} />
+                )}
+                {downloading && downloading !== "pdf"
+                  ? `Downloading ${downloading.toUpperCase()}…`
+                  : "More formats"}
+                <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => void handleDownload("png")}>
+                PNG — high-resolution image
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void handleDownload("svg")}>
+                SVG — editable vector file
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <ul className="mt-5 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
+          <li>
+            <span className="font-medium text-foreground">At home:</span> print
+            the PDF at <strong>100% scale</strong> (not &ldquo;fit to
+            page&rdquo;) on cardstock.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Double-sided:</span>{" "}
+            print all pages, reload the stack, then print again — or use duplex
+            / long-edge flip if your printer supports it.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Print shop:</span>{" "}
+            send the PDF or PNG; files are exported at 6× resolution (~300 DPI).
+          </li>
+        </ul>
+      </section>
+
+      <CardExportSurface
+        ref={cardExportRef}
+        data={card.cardData}
+        theme={theme}
+      />
 
       <Tabs defaultValue="link" className="mt-8">
         <TabsList>
@@ -422,8 +496,8 @@ export function ShareView({ cardId }: { cardId: string }) {
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="text-sm font-semibold">QR code</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each card has a permanent QR link. Publish first, then download
-              or scan — the encoded URL stays the same.
+              Each card has a permanent QR link. Publish first, then download or
+              scan — the encoded URL stays the same.
             </p>
             {card.qrCodeId ? (
               <div className="mt-6">
@@ -457,6 +531,21 @@ export function ShareView({ cardId }: { cardId: string }) {
               Paste this code into your site. The card stays live — edits you
               make here appear automatically (refreshes every 15 seconds).
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {(Object.keys(EMBED_CODE_FORMAT_LABELS) as EmbedCodeFormat[]).map(
+                (format) => (
+                  <Button
+                    key={format}
+                    type="button"
+                    size="sm"
+                    variant={embedFormat === format ? "default" : "outline"}
+                    onClick={() => setEmbedFormat(format)}
+                  >
+                    {EMBED_CODE_FORMAT_LABELS[format]}
+                  </Button>
+                ),
+              )}
+            </div>
             <textarea
               id="embed-code"
               readOnly
@@ -475,9 +564,23 @@ export function ShareView({ cardId }: { cardId: string }) {
               </Button>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
+              {embedFormat === "html" ? (
+                <>
+                  Plain HTML uses a <code className="text-[11px]">style</code>{" "}
+                  string on the iframe.
+                </>
+              ) : embedFormat === "react" ? (
+                <>
+                  In React / Next.js, use{" "}
+                  <code className="text-[11px]">style=&#123;&#123; ... &#125;&#125;</code>{" "}
+                  (an object, not a string).
+                </>
+              ) : (
+                <>Vue templates can use a string style attribute on the iframe.</>
+              )}{" "}
               {billing?.isPro
                 ? "Pro plan: no Cardably branding in the embed."
-                : "Free plan: a small “Powered by Cardably” badge appears below the card."}{" "}
+                : 'Free plan: a small "Powered by Cardably" badge appears below the card.'}{" "}
               Embed views appear as <strong>Website embed</strong> in Analytics.
             </p>
             {!card.published ? (

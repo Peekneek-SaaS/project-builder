@@ -506,21 +506,21 @@ export const cardThemes: CardTheme[] = [
   }),
 
   // Dark
-  base({
-    id: "hi-minimal",
-    name: "Hi Minimal",
-    description: "Dark charcoal hi! greeting card.",
-    category: "dark",
-    layout: "job-hi",
-    orientation: "landscape",
-    size: "md",
-    surface: "bg-[#1a1d21]",
-    text: "text-white",
-    subtext: "text-neutral-400",
-    accent: "bg-white",
-    accentText: "text-white",
-    pro: true,
-  }),
+  // base({
+  //   id: "hi-minimal",
+  //   name: "Hi Minimal",
+  //   description: "Dark charcoal hi! greeting card.",
+  //   category: "dark",
+  //   layout: "job-hi",
+  //   orientation: "landscape",
+  //   size: "md",
+  //   surface: "bg-[#1a1d21]",
+  //   text: "text-white",
+  //   subtext: "text-neutral-400",
+  //   accent: "bg-white",
+  //   accentText: "text-white",
+  //   pro: true,
+  // }),
 
   // Creative
   base({
