@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Logo from "../../public/Logo/Logo";
 import { Show } from "@clerk/nextjs";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { DashboardSquare01Icon } from "@hugeicons/core-free-icons";
+import { DashboardSquare01Icon, Home02Icon } from "@hugeicons/core-free-icons";
 import { ModeToggle } from "./mode-toggle";
 
 export function MarketingNav() {
@@ -49,7 +49,7 @@ export function MarketingNav() {
           >
             <Button asChild>
               <Link href="/dashboard" className="flex items-center gap-1">
-                <HugeiconsIcon icon={DashboardSquare01Icon} />
+                <HugeiconsIcon icon={Home02Icon} />
                 Dashboard
               </Link>
             </Button>

@@ -20,7 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from "@/features/builder/components/business-card";
-import type { CardDisplayMode } from "@/lib/card-data";
+import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
+import { getCardBuilderLabel, type CardDisplayMode } from "@/lib/card-data";
 import { ShareQrCode } from "@/features/share/components/share-qr-code";
 import { downloadCard, type CardDownloadFormat } from "@/lib/card-export";
 import {
@@ -128,10 +129,11 @@ export function ShareView({ cardId }: { cardId: string }) {
   }
 
   const theme = getTheme(card.themeId);
+  const cardTitle = getCardBuilderLabel(card.cardData);
   const cardUrl = card.slug ? getTrackableShareUrl(card.slug) : "";
   const publicCardUrl = card.slug ? getPublicCardUrl(card.slug) : "";
   const embedCode = card.slug
-    ? buildEmbedIframeCode(card.slug, card.cardData.name || theme.name)
+    ? buildEmbedIframeCode(card.slug, cardTitle)
     : "";
 
   const bundleIndex = cardSetCards.findIndex((item) => item.id === card.id);
@@ -143,7 +145,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   const isBundle = cardSetCards.length > 1;
 
   const editHref = `/builder/${card.resumeId}?cards=${card.id}`;
-  const downloadName = card.cardData.name || theme.name;
+  const downloadName = cardTitle;
 
   async function handleDownload(format: CardDownloadFormat) {
     const element = cardPreviewRef.current;
@@ -214,7 +216,7 @@ export function ShareView({ cardId }: { cardId: string }) {
             Share your card
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {card.cardData.name || theme.name} · {theme.name} theme
+            {cardTitle} · {theme.name} theme
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -333,15 +335,18 @@ export function ShareView({ cardId }: { cardId: string }) {
             </Button>
           </div>
         ) : null}
-        <div className="flex justify-center p-6">
+        <CardPreviewScaler
+          className="mt-2 min-w-0 max-w-full border-0 bg-transparent"
+          minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[calc(100vh-18rem)]"
+        >
           <BusinessCard
             data={card.cardData}
             theme={theme}
             displayMode="pair"
             showSideLabels={false}
-            className="flex-col items-center md:flex-row md:items-start md:justify-center"
+            className="flex-col items-center justify-center gap-8 md:gap-12"
           />
-        </div>
+        </CardPreviewScaler>
       </div>
 
       <Tabs defaultValue="link" className="mt-8">
@@ -488,7 +493,7 @@ export function ShareView({ cardId }: { cardId: string }) {
               <div className="overflow-hidden rounded-lg border border-border bg-muted/20 p-2 sm:p-4">
                 <iframe
                   src={card.slug ? `/embed/${card.slug}` : undefined}
-                  title={`${card.cardData.name || theme.name} embed preview`}
+                  title={`${cardTitle} embed preview`}
                   className="mx-auto w-full max-w-[960px] rounded-lg border-0 bg-background"
                   height={560}
                   loading="lazy"

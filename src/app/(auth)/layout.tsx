@@ -2,7 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Wrapper from "@/components/Wrapper";
 import * as motion from "motion/react-client";
-import { defaultTransition, fadeInUp, staggerContainer, staggerItem } from "@/lib/motion";
+import {
+  defaultTransition,
+  fadeInUp,
+  staggerContainer,
+  staggerItem,
+} from "@/lib/motion";
 import {
   ArrowLeft01Icon,
   AiMagicIcon,
@@ -10,6 +15,7 @@ import {
   CursorMagicSelection03Icon,
   Share08Icon,
   Loading03Icon,
+  PaintBoardIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
@@ -32,7 +38,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex items-center justify-between">
               <Logo />
               <Button variant="link" asChild>
-                <Link href="/">
+                <Link href="/" className="dark:text-white ">
                   <HugeiconsIcon icon={ArrowLeft01Icon} />
                   Back to home
                 </Link>
@@ -48,13 +54,10 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
               {children}
             </motion.div>
           </Wrapper>
-          <div className="hidden lg:flex flex-1 bg-primary text-white dark:text-black">
+          <div className="hidden lg:flex flex-1 bg-primary text-white">
             <Wrapper className="py-4 flex flex-col justify-between h-full">
               <div>
-                <Badge
-                  variant="outline"
-                  className="text-white border-white dark:text-black dark:border-black"
-                >
+                <Badge variant="outline" className="text-white border-white ">
                   <HugeiconsIcon icon={AiMagicIcon} size={20} />
                   AI powered
                 </Badge>
@@ -70,7 +73,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     variants={staggerItem}
                     className="scroll-m-20 text-3xl font-extrabold tracking-tight text-balance"
                   >
-                    One upload away from a card people remember.
+                    One upload away from creating your business card.
                   </motion.h1>
                   <motion.ul className="space-y-1" variants={staggerContainer}>
                     <motion.li
@@ -84,10 +87,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                       variants={staggerItem}
                       className="flex gap-1 items-center"
                     >
-                      <HugeiconsIcon
-                        icon={CursorMagicSelection03Icon}
-                        size={20}
-                      />
+                      <HugeiconsIcon icon={PaintBoardIcon} size={20} />
                       Choose from beautiful, modern themes
                     </motion.li>
                     <motion.li
@@ -106,8 +106,8 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 transition={{ ...defaultTransition, delay: 0.3 }}
               >
                 <p className="leading-7">
-                  “Cardably replaced my paper cards entirely. I share one link
-                  and I'm done.”
+                  Cardify replaced my paper cards entirely. I share one link
+                  and I'm done.
                 </p>
               </motion.div>
             </Wrapper>

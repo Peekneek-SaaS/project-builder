@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
 import { getCardBuilderLabel } from "@/lib/card-data";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import {
@@ -28,6 +29,7 @@ import {
   Delete01Icon,
   Delete02Icon,
   Delete04Icon,
+  Home02Icon,
   Loading03Icon,
   RestoreBinIcon,
 } from "@hugeicons/core-free-icons";
@@ -126,7 +128,7 @@ export function TrashContent() {
             </div>
             <Button asChild className="mt-4" variant="outline">
               <Link href="/dashboard">
-                <HugeiconsIcon icon={DashboardSquare01Icon} />
+                <HugeiconsIcon icon={Home02Icon} />
                 Go to dashboard
               </Link>
             </Button>
@@ -160,7 +162,7 @@ function TrashCardTile({ card }: { card: TrashedCard }) {
 
   const theme = getTheme(card.themeId);
   const styles = getThemeStyleClasses(theme.id);
-  const title = getCardBuilderLabel(card.cardData) || theme.name;
+  const title = getCardBuilderLabel(card.cardData);
   const deletedAt = toDate(card.deletedAt) ?? new Date();
   const daysRemaining = getTrashDaysRemaining(deletedAt);
 
@@ -195,16 +197,22 @@ function TrashCardTile({ card }: { card: TrashedCard }) {
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div
           className={cn(
-            "relative flex h-44 items-center justify-center overflow-hidden opacity-70",
+            "relative overflow-hidden opacity-70",
             styles.frontSurface,
           )}
         >
-          <BusinessCard
-            data={card.cardData}
-            theme={theme}
-            displayMode="front"
-            className="pointer-events-none shadow-none ring-0"
-          />
+          <CardPreviewScaler
+            className="border-0 bg-transparent p-2"
+            minHeightClass="h-44"
+          >
+            <BusinessCard
+              data={card.cardData}
+              theme={theme}
+              displayMode="front"
+              compact
+              className="pointer-events-none shadow-none ring-0"
+            />
+          </CardPreviewScaler>
         </div>
 
         <div className="space-y-3 p-4">

@@ -1,9 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import {
-  Add01Icon,
   Cancel01Icon,
   CloudUploadIcon,
 } from "@hugeicons/core-free-icons";
@@ -30,21 +29,31 @@ import {
   type CardFieldStyle,
   getFieldSettings,
 } from "@/lib/card-field-utils";
+import { getSupportedFieldsForLayout } from "@/lib/card-layout-fields";
+import { getTheme } from "@/lib/card-themes";
 import { useUploadThing } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
 type EditCardPanelProps = {
   data: CardData;
   setData: (d: CardData) => void;
+  themeId: string;
   className?: string;
 };
 
 export function EditCardPanel({
   data,
   setData,
+  themeId,
   className,
 }: EditCardPanelProps) {
-  const [skillInput, setSkillInput] = useState("");
+  const supportedFields = useMemo(
+    () => getSupportedFieldsForLayout(getTheme(themeId).layout),
+    [themeId],
+  );
+  const isSupported = (fieldKey: CardFieldKey) =>
+    supportedFields.has(fieldKey);
+
   const uploadErrorRef = useRef<string | null>(null);
   const { startUpload, isUploading } = useUploadThing("logoUploader", {
     onUploadError: (error) => {
@@ -89,13 +98,6 @@ export function EditCardPanel({
     }
   }
 
-  function addSkill() {
-    const value = skillInput.trim();
-    if (!value) return;
-    update("skills", [...data.skills, value]);
-    setSkillInput("");
-  }
-
   return (
     <div className={cn("space-y-6", className)}>
       <Section title="Branding (front page)">
@@ -103,6 +105,7 @@ export function EditCardPanel({
           fieldKey="logo"
           label="Company logo"
           data={data}
+          supported={isSupported("logo")}
           onToggle={(enabled) => updateFieldStyle("logo", { enabled })}
           onStyleChange={(patch) => updateFieldStyle("logo", patch)}
           showStyleControls={false}
@@ -161,6 +164,7 @@ export function EditCardPanel({
           label="Company name"
           value={data.company}
           data={data}
+          supported={isSupported("company")}
           onValueChange={(value) => update("company", value)}
           onStyleChange={(patch) => updateFieldStyle("company", patch)}
         />
@@ -170,6 +174,7 @@ export function EditCardPanel({
           label="Tagline"
           value={data.tagline}
           data={data}
+          supported={isSupported("tagline")}
           placeholder="Design that defines you"
           onValueChange={(value) => update("tagline", value)}
           onStyleChange={(patch) => updateFieldStyle("tagline", patch)}
@@ -183,6 +188,7 @@ export function EditCardPanel({
           label="Full name"
           value={data.name}
           data={data}
+          supported={isSupported("name")}
           onValueChange={(value) => update("name", value)}
           onStyleChange={(patch) => updateFieldStyle("name", patch)}
         />
@@ -192,6 +198,7 @@ export function EditCardPanel({
           label="Job title"
           value={data.title}
           data={data}
+          supported={isSupported("title")}
           onValueChange={(value) => update("title", value)}
           onStyleChange={(patch) => updateFieldStyle("title", patch)}
         />
@@ -204,6 +211,7 @@ export function EditCardPanel({
           label="Email"
           value={data.email}
           data={data}
+          supported={isSupported("email")}
           onValueChange={(value) => update("email", value)}
           onStyleChange={(patch) => updateFieldStyle("email", patch)}
         />
@@ -213,6 +221,7 @@ export function EditCardPanel({
           label="Phone"
           value={data.phone}
           data={data}
+          supported={isSupported("phone")}
           onValueChange={(value) => update("phone", value)}
           onStyleChange={(patch) => updateFieldStyle("phone", patch)}
         />
@@ -222,6 +231,7 @@ export function EditCardPanel({
           label="Location"
           value={data.location}
           data={data}
+          supported={isSupported("location")}
           onValueChange={(value) => update("location", value)}
           onStyleChange={(patch) => updateFieldStyle("location", patch)}
         />
@@ -231,116 +241,10 @@ export function EditCardPanel({
           label="Website"
           value={data.website}
           data={data}
+          supported={isSupported("website")}
           onValueChange={(value) => update("website", value)}
           onStyleChange={(patch) => updateFieldStyle("website", patch)}
         />
-      </Section>
-
-      <Section title="Bio">
-        <FieldRow
-          fieldKey="bio"
-          label="About you"
-          data={data}
-          onToggle={(enabled) => updateFieldStyle("bio", { enabled })}
-          onStyleChange={(patch) => updateFieldStyle("bio", patch)}
-        >
-          <textarea
-            id="bio"
-            rows={4}
-            value={data.bio}
-            onChange={(e) => update("bio", e.target.value)}
-            className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-ring focus-visible:ring-2"
-          />
-        </FieldRow>
-      </Section>
-
-      <Section title="Skills">
-        <FieldRow
-          fieldKey="skills"
-          label="Skills"
-          data={data}
-          onToggle={(enabled) => updateFieldStyle("skills", { enabled })}
-          onStyleChange={(patch) => updateFieldStyle("skills", patch)}
-        >
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-1.5">
-              {data.skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="gap-1">
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update(
-                        "skills",
-                        data.skills.filter((s) => s !== skill),
-                      )
-                    }
-                    aria-label={`Remove ${skill}`}
-                  >
-                    <HugeiconsIcon icon={Cancel01Icon} size={12} />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                value={skillInput}
-                placeholder="Add a skill…"
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addSkill();
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={addSkill}
-                aria-label="Add skill"
-              >
-                <HugeiconsIcon icon={Add01Icon} size={16} />
-              </Button>
-            </div>
-          </div>
-        </FieldRow>
-      </Section>
-
-      <Section title="Links">
-        <FieldRow
-          fieldKey="links"
-          label="Links"
-          data={data}
-          onToggle={(enabled) => updateFieldStyle("links", { enabled })}
-          onStyleChange={(patch) => updateFieldStyle("links", patch)}
-        >
-          <div className="space-y-2">
-            {data.links.map((link, i) => (
-              <div key={i} className="grid grid-cols-2 gap-2">
-                <Input
-                  value={link.label}
-                  aria-label="Link label"
-                  onChange={(e) => {
-                    const links = [...data.links];
-                    links[i] = { ...links[i], label: e.target.value };
-                    update("links", links);
-                  }}
-                />
-                <Input
-                  value={link.href}
-                  aria-label="Link URL"
-                  onChange={(e) => {
-                    const links = [...data.links];
-                    links[i] = { ...links[i], href: e.target.value };
-                    update("links", links);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </FieldRow>
       </Section>
     </div>
   );
@@ -349,12 +253,14 @@ export function EditCardPanel({
 export function EditCardDrawer({
   data,
   setData,
+  themeId,
   open,
   setOpen,
   trigger,
 }: {
   data: CardData;
   setData: (d: CardData) => void;
+  themeId: string;
   open: boolean;
   setOpen: (open: boolean) => void;
   trigger: ReactNode;
@@ -366,11 +272,12 @@ export function EditCardDrawer({
         <DrawerHeader className="border-b border-border pb-4">
           <DrawerTitle>Edit card details</DrawerTitle>
           <DrawerDescription>
-            Toggle fields, edit content, and customize text styling.
+            Toggle fields, edit content, and customize text styling. Unavailable
+            fields depend on the card theme.
           </DrawerDescription>
         </DrawerHeader>
         <div className="overflow-y-auto px-4 pb-6 pt-2">
-          <EditCardPanel data={data} setData={setData} />
+          <EditCardPanel data={data} setData={setData} themeId={themeId} />
         </div>
       </DrawerContent>
     </Drawer>
@@ -452,6 +359,7 @@ function FieldRow({
   fieldKey,
   label,
   data,
+  supported = true,
   children,
   onToggle,
   onStyleChange,
@@ -460,6 +368,7 @@ function FieldRow({
   fieldKey: CardFieldKey;
   label: string;
   data: CardData;
+  supported?: boolean;
   children: ReactNode;
   onToggle: (enabled: boolean) => void;
   onStyleChange: (patch: Partial<CardFieldStyle>) => void;
@@ -468,30 +377,40 @@ function FieldRow({
   const settings = getFieldSettings(data, fieldKey);
 
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", !supported && "opacity-60")}>
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Checkbox
             id={`field-${fieldKey}`}
-            checked={settings.enabled}
+            checked={supported ? settings.enabled : false}
+            disabled={!supported}
             onCheckedChange={(checked) => onToggle(checked === true)}
           />
           <Label
             htmlFor={`field-${fieldKey}`}
-            className={cn(!settings.enabled && "text-muted-foreground")}
+            className={cn(
+              (!supported || !settings.enabled) && "text-muted-foreground",
+            )}
           >
             {label}
           </Label>
+          {!supported ? (
+            <Badge variant="outline" className="text-[10px] font-normal">
+              Not on this theme
+            </Badge>
+          ) : null}
         </div>
-        {showStyleControls ? (
+        {showStyleControls && supported ? (
           <FieldStyleControls settings={settings} onChange={onStyleChange} />
         ) : null}
       </div>
-      <div
-        className={cn(!settings.enabled && "pointer-events-none opacity-40")}
-      >
-        {children}
-      </div>
+      {supported ? (
+        <div
+          className={cn(!settings.enabled && "pointer-events-none opacity-40")}
+        >
+          {children}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -502,6 +421,7 @@ function FieldInputRow({
   label,
   value,
   data,
+  supported = true,
   onValueChange,
   onStyleChange,
   placeholder,
@@ -511,6 +431,7 @@ function FieldInputRow({
   label: string;
   value: string;
   data: CardData;
+  supported?: boolean;
   onValueChange: (value: string) => void;
   onStyleChange: (patch: Partial<CardFieldStyle>) => void;
   placeholder?: string;
@@ -518,37 +439,47 @@ function FieldInputRow({
   const settings = getFieldSettings(data, fieldKey);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
+    <div className={cn("space-y-2", !supported && "opacity-60")}>
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Checkbox
           id={`field-${fieldKey}`}
-          checked={settings.enabled}
+          checked={supported ? settings.enabled : false}
+          disabled={!supported}
           onCheckedChange={(checked) =>
             onStyleChange({ enabled: checked === true })
           }
         />
         <Label
           htmlFor={`field-${fieldKey}`}
-          className={cn(!settings.enabled && "text-muted-foreground")}
+          className={cn(
+            (!supported || !settings.enabled) && "text-muted-foreground",
+          )}
         >
           {label}
         </Label>
+        {!supported ? (
+          <Badge variant="outline" className="text-[10px] font-normal">
+            Not on this theme
+          </Badge>
+        ) : null}
       </div>
-      <div
-        className={cn(
-          "flex items-center gap-2",
-          !settings.enabled && "pointer-events-none opacity-40",
-        )}
-      >
-        <Input
-          id={id}
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onValueChange(e.target.value)}
-          className="min-w-0 flex-1"
-        />
-        <FieldStyleControls settings={settings} onChange={onStyleChange} />
-      </div>
+      {supported ? (
+        <div
+          className={cn(
+            "flex items-center gap-2",
+            !settings.enabled && "pointer-events-none opacity-40",
+          )}
+        >
+          <Input
+            id={id}
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onValueChange(e.target.value)}
+            className="min-w-0 flex-1"
+          />
+          <FieldStyleControls settings={settings} onChange={onStyleChange} />
+        </div>
+      ) : null}
     </div>
   );
 }

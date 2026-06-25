@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { extractCardDataWithOpenAI } from "@/lib/resume/extract-with-openai";
 import { extractResumeText, ResumeExtractionError } from "@/lib/resume/extract-text";
 import { extensionFromFileName } from "@/lib/resume/validate-file";
+import { isUploadedResumeHistoryItem } from "@/lib/resume/history";
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 const blankExtractedData = {
@@ -144,22 +145,38 @@ export const resumeRouter = createTRPCRouter({
 
   list: protectedProcedure.query(async ({ ctx }) => {
     const resumes = await prisma.resume.findMany({
-      where: { userId: ctx.userId },
+      where: {
+        userId: ctx.userId,
+        fileKey: { not: "manual" },
+        fileUrl: { not: "" },
+        rawText: { not: null },
+      },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
         fileName: true,
         fileUrl: true,
+        fileKey: true,
+        rawText: true,
         extractedData: true,
         createdAt: true,
       },
     });
 
-    return resumes.map((resume) => ({
-      ...resume,
-      extractedData: extractedCardDataSchema.parse(
-        resume.extractedData,
-      ) satisfies ExtractedCardData,
-    }));
+    return resumes
+      .map((resume) => ({
+        ...resume,
+        extractedData: extractedCardDataSchema.parse(
+          resume.extractedData,
+        ) satisfies ExtractedCardData,
+      }))
+      .filter(isUploadedResumeHistoryItem)
+      .map(({ id, fileName, fileUrl, extractedData, createdAt }) => ({
+        id,
+        fileName,
+        fileUrl,
+        extractedData,
+        createdAt,
+      }));
   }),
 });

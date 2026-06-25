@@ -63,6 +63,7 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
   };
 }
 
+/** Canonical card title — builder header, dashboard, analytics, share, etc. */
 export function getCardBuilderLabel(
   data: Pick<CardData, "name" | "builderLabel">,
 ): string {
@@ -86,25 +87,7 @@ export function cloneCardData(data: CardData): CardData {
   };
 }
 
-/** Rich preview data for theme picker — fills gaps so cards look complete. */
-const PREVIEW_DEFAULT_LINKS: CardLink[] = [
-  { label: "LinkedIn", href: "https://linkedin.com" },
-  { label: "Portfolio", href: "https://portfolio.com" },
-  { label: "GitHub", href: "https://github.com" },
-];
-
-function fillPreviewLinks(links: CardLink[]): CardLink[] {
-  if (links.length >= 2) return links;
-  const merged = [...links];
-  for (const link of PREVIEW_DEFAULT_LINKS) {
-    if (merged.length >= 3) break;
-    if (!merged.some((item) => item.label === link.label)) {
-      merged.push(link);
-    }
-  }
-  return merged;
-}
-
+/** Rich preview data for theme picker — fills contact gaps only. */
 export function buildThemePreviewData(
   extracted: ExtractedCardData | null,
 ): CardData {
@@ -120,9 +103,9 @@ export function buildThemePreviewData(
       phone: "+1 (415) 555-0142",
       location: "San Francisco, CA",
       website: "jordanavery.design",
-      bio: "Designer focused on clear product experiences, design systems, and thoughtful interaction details.",
-      skills: ["Product Design", "Design Systems", "Prototyping", "Figma"],
-      links: PREVIEW_DEFAULT_LINKS,
+      bio: "",
+      skills: [],
+      links: [],
       fieldSettings: createDefaultFieldSettings(),
     };
   }
@@ -133,21 +116,16 @@ export function buildThemePreviewData(
 
   return {
     ...base,
+    bio: "",
+    skills: [],
+    links: [],
     name: base.name || "Your Name",
     title,
     company,
     tagline: base.tagline || `${company} — professional branding`,
-    bio:
-      base.bio ||
-      `${title} focused on clear product experiences and thoughtful design work.`,
-    skills:
-      base.skills.length > 0
-        ? base.skills
-        : ["Product Design", "Collaboration", "Strategy"],
     email: base.email || "you@email.com",
     phone: base.phone || "+1 (555) 000-0000",
     location: base.location || "Your City",
     website: base.website || "yoursite.com",
-    links: fillPreviewLinks(base.links),
   };
 }

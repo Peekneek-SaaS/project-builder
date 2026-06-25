@@ -8,6 +8,7 @@ import {
   CardWatermarkLogo,
 } from "@/features/builder/components/card-brand-elements";
 import { FieldText } from "@/features/builder/components/field-text";
+import { NameTitleStack } from "@/features/builder/components/card-name-title";
 import {
   ContactList,
   type LinkClickPayload,
@@ -174,28 +175,19 @@ export function ModernCardFront({
         <div className={layoutShell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="max-w-[72%]">
-              <FieldText
+              <NameTitleStack
                 data={data}
-                fieldKey="name"
-                className={cn(
+                compact={compact}
+                styles={styles}
+                nameClassName={cn(
                   "font-semibold uppercase tracking-[0.14em]",
                   tx(compact, "text-[9px]", "text-sm"),
                 )}
-              >
-                {data.name}
-              </FieldText>
-              {isFieldEnabled(data, "title") && (
-                <FieldText
-                  data={data}
-                  fieldKey="title"
-                  className={cn(
-                    "mt-1.5 uppercase tracking-[0.2em] opacity-75",
-                    tx(compact, "text-[6px]", "text-[10px]"),
-                  )}
-                >
-                  {data.title}
-                </FieldText>
-              )}
+                titleClassName={cn(
+                  "uppercase tracking-[0.2em] opacity-75",
+                  tx(compact, "text-[6px]", "text-[10px]"),
+                )}
+              />
             </div>
             <div className="flex items-end justify-between gap-4">
               <PrefixedContact data={data} compact={compact} className="opacity-90" />
@@ -437,24 +429,13 @@ export function ModernCardFront({
         <div className={layoutShell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <FieldText
-                  data={data}
-                  fieldKey="name"
-                  className={cn("font-semibold leading-tight", tx(compact, "text-[9px]", "text-sm"))}
-                >
-                  {data.name}
-                </FieldText>
-                {isFieldEnabled(data, "title") && (
-                  <FieldText
-                    data={data}
-                    fieldKey="title"
-                    className={cn("mt-1 opacity-70", tx(compact, "text-[6.5px]", "text-[10px]"))}
-                  >
-                    {data.title}
-                  </FieldText>
-                )}
-              </div>
+              <NameTitleStack
+                data={data}
+                compact={compact}
+                styles={styles}
+                nameClassName={cn("font-semibold leading-tight", tx(compact, "text-[9px]", "text-sm"))}
+                titleClassName={cn("opacity-70", tx(compact, "text-[6.5px]", "text-[10px]"))}
+              />
               <CardBrandMark
                 data={data}
                 theme={theme}
@@ -1018,27 +999,16 @@ export function ModernCardBack({
       return (
         <div className={layoutShell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
-            <div>
-              <FieldText
-                data={data}
-                fieldKey="name"
-                className={cn(
-                  "font-medium tracking-wide opacity-30",
-                  tx(compact, "text-[10px]", "text-base"),
-                )}
-              >
-                {data.name}
-              </FieldText>
-              {isFieldEnabled(data, "title") && (
-                <FieldText
-                  data={data}
-                  fieldKey="title"
-                  className={cn("mt-1 opacity-90", tx(compact, "text-[6.5px]", "text-[10px]"))}
-                >
-                  {data.title}
-                </FieldText>
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              nameClassName={cn(
+                "font-medium tracking-wide opacity-30",
+                tx(compact, "text-[10px]", "text-base"),
               )}
-            </div>
+              titleClassName={cn("opacity-90", tx(compact, "text-[6.5px]", "text-[10px]"))}
+            />
             <div className="flex items-end justify-between gap-4">
               <CardBrandMark
                 data={data}
@@ -1127,19 +1097,6 @@ export function ModernCardBack({
                 onLinkClick={onLinkClick}
                 className="opacity-90"
               />
-              {isFieldEnabled(data, "skills") && data.skills.length > 0 && (
-                <div className={cn("max-w-[46%] text-right", tx(compact, "text-[5.5px]", "text-[9px]"))}>
-                  <p className="mb-1.5 flex items-center justify-end gap-1 font-medium uppercase tracking-wider opacity-80">
-                    <ToothMark className={cn(tx(compact, "h-2.5 w-2.5", "h-3.5 w-3.5"))} />
-                    Services
-                  </p>
-                  <div className="space-y-0.5 opacity-90">
-                    {data.skills.slice(0, 4).map((skill) => (
-                      <p key={skill}>{skill}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1585,11 +1542,6 @@ export function ModernCardBack({
             </div>
             <div className="flex w-[42%] flex-col items-end justify-between">
               <DecorativeQrPlaceholder className={cn(tx(compact, "h-12 w-12", "h-[4.25rem] w-[4.25rem]"))} />
-              {isFieldEnabled(data, "links") && data.links.length > 0 && (
-                <p className={cn("opacity-75", tx(compact, "text-[5.5px]", "text-[9px]"))}>
-                  {data.links[0]?.label ? `@${data.links[0].label}` : data.links[0]?.href}
-                </p>
-              )}
             </div>
           </div>
         </div>

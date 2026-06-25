@@ -16,6 +16,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
 import {
   EditCardDrawer,
   EditCardPanel,
@@ -30,7 +31,7 @@ import {
   type CardData,
   type CardDisplayMode,
 } from "@/lib/card-data";
-import { cardThemes, getTheme } from "@/lib/card-themes";
+import { cardThemes, getDefaultThemeId, getTheme } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import Logo from "../../../../public/Logo/Logo";
@@ -126,7 +127,7 @@ export default function BuilderView() {
   const activeCard = cards[activeIndex];
   const activeTheme = activeCard
     ? getTheme(activeCard.themeId)
-    : getTheme(cardThemes[0]?.id ?? "rob-hatch");
+    : getTheme(getDefaultThemeId());
   const isMulti = cards.length > 1;
   const displayMode = activeCard?.displayMode ?? "pair";
 
@@ -276,9 +277,9 @@ export default function BuilderView() {
   const fallbackPreview = buildThemePreviewData(resume.extractedData);
 
   function withPreviewFallback(data: CardData): CardData {
-    if (data.bio || data.skills.length > 0) return data;
     return {
       ...fallbackPreview,
+      ...data,
       name: data.name || fallbackPreview.name,
       title: data.title || fallbackPreview.title,
       company: data.company || fallbackPreview.company,
@@ -288,7 +289,9 @@ export default function BuilderView() {
       website: data.website || fallbackPreview.website,
       tagline: data.tagline || fallbackPreview.tagline,
       logoUrl: data.logoUrl || fallbackPreview.logoUrl,
-      links: data.links.length > 0 ? data.links : fallbackPreview.links,
+      bio: "",
+      skills: [],
+      links: [],
       fieldSettings: data.fieldSettings,
     };
   }
@@ -297,8 +300,8 @@ export default function BuilderView() {
 
   return (
     <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background">
-      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-2 overflow-x-hidden border-b border-border bg-background/95 px-3 backdrop-blur-md sm:gap-4 sm:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <Button
             asChild
             variant="ghost"
@@ -321,7 +324,7 @@ export default function BuilderView() {
             />
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {updateCardMutation.isPending ? (
             <span className="hidden text-xs text-muted-foreground sm:flex items-center gap-1">
               <HugeiconsIcon
@@ -335,36 +338,43 @@ export default function BuilderView() {
           <EditCardDrawer
             data={activeCard.data}
             setData={updateActiveCard}
+            themeId={activeCard.themeId}
             open={mobileEditOpen}
             setOpen={setMobileEditOpen}
             trigger={
-              <Button variant="outline" size="sm" className="gap-2 lg:hidden">
+              <Button variant="outline" size="icon-sm" className="lg:hidden">
                 <HugeiconsIcon icon={Edit02Icon} size={16} />
-                <span className="hidden md:flex">Edit details</span>
+                <span className="sr-only">Edit details</span>
               </Button>
             }
           />
           <Button
-            className="gap-2"
+            className="gap-1.5 px-2.5 sm:gap-2 sm:px-4"
+            size="sm"
             disabled={publishMutation.isPending}
             onClick={handlePublish}
           >
             <HugeiconsIcon icon={Share01Icon} size={16} />
-            {publishMutation.isPending
-              ? "Publishing…"
-              : isMulti
-                ? "Publish all & share"
-                : "Publish & share"}
+            <span className="hidden sm:inline">
+              {publishMutation.isPending
+                ? "Publishing…"
+                : isMulti
+                  ? "Publish all & share"
+                  : "Publish & share"}
+            </span>
+            <span className="sm:hidden">
+              {publishMutation.isPending ? "…" : "Publish"}
+            </span>
           </Button>
           <ModeToggle />
           <UserButton />
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1600px] min-w-0 flex-1 overflow-x-hidden px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
         <div
           className={cn(
-            "grid gap-6 lg:gap-10",
+            "grid min-w-0 gap-4 sm:gap-6 lg:gap-10",
             isMulti
               ? "lg:grid-cols-[minmax(0,172px)_minmax(0,1fr)_minmax(360px,420px)] xl:grid-cols-[minmax(0,180px)_minmax(0,1fr)_minmax(380px,440px)]"
               : "lg:grid-cols-[minmax(0,1fr)_minmax(360px,420px)] xl:grid-cols-[minmax(0,1fr)_minmax(380px,440px)]",
@@ -380,8 +390,7 @@ export default function BuilderView() {
                   const theme = getTheme(card.themeId);
                   const selected = index === activeIndex;
                   const thumbData = withPreviewFallback(card.data);
-                  const cardLabel =
-                    getCardBuilderLabel(card.data) || theme.name;
+                  const cardLabel = getCardBuilderLabel(card.data);
 
                   return (
                     <div
@@ -408,7 +417,7 @@ export default function BuilderView() {
                         >
                           {index + 1}
                         </span>
-                        <div className="overflow-hidden rounded-lg">
+                        <div className="overflow-hidden rounded-lg ">
                           <BusinessCard
                             data={{
                               ...thumbData,
@@ -447,11 +456,11 @@ export default function BuilderView() {
 
           <section
             className={cn(
-              "order-1 flex min-w-0 flex-col lg:min-w-[320px]",
+              "order-1 flex min-w-0 max-w-full flex-1 flex-col",
               isMulti && "lg:order-2",
             )}
           >
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <HugeiconsIcon icon={ViewIcon} size={16} />
                 Live preview
@@ -461,7 +470,7 @@ export default function BuilderView() {
                   </span>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {isMulti && cards.length > 1 ? (
                   <Button
                     type="button"
@@ -486,7 +495,7 @@ export default function BuilderView() {
                     type="button"
                     size="sm"
                     variant={displayMode === mode ? "default" : "outline"}
-                    className="min-w-18 text-xs"
+                    className="min-w-14 text-xs"
                     onClick={() => setDisplayMode(mode)}
                   >
                     {label}
@@ -494,27 +503,24 @@ export default function BuilderView() {
                 ))}
               </div>
             </div>
-            <div className="mt-5 flex min-h-[420px] w-full flex-1 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/30 p-4 sm:min-h-[520px] sm:p-8 lg:min-h-[580px] lg:p-12">
-              <div
-                className={cn(
-                  "origin-center",
+            <CardPreviewScaler
+              key={displayMode}
+              variant={displayMode === "pair" ? "default" : "single"}
+              minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[calc(100vh-11rem)]"
+              className="mt-4 min-w-0 max-w-full flex-1 rounded-xl border border-border bg-muted/30 sm:mt-5 sm:rounded-2xl"
+            >
+              <BusinessCard
+                data={displayData}
+                theme={activeTheme}
+                displayMode={displayMode}
+                showSideLabels={false}
+                className={
                   displayMode === "pair"
-                    ? "scale-[0.62] sm:scale-[0.78] md:scale-90 lg:scale-100"
-                    : "scale-[0.78] sm:scale-90 lg:scale-100",
-                )}
-              >
-                <BusinessCard
-                  data={displayData}
-                  theme={activeTheme}
-                  displayMode={displayMode}
-                  className={
-                    displayMode === "pair"
-                      ? "flex-col lg:items-start lg:justify-center lg:gap-10 xl:gap-14"
-                      : undefined
-                  }
-                />
-              </div>
-            </div>
+                    ? "flex-col items-center justify-center gap-8 md:gap-12"
+                    : undefined
+                }
+              />
+            </CardPreviewScaler>
           </section>
 
           <aside className="order-3 hidden min-w-0 lg:block">
@@ -528,6 +534,7 @@ export default function BuilderView() {
               <EditCardPanel
                 data={activeCard.data}
                 setData={updateActiveCard}
+                themeId={activeCard.themeId}
               />
             </div>
           </aside>
@@ -542,13 +549,14 @@ export default function BuilderView() {
         title="Remove this card?"
         description={
           removeTarget
-            ? `"${getCardBuilderLabel(removeTarget.data) || getTheme(removeTarget.themeId).name}" will be moved to trash. You can recover it within 30 days.`
+            ? `The card will be moved to trash. You can recover it within 30 days.`
             : ""
         }
         confirmLabel="Remove"
         loading={removeCardMutation.isPending}
         onConfirm={confirmRemoveCard}
       />
+      {/* "${getCardBuilderLabel(removeTarget.data) || getTheme(removeTarget.themeId).name}" */}
     </div>
   );
 }

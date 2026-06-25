@@ -35,7 +35,7 @@ export function BusinessCard({
 
   if (displayMode === "front") {
     return (
-      <div {...{ [CARD_EXPORT_ATTR]: "front" }}>
+      <div className="w-fit max-w-full" {...{ [CARD_EXPORT_ATTR]: "front" }}>
         <CardFront
           data={data}
           theme={theme}
@@ -49,7 +49,7 @@ export function BusinessCard({
 
   if (displayMode === "back") {
     return (
-      <div {...{ [CARD_EXPORT_ATTR]: "back" }}>
+      <div className="w-fit max-w-full" {...{ [CARD_EXPORT_ATTR]: "back" }}>
         <CardBack
           data={data}
           theme={theme}

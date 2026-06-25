@@ -275,7 +275,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        {/* <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <HugeiconsIcon icon={DashboardSquare01Icon} size={18} />
@@ -325,7 +325,7 @@ export default function SettingsPage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   CardWatermarkLogo,
 } from "@/features/builder/components/card-brand-elements";
 import { FieldText } from "@/features/builder/components/field-text";
+import { NameTitleStack } from "@/features/builder/components/card-name-title";
 import { CirclePattern, DecorativeQrPlaceholder } from "@/features/builder/components/card-layout-marks";
 import {
   ContactList,
@@ -262,18 +263,20 @@ export function JobCardFront({
             )}
             opacity={0.28}
           />
-          <div className="relative flex flex-1 flex-col justify-end p-6">
+          <div className="relative flex flex-1 flex-col justify-end gap-1.5 p-6">
             <FieldText
               data={data}
               fieldKey="name"
-              className={cn("font-bold tracking-tight", tx(compact, "text-[10px]", "text-lg"))}
+              as="p"
+              className={cn("font-bold leading-tight tracking-tight", tx(compact, "text-[10px]", "text-lg"))}
             >
               {data.name}
             </FieldText>
             <FieldText
               data={data}
               fieldKey="title"
-              className={cn("mt-0.5 opacity-80", tx(compact, "text-[8px]", "text-sm"))}
+              as="p"
+              className={cn("leading-snug opacity-80", tx(compact, "text-[8px]", "text-sm"))}
             >
               {data.title}
             </FieldText>
@@ -541,22 +544,13 @@ export function JobCardFront({
             opacity={0.12}
           />
           <div className="relative flex flex-1 flex-col justify-between p-6">
-            <div>
-              <FieldText
-                data={data}
-                fieldKey="name"
-                className={cn("font-bold uppercase leading-tight tracking-tight", tx(compact, "text-[10px]", "text-xl"))}
-              >
-                {data.name}
-              </FieldText>
-              <FieldText
-                data={data}
-                fieldKey="title"
-                className={cn("mt-1 uppercase tracking-wide opacity-80", tx(compact, "text-[7px]", "text-[11px]"))}
-              >
-                {data.title}
-              </FieldText>
-            </div>
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              nameClassName={cn("font-bold uppercase leading-tight tracking-tight", tx(compact, "text-[10px]", "text-xl"))}
+              titleClassName={cn("uppercase tracking-wide opacity-80", tx(compact, "text-[7px]", "text-[11px]"))}
+            />
           </div>
         </div>
       );
@@ -711,35 +705,15 @@ export function JobCardBack({
                 interactive={interactive}
                 onLinkClick={onLinkClick}
               />
-              <div className="text-right">
-                <FieldText
-                  data={data}
-                  fieldKey="name"
-                  className={cn("font-bold leading-tight", tx(compact, "text-[10px]", "text-xl"))}
-                >
-                  {data.name}
-                </FieldText>
-                <FieldText
-                  data={data}
-                  fieldKey="title"
-                  className={cn("mt-0.5 opacity-80", tx(compact, "text-[8px]", "text-sm"))}
-                >
-                  {data.title}
-                </FieldText>
-              </div>
+              <NameTitleStack
+                data={data}
+                compact={compact}
+                styles={styles}
+                align="end"
+                nameClassName={cn("font-bold leading-tight", tx(compact, "text-[10px]", "text-xl"))}
+                titleClassName={cn("opacity-80", tx(compact, "text-[8px]", "text-sm"))}
+              />
             </div>
-            {isFieldEnabled(data, "links") && data.links.length > 0 ? (
-              <div
-                className={cn(
-                  "flex flex-wrap justify-center gap-4 border-t border-current/10 pt-3",
-                  tx(compact, "text-[6px]", "text-[9px]"),
-                )}
-              >
-                {data.links.slice(0, 3).map((link) => (
-                  <span key={link.label}>{link.label}</span>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
       );
@@ -754,22 +728,14 @@ export function JobCardBack({
             opacity={0.07}
           />
           <div className="relative flex flex-1 flex-col items-end justify-between p-6 text-right">
-            <div>
-              <FieldText
-                data={data}
-                fieldKey="name"
-                className={cn("font-bold uppercase tracking-wide", tx(compact, "text-[10px]", "text-lg"))}
-              >
-                {data.name}
-              </FieldText>
-              <FieldText
-                data={data}
-                fieldKey="title"
-                className={cn("mt-0.5 opacity-80", tx(compact, "text-[8px]", "text-sm"))}
-              >
-                {data.title}
-              </FieldText>
-            </div>
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              align="end"
+              nameClassName={cn("font-bold uppercase tracking-wide", tx(compact, "text-[10px]", "text-lg"))}
+              titleClassName={cn("opacity-80", tx(compact, "text-[8px]", "text-sm"))}
+            />
             <ContactList
               data={data}
               styles={styles}
@@ -857,20 +823,13 @@ export function JobCardBack({
         <div className={box}>
           <div className="flex flex-1 flex-col justify-between p-5">
             <div>
-              <FieldText
+              <NameTitleStack
                 data={data}
-                fieldKey="name"
-                className={cn("font-bold", tx(compact, "text-[10px]", "text-lg"))}
-              >
-                {data.name}
-              </FieldText>
-              <FieldText
-                data={data}
-                fieldKey="title"
-                className={tx(compact, "text-[8px]", "text-sm")}
-              >
-                {data.title}
-              </FieldText>
+                compact={compact}
+                styles={styles}
+                nameClassName={cn("font-bold", tx(compact, "text-[10px]", "text-lg"))}
+                titleClassName={tx(compact, "text-[8px]", "text-sm")}
+              />
               <div className={cn("mt-3 space-y-1", tx(compact, "text-[7px]", "text-[11px]"))}>
                 {isFieldEnabled(data, "phone") && data.phone ? (
                   <FieldText data={data} fieldKey="phone">
@@ -1033,18 +992,20 @@ export function JobCardBack({
             aria-hidden
           />
           <div className="relative flex flex-1">
-            <div className={cn("flex w-[52%] flex-col justify-center p-6", styles.initialsText)}>
+            <div className={cn("flex w-[52%] flex-col justify-center gap-1.5 p-6", styles.initialsText)}>
               <FieldText
                 data={data}
                 fieldKey="name"
-                className={cn("font-bold uppercase tracking-wide", tx(compact, "text-[9px]", "text-sm"))}
+                as="p"
+                className={cn("font-bold uppercase leading-tight tracking-wide", tx(compact, "text-[9px]", "text-sm"))}
               >
                 {data.name}
               </FieldText>
               <FieldText
                 data={data}
                 fieldKey="title"
-                className={cn("mt-1 opacity-85", tx(compact, "text-[7px]", "text-[10px]"))}
+                as="p"
+                className={cn("leading-snug opacity-85", tx(compact, "text-[7px]", "text-[10px]"))}
               >
                 {data.title}
               </FieldText>
@@ -1079,22 +1040,13 @@ export function JobCardBack({
           </div>
           <div className="relative flex flex-1 flex-col justify-between p-6 pl-12">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <FieldText
-                  data={data}
-                  fieldKey="name"
-                  className={cn("font-bold uppercase tracking-wide", tx(compact, "text-[9px]", "text-sm"))}
-                >
-                  {data.name}
-                </FieldText>
-                <FieldText
-                  data={data}
-                  fieldKey="title"
-                  className={cn("mt-0.5 opacity-80", tx(compact, "text-[7px]", "text-[10px]"))}
-                >
-                  {data.title}
-                </FieldText>
-              </div>
+              <NameTitleStack
+                data={data}
+                compact={compact}
+                styles={styles}
+                nameClassName={cn("font-bold uppercase tracking-wide", tx(compact, "text-[9px]", "text-sm"))}
+                titleClassName={cn("opacity-80", tx(compact, "text-[7px]", "text-[10px]"))}
+              />
               <CardBrandMark
                 data={data}
                 theme={theme}
@@ -1121,22 +1073,14 @@ export function JobCardBack({
             <CirclePattern className="h-full w-full text-white/40" color="white" />
           </div>
           <div className="flex flex-1 flex-col justify-between p-5 pl-20">
-            <div className="text-right">
-              <FieldText
-                data={data}
-                fieldKey="name"
-                className={cn("font-bold uppercase", tx(compact, "text-[10px]", "text-lg"))}
-              >
-                {data.name}
-              </FieldText>
-              <FieldText
-                data={data}
-                fieldKey="title"
-                className={tx(compact, "text-[7px]", "text-[10px]")}
-              >
-                {data.title}
-              </FieldText>
-            </div>
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              align="end"
+              nameClassName={cn("font-bold uppercase", tx(compact, "text-[10px]", "text-lg"))}
+              titleClassName={tx(compact, "text-[7px]", "text-[10px]")}
+            />
             <div className="flex items-end gap-3">
               {!compact ? <DecorativeQrPlaceholder className="size-12" /> : null}
               <ContactList

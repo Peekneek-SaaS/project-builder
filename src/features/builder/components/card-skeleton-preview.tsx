@@ -11,8 +11,10 @@ import {
   CardLogo,
   CardWatermarkLogo,
 } from "@/features/builder/components/card-brand-elements";
+import { isFreeLayout } from "@/features/builder/components/card-free-layouts";
 import { isJobLayout } from "@/features/builder/components/card-job-layouts";
 import { isModernLayout } from "@/features/builder/components/card-modern-layouts";
+import { isStudioLayout } from "@/features/builder/components/card-studio-layouts";
 
 export function SkeletonBar({
   className,
@@ -73,7 +75,12 @@ export function CardFrontSkeleton({
     sizeClass,
   );
 
-  if (isJobLayout(theme.layout) || isModernLayout(theme.layout)) {
+  if (
+    isJobLayout(theme.layout) ||
+    isModernLayout(theme.layout) ||
+    isFreeLayout(theme.layout) ||
+    isStudioLayout(theme.layout)
+  ) {
     return (
       <div className={shell}>
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
@@ -242,7 +249,12 @@ export function CardBackSkeleton({
     sizeClass,
   );
 
-  if (isJobLayout(theme.layout) || isModernLayout(theme.layout)) {
+  if (
+    isJobLayout(theme.layout) ||
+    isModernLayout(theme.layout) ||
+    isFreeLayout(theme.layout) ||
+    isStudioLayout(theme.layout)
+  ) {
     return (
       <div className={shell}>
         <div className="flex flex-1 flex-col justify-center gap-3 p-6">

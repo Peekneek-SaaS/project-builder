@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
 import { getCardBuilderLabel } from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
@@ -197,7 +198,7 @@ const DashboardContent = () => {
             <HugeiconsIcon icon={CreditCardNotFoundIcon} size="40" />
             <div className="flex flex-col items-center">
               <p className="text-sm font-medium">No cards yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground text-center">
                 Upload a resume and pick a theme to create your first card.
               </p>
             </div>
@@ -351,7 +352,7 @@ function CardTile({
   const styles = getThemeStyleClasses(theme.id);
   const builderHref = `/builder/${card.resumeId}?cards=${card.id}`;
   const shareHref = `/share/${card.id}`;
-  const title = getCardBuilderLabel(card.cardData) || theme.name;
+  const title = getCardBuilderLabel(card.cardData);
 
   const moveToTrash = useMutation(
     trpc.card.moveToTrash.mutationOptions({
@@ -378,17 +379,22 @@ function CardTile({
         <Link href={shareHref} className="block">
           <div
             className={cn(
-              "relative flex h-28 items-center justify-center overflow-hidden sm:h-36 md:h-44",
+              "relative overflow-hidden",
               styles.frontSurface,
             )}
           >
-            <BusinessCard
-              data={card.cardData}
-              theme={theme}
-              displayMode="front"
-              compact
-              className="pointer-events-none shadow-none ring-0"
-            />
+            <CardPreviewScaler
+              className="border-0 bg-transparent p-1.5 sm:p-2"
+              minHeightClass="h-28 sm:h-36 md:h-44"
+            >
+              <BusinessCard
+                data={card.cardData}
+                theme={theme}
+                displayMode="front"
+                compact
+                className="pointer-events-none shadow-none ring-0"
+              />
+            </CardPreviewScaler>
 
             <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <div className="space-y-1 space-x-2 text-xs text-white/80">

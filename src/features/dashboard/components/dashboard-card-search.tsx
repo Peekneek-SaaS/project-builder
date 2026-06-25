@@ -109,7 +109,7 @@ export function DashboardCardSearch({ className }: { className?: string }) {
             <ul className="max-h-72 overflow-y-auto py-1">
               {results.map((card) => {
                 const theme = getTheme(card.themeId);
-                const name = getCardBuilderLabel(card.cardData) || theme.name;
+                const name = getCardBuilderLabel(card.cardData);
 
                 return (
                   <li key={card.id}>

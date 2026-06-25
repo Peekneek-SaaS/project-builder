@@ -17,7 +17,7 @@ const data = {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: DashboardSquare01Icon,
+      icon: Home02Icon,
     },
     {
       title: "Analytics",
@@ -85,6 +85,7 @@ import {
   CreditCardIcon,
   DashboardSquare01Icon,
   Delete02Icon,
+  Home02Icon,
   LockIcon,
   LockPasswordIcon,
   PlusSignIcon,
@@ -163,7 +164,8 @@ export function NavMain({
                       icon={LockPasswordIcon}
                       size={14}
                       className="ml-auto shrink-0 text-muted-foreground"
-                    />
+                    />{" "}
+                    PRO
                   </SidebarMenuButton>
                 ) : (
                   <SidebarMenuButton

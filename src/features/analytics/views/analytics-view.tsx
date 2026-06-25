@@ -20,6 +20,7 @@ import {
   isAnalyticsPeriod,
   type AnalyticsPeriod,
 } from "@/lib/card-analytics";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { getTheme } from "@/lib/card-themes";
 import { useTRPC } from "@/trpc/client";
 import { ArrowLeft01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
@@ -62,12 +63,11 @@ export function AnalyticsView({ cardId }: { cardId: string }) {
     if (analytics) return analytics;
     if (!selectedCard) return null;
 
-    const theme = getTheme(selectedCard.themeId);
     return createAnalyticsFromViewCount(
       {
         id: selectedCard.id,
         themeId: selectedCard.themeId,
-        name: selectedCard.cardData.name || theme.name,
+        name: getCardBuilderLabel(selectedCard.cardData),
       },
       period,
       selectedCard.viewCount,
@@ -160,15 +160,11 @@ export function AnalyticsView({ cardId }: { cardId: string }) {
               <SelectValue placeholder="Select card" />
             </SelectTrigger>
             <SelectContent>
-              {cards.map((card) => {
-                const cardTheme = getTheme(card.themeId);
-                const name = card.cardData.name || cardTheme.name;
-                return (
+              {cards.map((card) => (
                   <SelectItem key={card.id} value={card.id}>
-                    {name}
+                    {getCardBuilderLabel(card.cardData)}
                   </SelectItem>
-                );
-              })}
+                ))}
             </SelectContent>
           </Select>
           <Select

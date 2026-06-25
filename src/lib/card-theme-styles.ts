@@ -1,7 +1,44 @@
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
+import { studioThemeStyles } from "@/lib/card-studio-themes";
 
 /** Literal Tailwind classes — keep in sync with card-themes.ts */
 export const THEME_STYLES: Record<string, ThemeStyleClasses> = {
+  "free-serif-split": {
+    frontSurface: "bg-[#F2F2F2]",
+    frontText: "text-black",
+    surface: "bg-[#F2F2F2]",
+    text: "text-black",
+    subtext: "text-neutral-600",
+    accent: "bg-black",
+    accentBarMuted: "bg-neutral-300",
+    initialsText: "text-black",
+    isLightFront: true,
+    isLightSurface: true,
+  },
+  "free-montreal-frame": {
+    frontSurface: "bg-white",
+    frontText: "text-black",
+    surface: "bg-[#1A1A1A]",
+    text: "text-white",
+    subtext: "text-neutral-600",
+    accent: "bg-black",
+    accentBarMuted: "bg-neutral-400",
+    initialsText: "text-black",
+    isLightFront: true,
+    isLightSurface: false,
+  },
+  "free-prism-dark": {
+    frontSurface: "bg-[#0D1117]",
+    frontText: "text-white",
+    surface: "bg-[#0D1117]",
+    text: "text-white",
+    subtext: "text-white/70",
+    accent: "bg-white",
+    accentBarMuted: "bg-white/30",
+    initialsText: "text-white",
+    isLightFront: false,
+    isLightSurface: false,
+  },
   midnight: {
     frontSurface: "bg-slate-900",
     frontText: "text-white",
@@ -554,4 +591,5 @@ export const THEME_STYLES: Record<string, ThemeStyleClasses> = {
     isLightFront: true,
     isLightSurface: false,
   },
+  ...studioThemeStyles,
 };

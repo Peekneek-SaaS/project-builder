@@ -1,5 +1,4 @@
 import {
-  ArrowUpRight01Icon,
   CallIcon,
   Globe02Icon,
   Location01Icon,
@@ -8,12 +7,7 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import type { CardData } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
-import {
-  getFieldClassName,
-  getFieldInlineStyle,
-  getFieldSettings,
-  isFieldEnabled,
-} from "@/lib/card-field-utils";
+import { isFieldEnabled } from "@/lib/card-field-utils";
 import { FieldText } from "@/features/builder/components/field-text";
 import { DecorativeQrPlaceholder } from "@/features/builder/components/card-layout-marks";
 import {
@@ -23,6 +17,16 @@ import {
 } from "@/features/builder/components/card-brand-elements";
 
 export { CardLogo };
+import {
+  StudioCardBack,
+  StudioCardFront,
+  isStudioLayout,
+} from "@/features/builder/components/card-studio-layouts";
+import {
+  FreeCardBack,
+  FreeCardFront,
+  isFreeLayout,
+} from "@/features/builder/components/card-free-layouts";
 import {
   JobCardBack,
   JobCardFront,
@@ -37,6 +41,7 @@ import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
+import { usesInvertedCardSides } from "@/lib/card-side-inversion";
 import { cn } from "@/lib/utils";
 
 function SideDotDecorations() {
@@ -153,7 +158,16 @@ export function CardFront({
   );
 
   if (isModernLayout(theme.layout)) {
-    return (
+    const invert = usesInvertedCardSides(theme.layout);
+    return invert ? (
+      <ModernCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    ) : (
       <ModernCardFront
         data={data}
         theme={theme}
@@ -167,6 +181,48 @@ export function CardFront({
   if (isJobLayout(theme.layout)) {
     return (
       <JobCardFront
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
+
+  if (isStudioLayout(theme.layout)) {
+    const invert = usesInvertedCardSides(theme.layout);
+    return invert ? (
+      <StudioCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    ) : (
+      <StudioCardFront
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
+
+  if (isFreeLayout(theme.layout)) {
+    const invert = usesInvertedCardSides(theme.layout);
+    return invert ? (
+      <FreeCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    ) : (
+      <FreeCardFront
         data={data}
         theme={theme}
         styles={styles}
@@ -398,6 +454,18 @@ export function CardBack({
   );
 
   if (isModernLayout(theme.layout)) {
+    const invert = usesInvertedCardSides(theme.layout);
+    if (invert) {
+      return (
+        <ModernCardFront
+          data={data}
+          theme={theme}
+          styles={styles}
+          compact={compact}
+          className={className}
+        />
+      );
+    }
     return (
       <ModernCardBack
         data={data}
@@ -414,6 +482,60 @@ export function CardBack({
   if (isJobLayout(theme.layout)) {
     return (
       <JobCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+        interactive={interactive}
+        onLinkClick={onLinkClick}
+      />
+    );
+  }
+
+  if (isStudioLayout(theme.layout)) {
+    const invert = usesInvertedCardSides(theme.layout);
+    if (invert) {
+      return (
+        <StudioCardFront
+          data={data}
+          theme={theme}
+          styles={styles}
+          compact={compact}
+          className={className}
+          interactive={interactive}
+          onLinkClick={onLinkClick}
+        />
+      );
+    }
+    return (
+      <StudioCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+        interactive={interactive}
+        onLinkClick={onLinkClick}
+      />
+    );
+  }
+
+  if (isFreeLayout(theme.layout)) {
+    const invert = usesInvertedCardSides(theme.layout);
+    if (invert) {
+      return (
+        <FreeCardFront
+          data={data}
+          theme={theme}
+          styles={styles}
+          compact={compact}
+          className={className}
+        />
+      );
+    }
+    return (
+      <FreeCardBack
         data={data}
         theme={theme}
         styles={styles}
@@ -548,16 +670,6 @@ export function CardBack({
             </FieldText>
           </div>
           <div className="flex flex-1 flex-col justify-between p-4">
-            {data.bio && !compact ? (
-              <FieldText
-                data={data}
-                fieldKey="bio"
-                as="p"
-                className={cn("text-sm leading-relaxed", styles.subtext)}
-              >
-                {data.bio}
-              </FieldText>
-            ) : null}
             <ContactList
               data={data}
               styles={styles}
@@ -605,26 +717,6 @@ export function CardBack({
               interactive={interactive}
               onLinkClick={onLinkClick}
             />
-            {!compact && isFieldEnabled(data, "skills") && data.skills.length > 0 ? (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {data.skills.slice(0, 4).map((skill) => {
-                  const skillSettings = getFieldSettings(data, "skills");
-                  return (
-                    <span
-                      key={skill}
-                      className={cn(
-                        "rounded bg-black/5 px-1.5 py-0.5 text-[10px]",
-                        styles.subtext,
-                        getFieldClassName(skillSettings),
-                      )}
-                      style={getFieldInlineStyle(skillSettings)}
-                    >
-                      {skill}
-                    </span>
-                  );
-                })}
-              </div>
-            ) : null}
           </div>
         </div>
       );
@@ -869,38 +961,6 @@ export function CardBack({
               ) : null}
             </div>
 
-            {!compact && data.bio ? (
-              <FieldText
-                data={data}
-                fieldKey="bio"
-                as="p"
-                className={cn("text-sm leading-relaxed", styles.subtext)}
-              >
-                {data.bio}
-              </FieldText>
-            ) : null}
-
-            {!compact && isFieldEnabled(data, "skills") && data.skills.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {data.skills.slice(0, 5).map((skill) => {
-                  const skillSettings = getFieldSettings(data, "skills");
-                  return (
-                    <span
-                      key={skill}
-                      className={cn(
-                        "rounded-md bg-black/10 px-2 py-1 text-[11px] font-medium",
-                        styles.subtext,
-                        getFieldClassName(skillSettings),
-                      )}
-                      style={getFieldInlineStyle(skillSettings)}
-                    >
-                      {skill}
-                    </span>
-                  );
-                })}
-              </div>
-            ) : null}
-
             <ContactList
               data={data}
               styles={styles}
@@ -908,53 +968,6 @@ export function CardBack({
               interactive={interactive}
               onLinkClick={onLinkClick}
             />
-
-            {!compact && isFieldEnabled(data, "links") && data.links.length > 0 ? (
-              <div className="flex flex-wrap gap-2 border-t border-current/10 pt-3">
-                {data.links.map((link) => {
-                  const linkSettings = getFieldSettings(data, "links");
-                  const classNames = cn(
-                    "inline-flex items-center gap-1 rounded-full bg-black/10 px-3 py-1 text-xs font-medium",
-                    styles.text,
-                    getFieldClassName(linkSettings),
-                    interactive && "transition-opacity hover:opacity-80",
-                  );
-
-                  if (interactive) {
-                    return (
-                      <a
-                        key={link.label}
-                        href={link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={classNames}
-                        style={getFieldInlineStyle(linkSettings)}
-                        onClick={() =>
-                          onLinkClick?.({
-                            label: link.label,
-                            href: link.href,
-                          })
-                        }
-                      >
-                        {link.label}
-                        <HugeiconsIcon icon={ArrowUpRight01Icon} size={12} />
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <span
-                      key={link.label}
-                      className={classNames}
-                      style={getFieldInlineStyle(linkSettings)}
-                    >
-                      {link.label}
-                      <HugeiconsIcon icon={ArrowUpRight01Icon} size={12} />
-                    </span>
-                  );
-                })}
-              </div>
-            ) : null}
           </div>
         </div>
       );

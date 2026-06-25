@@ -42,6 +42,8 @@ export const CARD_FIELD_KEYS: CardFieldKey[] = [
   "links",
 ];
 
+const DEPRECATED_FIELD_KEYS = new Set<CardFieldKey>(["bio", "skills", "links"]);
+
 export function defaultFieldStyle(): CardFieldStyle {
   return {
     enabled: true,
@@ -54,7 +56,13 @@ export function defaultFieldStyle(): CardFieldStyle {
 
 export function createDefaultFieldSettings(): CardFieldSettings {
   return Object.fromEntries(
-    CARD_FIELD_KEYS.map((key) => [key, defaultFieldStyle()]),
+    CARD_FIELD_KEYS.map((key) => [
+      key,
+      {
+        ...defaultFieldStyle(),
+        enabled: !DEPRECATED_FIELD_KEYS.has(key),
+      },
+    ]),
   ) as CardFieldSettings;
 }
 

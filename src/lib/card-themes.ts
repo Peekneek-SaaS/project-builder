@@ -1,4 +1,5 @@
 import type { ThemeCategory, ThemePreviewConfig } from "@/lib/theme-categories";
+import { buildStudioCardThemes } from "@/lib/card-studio-themes";
 
 export type CardLayout =
   | "classic"
@@ -52,7 +53,28 @@ export type CardLayout =
   | "mod-naturopathy"
   | "mod-maya"
   | "mod-southern"
-  | "mod-riwo";
+  | "mod-riwo"
+  | "free-serif-split"
+  | "free-montreal-frame"
+  | "free-prism-dark"
+  | "studio-cohub"
+  | "studio-austerlitz"
+  | "studio-rocket"
+  | "studio-bauhaus"
+  | "studio-golden-wave"
+  | "studio-sarah"
+  | "studio-florence"
+  | "studio-adventure"
+  | "studio-ponto"
+  | "studio-business"
+  | "studio-bill"
+  | "studio-refresh"
+  | "studio-flox"
+  | "studio-hello"
+  | "studio-revive"
+  | "studio-southern-craft"
+  | "studio-skild"
+  | "studio-farmhouse";
 
 export type CardOrientation = "portrait" | "landscape";
 export type CardSize = "sm" | "md" | "lg";
@@ -94,6 +116,61 @@ const base = (
 });
 
 export const cardThemes: CardTheme[] = [
+  base({
+    id: "free-serif-split",
+    name: "Serif Monogram",
+    description: "Light monogram front with split serif contact back.",
+    category: "free",
+    preview: {
+      layout: "typography",
+      fields: ["name", "divider"],
+    },
+    layout: "free-serif-split",
+    orientation: "landscape",
+    size: "md",
+    surface: "bg-[#F2F2F2]",
+    text: "text-black",
+    subtext: "text-neutral-600",
+    accent: "bg-black",
+    accentText: "text-black",
+  }),
+  base({
+    id: "free-montreal-frame",
+    name: "Montreal Frame",
+    description: "Framed serif front with centered logo on charcoal back.",
+    category: "free",
+    preview: {
+      layout: "split",
+      fields: ["initials", "name", "title", "divider"],
+    },
+    layout: "free-montreal-frame",
+    orientation: "landscape",
+    size: "md",
+    surface: "bg-[#1A1A1A]",
+    text: "text-white",
+    subtext: "text-white/75",
+    accent: "bg-white",
+    accentText: "text-white",
+  }),
+  base({
+    id: "free-prism-dark",
+    name: "Prism Dark",
+    description: "Minimal navy front with corner contact layout back.",
+    category: "free",
+    preview: {
+      layout: "minimal",
+      fields: ["orbit", "name"],
+    },
+    layout: "free-prism-dark",
+    orientation: "landscape",
+    size: "md",
+    surface: "bg-[#0D1117]",
+    text: "text-white",
+    subtext: "text-white/70",
+    accent: "bg-white",
+    accentText: "text-white",
+  }),
+  ...buildStudioCardThemes(base),
   base({
     id: "rob-hatch",
     name: "Rob Hatch",
@@ -799,12 +876,24 @@ export const cardThemes: CardTheme[] = [
   }),
 ];
 
+export function getDefaultThemeId(): string {
+  return (
+    cardThemes.find((theme) => !theme.pro)?.id ??
+    cardThemes[0]?.id ??
+    "free-serif-split"
+  );
+}
+
 export function getTheme(id: string): CardTheme {
-  return cardThemes.find((theme) => theme.id === id) ?? cardThemes[0];
+  return (
+    cardThemes.find((theme) => theme.id === id) ??
+    cardThemes.find((theme) => !theme.pro) ??
+    cardThemes[0]
+  );
 }
 
 export function parseThemeIds(raw: string | null): string[] {
-  const fallback = cardThemes[0]?.id ?? "rob-hatch";
+  const fallback = getDefaultThemeId();
   if (!raw) return [fallback];
 
   const ids = raw

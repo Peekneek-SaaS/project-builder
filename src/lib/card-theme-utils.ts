@@ -15,7 +15,7 @@ export type ThemeStyleClasses = {
   isLightSurface: boolean;
 };
 
-const FALLBACK_STYLES: ThemeStyleClasses = THEME_STYLES["rob-hatch"];
+const FALLBACK_STYLES: ThemeStyleClasses = THEME_STYLES["free-serif-split"];
 
 export function getThemeStyleClasses(themeId: string): ThemeStyleClasses {
   return THEME_STYLES[themeId] ?? FALLBACK_STYLES;

@@ -12,6 +12,7 @@ import {
   mergeLegacyViewsIntoSnapshot,
   type AnalyticsOverviewCard,
 } from "@/lib/card-analytics";
+import { getCardBuilderLabel } from "@/lib/card-data";
 import { cardDataSchema } from "@/lib/card-schema";
 import { assertCanAccessAnalytics } from "@/lib/billing";
 import { prisma } from "@/lib/db";
@@ -27,6 +28,10 @@ async function getOwnedCard(userId: string, cardId: string) {
   }
 
   return card;
+}
+
+function cardDisplayName(cardData: unknown) {
+  return getCardBuilderLabel(cardDataSchema.parse(cardData));
 }
 
 function analyticsTablesReady() {
@@ -93,7 +98,7 @@ export const analyticsRouter = createTRPCRouter({
       const cardSummary = {
         id: card.id,
         themeId: card.themeId,
-        name: cardDataSchema.parse(card.cardData).name || "Untitled card",
+        name: cardDisplayName(card.cardData),
       };
 
       if (!analyticsTablesReady()) {
@@ -300,7 +305,7 @@ export const analyticsRouter = createTRPCRouter({
       const cardSummaries: AnalyticsOverviewCard[] = cards.map((card) => ({
         id: card.id,
         themeId: card.themeId,
-        name: cardDataSchema.parse(card.cardData).name || "Untitled card",
+        name: cardDisplayName(card.cardData),
         views: card.viewCount,
       }));
 

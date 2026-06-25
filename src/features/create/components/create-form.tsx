@@ -37,24 +37,18 @@ import { canUseTheme } from "@/lib/plan";
 import { ThemePickerGrid } from "@/features/builder/components/theme-picker";
 import { buildThemePreviewData } from "@/lib/card-data";
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type step = 1 | 2;
 
 type ResumeHistoryItem =
   inferRouterOutputs<AppRouter>["resume"]["list"][number];
-
-function formatResumeLabel(resume: ResumeHistoryItem) {
-  const name = resume.extractedData.name.trim();
-  return name ? `${name} · ${resume.fileName}` : resume.fileName;
-}
 
 const CreateForm = ({ className }: { className: string }) => {
   const router = useRouter();
@@ -275,33 +269,37 @@ const CreateForm = ({ className }: { className: string }) => {
       )}
     >
       <div className="shrink-0 border-b border-border bg-card/40">
-        <Wrapper className="mx-auto flex max-w-2xl min-w-0 items-center justify-center gap-2 px-4 py-4 sm:gap-4 sm:px-6">
+        <Wrapper className="mx-auto flex max-w-2xl min-w-0 items-center justify-center gap-1.5 px-2 py-3 sm:gap-4 sm:px-6 sm:py-4">
           <StepDot
             index={1}
             current={step}
             label="Upload resume"
             icon={GoogleDocIcon}
+            compact
           />
-          <div className="h-px w-4 bg-border" />
+          <div className="h-px w-3 bg-border sm:w-4" />
           <StepDot
             index={2}
             current={step}
             label="Choose theme"
             icon={PaintBoardIcon}
+            compact
           />
         </Wrapper>
       </div>
 
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col px-4 py-6",
-          step === 1 ? "overflow-y-auto" : "overflow-hidden",
+          "flex min-h-0 flex-1 flex-col",
+          step === 1
+            ? "overflow-y-auto px-4 py-6"
+            : "overflow-hidden py-3 sm:py-6",
         )}
       >
         <Wrapper
           className={cn(
             "mx-auto flex w-full min-h-0 flex-1 flex-col",
-            step === 1 ? "max-w-2xl" : "w-full max-w-none",
+            step === 1 ? "max-w-2xl" : "max-w-none !px-0 sm:!px-2",
           )}
         >
           {step === 1 ? (
@@ -331,10 +329,10 @@ const CreateForm = ({ className }: { className: string }) => {
         </Wrapper>
       </div>
 
-      <footer className="sticky bottom-0 z-20 shrink-0 overflow-x-hidden border-t border-border bg-background/95 backdrop-blur-md">
+      <footer className="sticky bottom-0 z-20 shrink-0 overflow-x-hidden border-t border-border bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
         <div
           className={cn(
-            "mx-auto flex min-w-0 items-center justify-between gap-2 px-4 py-4 sm:px-6",
+            "mx-auto flex min-w-0 items-center justify-between gap-2 px-3 py-3 sm:px-6 sm:py-4",
             step === 1 ? "max-w-md" : "w-full max-w-none",
           )}
         >
@@ -364,8 +362,11 @@ const CreateForm = ({ className }: { className: string }) => {
             >
               {createCards.isPending ? (
                 <span className="flex items-center gap-1">
-                  <HugeiconsIcon icon={Loading03Icon} />
-                  Creating
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    className="animate-spin"
+                  />
+                  Building
                 </span>
               ) : (
                 <span className="flex items-center gap-1">
@@ -481,43 +482,51 @@ function StepUpload({
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <Combobox
-            items={resumeHistory}
-            value={selectedHistory}
-            onValueChange={onSelectHistory}
-            itemToStringLabel={formatResumeLabel}
-            isItemEqualToValue={(a, b) => a.id === b.id}
+          <Select
+            value={selectedHistory?.id ?? undefined}
+            onValueChange={(id) => {
+              const resume = resumeHistory.find((item) => item.id === id);
+              if (resume) onSelectHistory(resume);
+            }}
+            disabled={historyLoading || resumeHistory.length === 0}
           >
-            <ComboboxInput
-              className="w-full"
-              placeholder={
-                historyLoading
-                  ? "Loading saved resumes…"
-                  : resumeHistory.length === 0
-                    ? "No saved resumes yet"
-                    : "Select from previous history"
-              }
-              disabled={historyLoading || resumeHistory.length === 0}
-              showClear={Boolean(selectedHistory)}
-            />
-            <ComboboxContent>
-              <ComboboxEmpty>No saved resumes found.</ComboboxEmpty>
-              <ComboboxList>
-                {(item) => (
-                  <ComboboxItem key={item.id} value={item}>
-                    <div className="flex min-w-0 flex-col gap-0.5 py-0.5">
-                      <span className="truncate font-medium">
-                        {item.extractedData.name.trim() || "Untitled"}
-                      </span>
-                      <span className="truncate text-muted-foreground">
-                        {item.fileName}
-                      </span>
-                    </div>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            <SelectTrigger
+              className="h-10 w-full text-sm data-[size=default]:h-10"
+              aria-label="Select a saved resume"
+            >
+              <SelectValue
+                placeholder={
+                  historyLoading
+                    ? "Loading saved resumes…"
+                    : resumeHistory.length === 0
+                      ? "No saved resumes yet"
+                      : "Select from previous history"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent
+              position="popper"
+              align="start"
+              className="max-h-72 w-[var(--radix-select-trigger-width)]"
+            >
+              {resumeHistory.map((item) => (
+                <SelectItem
+                  key={item.id}
+                  value={item.id}
+                  className="min-h-0 items-start py-2.5 text-sm"
+                >
+                  <span className="flex min-w-0 flex-col gap-0.5 pr-4">
+                    <span className="truncate font-medium">
+                      {item.extractedData.name.trim()}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {item.fileName}
+                    </span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </>
       ) : (
         <ResumeExtractedPanel
@@ -558,10 +567,6 @@ function ResumeExtractedPanel({
         ["Email", extractedData.email || "—"],
         ["Phone", extractedData.phone || "—"],
         ["Location", extractedData.location || "—"],
-        [
-          "Skills",
-          extractedData.skills.length ? extractedData.skills.join(", ") : "—",
-        ],
       ]
     : [
         ["Name", ""],
@@ -569,7 +574,6 @@ function ResumeExtractedPanel({
         ["Email", ""],
         ["Phone", ""],
         ["Location", ""],
-        ["Skills", ""],
       ];
 
   return (
@@ -669,36 +673,7 @@ function StepTheme({
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
-      {/* <div className="shrink-0 space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Choose a theme
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isProPlan ? (
-            <>
-              Select one or more themes.{" "}
-              <span className="font-medium text-foreground">
-                {selected.length} selected
-              </span>
-            </>
-          ) : (
-            <>
-              Pick a look for your card.{" "}
-              <span className="font-medium text-foreground">
-                {selected.length} selected
-              </span>
-              . Select multiple themes with{" "}
-              <span className="font-medium text-foreground">Pro</span>.
-            </>
-          )}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Previews use your details with sample placeholders where needed. Use
-          the arrows to switch between front and back.
-        </p>
-      </div> */}
-
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <ThemePickerGrid
         className="min-h-0 flex-1"
         themes={cardThemes}
@@ -708,17 +683,18 @@ function StepTheme({
         searchQuery={themeSearch}
         onSearchQueryChange={setThemeSearch}
         isProPlan={isProPlan}
+        // footer={
+        //   !isProPlan ? (
+        //     <div className="rounded-xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
+        //       Want to build multiple cards at once?{" "}
+        //       <Link href="/#pricing" className="font-medium text-primary ">
+        //         Upgrade to Pro
+        //       </Link>{" "}
+        //       to select several themes.
+        //     </div>
+        //   ) : undefined
+        // }
       />
-
-      {!isProPlan ? (
-        <div className="shrink-0 rounded-xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
-          Want to build multiple cards at once?{" "}
-          <Link href="/#pricing" className="font-medium text-primary">
-            Upgrade to Pro
-          </Link>{" "}
-          to select several themes.
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -728,19 +704,21 @@ function StepDot({
   current,
   label,
   icon,
+  compact = false,
 }: {
   index: number;
   current: number;
   label: string;
   icon: IconSvgElement;
+  compact?: boolean;
 }) {
   const done = current > index;
   const active = current === index;
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
       <span
         className={cn(
-          "grid size-5 md:size-7 place-items-center rounded-full border text-xs font-semibold transition-colors",
+          "grid size-5 shrink-0 place-items-center rounded-full border text-xs font-semibold transition-colors sm:size-7",
           done && "border-primary bg-primary text-primary-foreground",
           active && "border-primary text-primary",
           !done && !active && "border-border text-muted-foreground",
@@ -750,12 +728,13 @@ function StepDot({
       </span>
       <span
         className={cn(
-          "flex items-center gap-1 text-xs md:text-sm font-medium",
-          active || done ? "text-foreground" : "text-muted-foreground",
+          "min-w-0 items-center gap-1 text-xs font-medium sm:text-sm",
+          compact ? "hidden sm:flex" : "flex",
+          active ? "text-primary dark:text-white" : "text-muted-foreground",
         )}
       >
-        <HugeiconsIcon icon={icon} size={16} />
-        {label}
+        <HugeiconsIcon icon={icon} size={16} className="shrink-0" />
+        <span className="truncate">{label}</span>
       </span>
     </div>
   );

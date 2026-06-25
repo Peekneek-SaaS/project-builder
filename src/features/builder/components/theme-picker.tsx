@@ -14,11 +14,13 @@ import {
   useRef,
   useState,
   type MouseEvent,
+  type ReactNode,
 } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BusinessCard } from "@/features/builder/components/business-card";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { CardData, CardDisplayMode } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
@@ -34,6 +36,7 @@ import {
   type ThemePreviewLayout,
 } from "@/lib/theme-categories";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const PREVIEW_TITLE = "Professional";
 
@@ -414,13 +417,17 @@ function ThemePreviewContent({
   }
 }
 
-const PREVIEW_LANDSCAPE_SIZE: CardTheme["size"] = "md";
+function themeForPickerPreview(theme: CardTheme, isMobile: boolean): CardTheme {
+  if (theme.orientation !== "landscape") return theme;
 
-function themeForPickerPreview(theme: CardTheme): CardTheme {
-  if (theme.orientation === "landscape" && theme.size === "lg") {
-    return { ...theme, size: PREVIEW_LANDSCAPE_SIZE };
-  }
-  return theme;
+  const targetSize: CardTheme["size"] = isMobile
+    ? "sm"
+    : theme.size === "lg"
+      ? "md"
+      : theme.size;
+
+  if (targetSize === theme.size) return theme;
+  return { ...theme, size: targetSize };
 }
 
 function ThemePickerCardPreview({
@@ -432,61 +439,63 @@ function ThemePickerCardPreview({
   previewData: CardData;
   side: CardDisplayMode;
 }) {
-  const previewTheme = useMemo(() => themeForPickerPreview(theme), [theme]);
+  const isMobile = useIsMobile();
+  const previewTheme = useMemo(
+    () => themeForPickerPreview(theme, isMobile),
+    [theme, isMobile],
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState({
-    scale: 1,
-    width: 0,
-    height: 0,
-    naturalWidth: 0,
-  });
+  const [scale, setScale] = useState(1);
+  const [ready, setReady] = useState(false);
 
   useLayoutEffect(() => {
+    let frame = 0;
+
     const updateLayout = () => {
       const container = containerRef.current;
       const card = cardRef.current;
       if (!container || !card) return;
 
       const naturalWidth = card.offsetWidth;
-      const naturalHeight = card.offsetHeight;
-      if (!naturalWidth || !naturalHeight) return;
+      if (!naturalWidth) return;
 
-      const padding = 32;
-      const availableWidth = Math.max(0, container.clientWidth - padding);
-      const scale = Math.min(1, availableWidth / naturalWidth);
+      const availableWidth = container.clientWidth;
+      if (availableWidth <= 0) {
+        frame = requestAnimationFrame(updateLayout);
+        return;
+      }
 
-      setLayout({
-        scale,
-        width: naturalWidth * scale,
-        height: naturalHeight * scale,
-        naturalWidth,
-      });
+      setScale(Math.min(1, availableWidth / naturalWidth));
+      setReady(true);
     };
 
+    setReady(false);
     updateLayout();
+    frame = requestAnimationFrame(updateLayout);
+
     const observer = new ResizeObserver(updateLayout);
     if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [previewTheme.id, side, previewData]);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [previewTheme.id, side, previewData, isMobile]);
 
   return (
-    <div ref={containerRef} className="flex w-full justify-center px-4 py-4">
+    <div
+      ref={containerRef}
+      className="flex w-full min-w-0 justify-center px-2 py-3 sm:px-4 sm:py-4"
+    >
       <div
-        className="overflow-hidden"
-        style={{
-          width: layout.width > 0 ? layout.width : undefined,
-          height: layout.height > 0 ? layout.height : undefined,
-        }}
+        className={cn(
+          "mx-auto shrink-0 transition-opacity duration-150",
+          !ready && "opacity-0",
+        )}
+        style={{ zoom: scale < 1 ? scale : undefined }}
       >
-        <div
-          ref={cardRef}
-          style={{
-            width: layout.naturalWidth > 0 ? layout.naturalWidth : undefined,
-            transform: layout.scale < 1 ? `scale(${layout.scale})` : undefined,
-            transformOrigin: "top left",
-          }}
-        >
+        <div ref={cardRef}>
           <BusinessCard
             data={previewData}
             theme={previewTheme}
@@ -536,14 +545,12 @@ export function ThemePickerCard({
           : "border-border hover:border-primary/40",
       )}
     >
-      <div className="relative bg-muted/15 pb-11">
-        <div className="pointer-events-none">
-          <ThemePickerCardPreview
-            theme={theme}
-            previewData={previewData}
-            side={side}
-          />
-        </div>
+      <div className="relative bg-muted/15 pb-11 pt-1 sm:pt-0">
+        <ThemePickerCardPreview
+          theme={theme}
+          previewData={previewData}
+          side={side}
+        />
 
         <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
           <button
@@ -586,7 +593,7 @@ export function ThemePickerCard({
       <div className="flex items-start justify-between gap-2 border-t border-border bg-card px-4 py-3 text-card-foreground">
         <div className="min-w-0">
           <p className="text-sm font-semibold">{theme.name}</p>
-          <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
             {theme.description}
           </p>
         </div>
@@ -610,6 +617,7 @@ export function ThemePickerGrid({
   onSearchQueryChange,
   className,
   isProPlan,
+  footer,
 }: {
   themes: CardTheme[];
   previewData: CardData;
@@ -619,6 +627,7 @@ export function ThemePickerGrid({
   onSearchQueryChange?: (query: string) => void;
   className?: string;
   isProPlan: boolean;
+  footer?: ReactNode;
 }) {
   const filteredThemes = filterThemesByQuery(themes, searchQuery);
   const grouped = groupThemesByCategory(filteredThemes);
@@ -627,9 +636,9 @@ export function ThemePickerGrid({
     <div
       className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}
     >
-      <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 pb-4 pt-1 backdrop-blur-sm">
-        <div className="flex items-center flex-col md:flex-row justify-end gap-3">
-          <p className="text-sm text-muted-foreground">
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 pb-3 pt-1 backdrop-blur-sm">
+        <div className="flex flex-col items-stretch gap-2 sm:gap-3 md:flex-row md:items-center md:justify-end">
+          <p className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
             {isProPlan ? (
               <>
                 Select one or more themes.{" "}
@@ -638,17 +647,16 @@ export function ThemePickerGrid({
                 </span>
               </>
             ) : (
-              <>
-                Pick a look for your card.{" "}
-                <span className="font-medium text-foreground">
-                  {selected.length} selected
-                </span>
-                . Select multiple themes with{" "}
-                <span className="font-medium text-foreground">Pro</span>.
-              </>
+              <div className="text-center text-sm text-muted-foreground py-2">
+                Want to build multiple cards at once?{" "}
+                <Link href="/#pricing" className="font-medium text-primary">
+                  Upgrade to Pro
+                </Link>{" "}
+                to select & unlock several themes.
+              </div>
             )}
           </p>
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full md:max-w-xs">
             <HugeiconsIcon
               icon={Search01Icon}
               size={16}
@@ -666,20 +674,23 @@ export function ThemePickerGrid({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pt-6">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain pt-4 sm:pt-6">
         {filteredThemes.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             No themes match &ldquo;{searchQuery}&rdquo;. Try a different name or
             category.
           </div>
         ) : (
-          <div className="flex flex-col gap-10 pb-4">
+          <div className="flex flex-col gap-8 pb-4 sm:gap-10">
             {THEME_CATEGORY_ORDER.map((category) => {
               const categoryThemes = grouped[category];
               if (!categoryThemes?.length) return null;
 
               return (
-                <section key={category} className="w-full min-w-0 shrink-0">
+                <section
+                  key={category}
+                  className="w-full min-w-0 shrink-0 px-2 md:px-0"
+                >
                   <div className="mb-4 space-y-1">
                     <h2 className="text-base font-semibold tracking-tight">
                       {CATEGORY_LABELS[category]}
@@ -702,6 +713,7 @@ export function ThemePickerGrid({
                 </section>
               );
             })}
+            {/* {footer ? <div className="shrink-0">{footer}</div> : null} */}
           </div>
         )}
       </div>

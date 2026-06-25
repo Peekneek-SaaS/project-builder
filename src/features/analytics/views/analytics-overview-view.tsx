@@ -19,6 +19,7 @@ import {
 import {
   ANALYTICS_PERIODS,
   isAnalyticsPeriod,
+  type AnalyticsOverviewCard,
   type AnalyticsPeriod,
 } from "@/lib/card-analytics";
 import { getTheme } from "@/lib/card-themes";
@@ -109,7 +110,10 @@ export function AnalyticsOverviewView() {
     );
   }
 
-  const paginatedTopCards = paginateItems(overview.topCards, cardsPage);
+  const paginatedTopCards = paginateItems<AnalyticsOverviewCard>(
+    overview.topCards,
+    cardsPage,
+  );
 
   return (
     <div className="mx-auto min-w-0  overflow-x-hidden px-4 py-8 sm:px-6">

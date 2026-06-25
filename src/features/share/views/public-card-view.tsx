@@ -9,13 +9,17 @@ import { usePublicCardViewTracking } from "@/features/share/hooks/use-public-car
 import { getVisitorId } from "@/lib/analytics-client";
 import { getTheme } from "@/lib/card-themes";
 import { useTRPC } from "@/trpc/client";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Loading03Icon } from "@hugeicons/core-free-icons";
 
 export function PublicCardView({ slug }: { slug: string }) {
   const trpc = useTRPC();
 
-  const { data: card, isLoading, isError } = useQuery(
-    trpc.card.getPublicBySlug.queryOptions({ slug }),
-  );
+  const {
+    data: card,
+    isLoading,
+    isError,
+  } = useQuery(trpc.card.getPublicBySlug.queryOptions({ slug }));
 
   usePublicCardViewTracking(card?.slug ?? undefined);
 
@@ -40,7 +44,12 @@ export function PublicCardView({ slug }: { slug: string }) {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Loading card…</p>
+        <HugeiconsIcon
+          icon={Loading03Icon}
+          className="animate-spin"
+          size={16}
+        />
+        <p className="text-sm text-muted-foreground">Loading card</p>
       </div>
     );
   }
