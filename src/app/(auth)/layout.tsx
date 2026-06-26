@@ -106,7 +106,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 transition={{ ...defaultTransition, delay: 0.3 }}
               >
                 <p className="leading-7">
-                  Cardify replaced my paper cards entirely. I share one link
+                  Kardably replaced my paper cards entirely. I share one link
                   and I'm done.
                 </p>
               </motion.div>

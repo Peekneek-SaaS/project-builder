@@ -108,7 +108,7 @@ export default function SettingsPage() {
               Appearance
             </CardTitle>
             <CardDescription>
-              Choose how Cardably looks on this device.
+              Choose how Kardably looks on this device.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -282,7 +282,7 @@ export default function SettingsPage() {
               Workspace
             </CardTitle>
             <CardDescription>
-              Quick links to the parts of Cardably you use most.
+              Quick links to the parts of Kardably you use most.
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -21,7 +21,7 @@ const Logo = ({
         <HugeiconsIcon icon={CreditCardIcon} size={22} color="white" />
       </span>
       <p className={cn("leading-7 text-lg font-semibold", className2)}>
-        Cardify
+        Kardably
       </p>
     </Link>
   );

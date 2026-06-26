@@ -300,7 +300,7 @@ export function ShareView({ cardId }: { cardId: string }) {
           </div>
         ) : null}
         <CardPreviewScaler
-          className="min-w-0 max-w-full rounded-xl border border-border bg-muted/30"
+          className="min-w-0 max-w-full rounded-xl border border-border dark:bg-white"
           minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[min(480px,55vh)]"
         >
           <BusinessCard
@@ -572,15 +572,19 @@ export function ShareView({ cardId }: { cardId: string }) {
               ) : embedFormat === "react" ? (
                 <>
                   In React / Next.js, use{" "}
-                  <code className="text-[11px]">style=&#123;&#123; ... &#125;&#125;</code>{" "}
+                  <code className="text-[11px]">
+                    style=&#123;&#123; ... &#125;&#125;
+                  </code>{" "}
                   (an object, not a string).
                 </>
               ) : (
-                <>Vue templates can use a string style attribute on the iframe.</>
+                <>
+                  Vue templates can use a string style attribute on the iframe.
+                </>
               )}{" "}
               {billing?.isPro
-                ? "Pro plan: no Cardably branding in the embed."
-                : 'Free plan: a small "Powered by Cardably" badge appears below the card.'}{" "}
+                ? "Pro plan: no Kardably branding in the embed."
+                : 'Free plan: a small "Powered by Kardably" badge appears below the card.'}{" "}
               Embed views appear as <strong>Website embed</strong> in Analytics.
             </p>
             {!card.published ? (

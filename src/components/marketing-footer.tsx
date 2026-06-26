@@ -73,7 +73,7 @@ export function MarketingFooter() {
           ))}
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center">
-          <p>© 2026 Cardably, Inc. All rights reserved.</p>
+          <p>© 2026 Kardably, Inc. All rights reserved.</p>
           <p>Made for people who network.</p>
         </div>
       </div>

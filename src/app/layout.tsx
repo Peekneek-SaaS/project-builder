@@ -26,8 +26,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Cardify",
-    template: "%s | Cardify",
+    default: "Kardably",
+    template: "%s | Kardably",
   },
   description:
     "Turn your resume into a beautiful business card in seconds. Upload, customize with AI, and share via link or QR code.",

@@ -1,4 +1,4 @@
-const VISITOR_STORAGE_KEY = "cardably_visitor_id";
+const VISITOR_STORAGE_KEY = "kardably_visitor_id";
 
 export function getVisitorId(): string {
   if (typeof window === "undefined") return "";

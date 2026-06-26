@@ -122,7 +122,7 @@ function Hero() {
                 className="dark:text-white text-primary"
                 size={16}
               />{" "}
-              Ready in 60 seconds
+              Ready under 60 seconds
             </span>
           </div>
         </motion.div>
@@ -340,7 +340,7 @@ function Pricing() {
         "All premium themes",
         "QR codes + custom URL",
         "Full analytics suite",
-        "Remove Cardably branding",
+        "Remove Kardably branding",
       ],
       cta: "Start Pro trial",
       highlighted: true,

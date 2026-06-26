@@ -13,7 +13,7 @@ export function EmbedBranding() {
     >
       <HugeiconsIcon icon={CreditCardIcon} size={14} />
       <span>
-        Powered by <span className="font-medium text-foreground">Cardably</span>
+        Powered by <span className="font-medium text-foreground">Kardably</span>
       </span>
     </Link>
   );

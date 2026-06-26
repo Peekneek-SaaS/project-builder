@@ -18,7 +18,7 @@ export default async function QrRedirectPage({
         <p className="text-sm font-medium">QR code not found</p>
         <p className="text-sm text-muted-foreground">
           This QR link may be invalid, point to another environment, or the card
-          was removed. Open Share in Cardably and confirm the URL under your QR
+          was removed. Open Share in Kardably and confirm the URL under your QR
           matches this site.
         </p>
         <Button asChild variant="outline">

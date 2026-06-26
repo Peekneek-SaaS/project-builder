@@ -1,83 +1,145 @@
-import { NextResponse } from "next/server";
+import { verifyWebhook, type WebhookEvent } from "@clerk/nextjs/webhooks";
+import { NextRequest, NextResponse } from "next/server";
 
+import { setUserPlan } from "@/lib/billing";
 import {
   FREE_PLAN_SLUG,
   isPlanId,
   PRO_PLAN_SLUG,
   type PlanId,
 } from "@/lib/plan";
-import { setUserPlan } from "@/lib/billing";
 
-type ClerkWebhookEvent = {
-  type: string;
-  data: {
-    id?: string;
-    user_id?: string;
-    payer?: { user_id?: string };
-    status?: string;
-    items?: Array<{ plan?: { slug?: string } }>;
-  };
+type BillingWebhookData = {
+  id?: string;
+  status?: string;
+  payer?: { user_id?: string };
+  user_id?: string;
+  plan?: { slug?: string } | null;
+  items?: Array<{ plan?: { slug?: string } | null; status?: string }>;
 };
 
-function getClerkUserId(event: ClerkWebhookEvent): string | null {
-  return event.data.user_id ?? event.data.payer?.user_id ?? null;
+function getWebhookSigningSecret() {
+  return (
+    process.env.CLERK_WEBHOOK_SIGNING_SECRET ??
+    process.env.CLERK_WEBHOOK_SECRET
+  );
 }
 
-function resolvePlanFromEvent(event: ClerkWebhookEvent): PlanId | null {
+function getClerkUserId(event: WebhookEvent): string | null {
+  if (event.type === "user.created" || event.type === "user.updated") {
+    return event.data.id ?? null;
+  }
+
+  const data = event.data as BillingWebhookData;
+  return data.payer?.user_id ?? data.user_id ?? null;
+}
+
+function resolvePlanFromSlug(
+  slug: string | undefined | null,
+  status?: string,
+): PlanId | null {
+  if (slug === PRO_PLAN_SLUG) return "pro";
+  if (slug === FREE_PLAN_SLUG) return "free";
+  if (status === "active" && slug && slug !== FREE_PLAN_SLUG) return "pro";
+  return null;
+}
+
+function isFreeBillingStatus(status: string | undefined): boolean {
+  return (
+    status === "past_due" ||
+    status === "canceled" ||
+    status === "cancelled" ||
+    status === "ended" ||
+    status === "expired" ||
+    status === "abandoned"
+  );
+}
+
+function resolvePlanFromEvent(event: WebhookEvent): PlanId | null {
+  const type = event.type;
+  const data = event.data as BillingWebhookData;
+
   if (
-    event.type === "subscription.pastDue" ||
-    event.type === "subscription.cancelled" ||
-    event.type === "subscription.expired"
+    type === "subscription.pastDue" ||
+    type === "subscriptionItem.canceled" ||
+    type === "subscriptionItem.ended" ||
+    type === "subscriptionItem.abandoned" ||
+    type === "subscriptionItem.pastDue"
   ) {
     return "free";
   }
 
+  if (isFreeBillingStatus(data.status)) {
+    return "free";
+  }
+
   if (
-    event.type === "subscription.active" ||
-    event.type === "subscription.updated" ||
-    event.type === "subscriptionItem.active"
+    type === "subscription.active" ||
+    type === "subscription.created" ||
+    type === "subscription.updated" ||
+    type === "subscriptionItem.active" ||
+    type === "subscriptionItem.created" ||
+    type === "subscriptionItem.updated"
   ) {
-    const slug = event.data.items?.[0]?.plan?.slug;
-    if (slug === PRO_PLAN_SLUG) return "pro";
-    if (slug === FREE_PLAN_SLUG) return "free";
-    if (event.data.status === "active" && slug !== FREE_PLAN_SLUG) {
-      return "pro";
-    }
+    const subscriptionSlug = data.items?.[0]?.plan?.slug;
+    const fromSubscription = resolvePlanFromSlug(subscriptionSlug, data.status);
+    if (fromSubscription) return fromSubscription;
+
+    const itemSlug = data.plan?.slug;
+    return resolvePlanFromSlug(itemSlug, data.status);
   }
 
   return null;
 }
 
-export async function POST(request: Request) {
-  const secret = process.env.CLERK_WEBHOOK_SECRET;
-  if (!secret) {
+function getSubscriptionMetadata(event: WebhookEvent) {
+  const data = event.data as BillingWebhookData;
+  return {
+    clerkSubscriptionId: data.id ?? null,
+    clerkSubscriptionStatus: data.status ?? null,
+  };
+}
+
+export async function POST(request: NextRequest) {
+  const signingSecret = getWebhookSigningSecret();
+  if (!signingSecret) {
     return NextResponse.json(
-      { error: "CLERK_WEBHOOK_SECRET is not configured." },
+      {
+        error:
+          "CLERK_WEBHOOK_SIGNING_SECRET (or CLERK_WEBHOOK_SECRET) is not configured.",
+      },
       { status: 501 },
     );
   }
 
-  let event: ClerkWebhookEvent;
+  let event: WebhookEvent;
   try {
-    event = (await request.json()) as ClerkWebhookEvent;
-  } catch {
+    event = await verifyWebhook(request, { signingSecret });
+  } catch (error) {
+    console.error("Clerk webhook verification failed:", error);
     return NextResponse.json(
-      { error: "Invalid JSON payload." },
+      { error: "Webhook verification failed." },
       { status: 400 },
     );
+  }
+
+  if (event.type === "user.created") {
+    const clerkUserId = event.data.id;
+    if (clerkUserId) {
+      await setUserPlan(clerkUserId, "free");
+    }
+
+    return NextResponse.json({ ok: true, type: event.type, plan: "free" });
   }
 
   const clerkUserId = getClerkUserId(event);
   const plan = resolvePlanFromEvent(event);
 
   if (!clerkUserId || !plan || !isPlanId(plan)) {
-    return NextResponse.json({ ok: true, ignored: true });
+    return NextResponse.json({ ok: true, ignored: true, type: event.type });
   }
 
-  await setUserPlan(clerkUserId, plan, {
-    clerkSubscriptionId: event.data.id ?? null,
-    clerkSubscriptionStatus: event.data.status ?? null,
-  });
+  await setUserPlan(clerkUserId, plan, getSubscriptionMetadata(event));
 
-  return NextResponse.json({ ok: true, plan });
+  return NextResponse.json({ ok: true, type: event.type, plan });
 }

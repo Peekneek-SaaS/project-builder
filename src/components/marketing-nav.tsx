@@ -17,7 +17,7 @@ export function MarketingNav() {
   ];
   return (
     <motion.header
-      className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md"
+      className="sticky top-0 z-90 border-b border-border/60 bg-background/80 backdrop-blur-md"
       initial="hidden"
       animate="visible"
       variants={fadeIn}

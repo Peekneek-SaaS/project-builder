@@ -18,7 +18,11 @@ const EMBED_REFETCH_MS = 15_000;
 export function EmbedCardView({ slug }: { slug: string }) {
   const trpc = useTRPC();
 
-  const { data: card, isLoading, isError } = useQuery({
+  const {
+    data: card,
+    isLoading,
+    isError,
+  } = useQuery({
     ...trpc.card.getPublicBySlug.queryOptions({ slug }),
     staleTime: 0,
     refetchInterval: EMBED_REFETCH_MS,
@@ -67,7 +71,7 @@ export function EmbedCardView({ slug }: { slug: string }) {
   const theme = getTheme(card.themeId);
 
   return (
-    <div className="flex min-h-[480px] w-full flex-col items-center justify-center gap-5 p-4 sm:p-6">
+    <div className="flex min-h-[480px] w-full flex-col items-center justify-center gap-5 p-4 sm:p-6 bg-white">
       <BusinessCard
         data={card.cardData}
         theme={theme}

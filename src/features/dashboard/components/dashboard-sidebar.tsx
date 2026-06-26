@@ -56,7 +56,7 @@ export function DashboardSidebar({
                   //   color="dark:blue white"
                 />
                 <p className="leading-7 text-sm font-semibold group-data-[collapsible=icon]:hidden!">
-                  Cardably
+                  Kardably
                 </p>
               </Link> */}
             <Logo className2="group-data-[collapsible=icon]:hidden!" />

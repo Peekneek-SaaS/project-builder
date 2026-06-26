@@ -12,7 +12,7 @@ export default async function PublicCardPage({
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex min-h-screen items-center justify-center bg-white">
           <p className="text-sm text-muted-foreground">Loading</p>
         </div>
       }

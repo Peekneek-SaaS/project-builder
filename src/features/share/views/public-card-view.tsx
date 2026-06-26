@@ -43,10 +43,10 @@ export function PublicCardView({ slug }: { slug: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <HugeiconsIcon
           icon={Loading03Icon}
-          className="animate-spin"
+          className="animate-spin text-black"
           size={16}
         />
         <p className="text-sm text-muted-foreground">Loading card</p>
@@ -56,7 +56,7 @@ export function PublicCardView({ slug }: { slug: string }) {
 
   if (isError || !card) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-2 bg-background px-4">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-2 bg-white px-4">
         <p className="text-sm font-medium">Card not found</p>
         <p className="text-sm text-muted-foreground">
           This card may be unpublished or the link is incorrect.
@@ -68,12 +68,12 @@ export function PublicCardView({ slug }: { slug: string }) {
   const theme = getTheme(card.themeId);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/30 px-4 py-12">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-12">
       <div className="mb-6 text-center">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Digital business card
         </p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-xl text-black font-semibold tracking-tight">
           {card.cardData.name}
         </h1>
         {card.cardData.title ? (

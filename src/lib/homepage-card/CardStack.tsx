@@ -11,7 +11,7 @@ interface CardStackProps {
   mode?: Mode;
 }
 
-const TILT_DEG = [-8, 8, -6, 18];
+const TILT_DEG = [-4, 4, -6, 18];
 const OFFSET_X = [-46, 46, -90, 90];
 const OFFSET_Y = [-70, 70, 30, -26];
 
@@ -35,8 +35,10 @@ export default function CardStack({ cards, mode = "lift" }: CardStackProps) {
         const offsetX = OFFSET_X[i % OFFSET_X.length];
         const offsetY = OFFSET_Y[i % OFFSET_Y.length];
 
-        const shouldFlip = (mode === "flip" || mode === "lift-flip") && isHovered;
-        const shouldLift = (mode === "lift" || mode === "lift-flip") && isHovered;
+        const shouldFlip =
+          (mode === "flip" || mode === "lift-flip") && isHovered;
+        const shouldLift =
+          (mode === "lift" || mode === "lift-flip") && isHovered;
         const rotateY = getRotateY(card.side, shouldFlip);
 
         return (
@@ -51,7 +53,7 @@ export default function CardStack({ cards, mode = "lift" }: CardStackProps) {
             className="absolute left-1/2 top-1/2 h-[180px] w-[300px] cursor-pointer rounded-2xl text-left shadow-[0_1px_3px_rgba(0,0,0,0.18)] outline-none transition-[transform,box-shadow] duration-500 [transform-style:preserve-3d] focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-[200px] sm:w-[340px]"
             style={{
               transform: shouldLift
-                ? `translate(-50%, -50%) translate(${offsetX * 0.3}px, ${offsetY * 0.3 - 18}px) rotate(0deg) scale(1.2) rotateY(${rotateY}deg)`
+                ? `translate(-50%, -50%) translate(${offsetX * 0.3}px, ${offsetY * 0.3 - 0}px) rotate(0deg) scale(1.2) rotateY(${rotateY}deg)`
                 : `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${tilt}deg) rotateY(${rotateY}deg)`,
               zIndex: isHovered ? 50 : i,
               boxShadow: isHovered

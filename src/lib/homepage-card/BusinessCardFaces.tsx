@@ -93,7 +93,9 @@ function BackFace({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="text-start uppercase tracking-[0.12em] text-[7px] sm:text-[8px]">
-          <p className="opacity-70">{card.tagline ?? "Home of powerhouses"}</p>
+          <p className="text-lg font-semibold">
+            {card.tagline ?? "Home of powerhouses"}
+          </p>
           <p className="font-semibold">{card.title}</p>
         </div>
       </div>
