@@ -23,6 +23,7 @@ export type BillingProfile = {
   canCreateCard: boolean;
   cardsRemaining: number | null;
   analyticsEnabled: boolean;
+  planRenewsAt: string | null;
 };
 
 function resolveDevPlanOverride(): PlanId | null {
@@ -61,6 +62,7 @@ function userBillingTableReady() {
 function buildBillingProfile(
   plan: PlanId,
   cardCount: number,
+  planRenewsAt: Date | null = null,
 ): BillingProfile {
   const limits = PLAN_LIMITS[plan];
   const isPro = isProPlan(plan);
@@ -76,6 +78,7 @@ function buildBillingProfile(
     canCreateCard: isPro || cardCount < limits.maxCards,
     cardsRemaining,
     analyticsEnabled: limits.analytics,
+    planRenewsAt: planRenewsAt?.toISOString() ?? null,
   };
 }
 
@@ -85,7 +88,10 @@ async function countActiveCards(clerkId: string) {
   });
 }
 
-async function resolveStoredPlan(clerkId: string): Promise<PlanId | null> {
+async function resolveStoredBilling(clerkId: string): Promise<{
+  plan: PlanId;
+  planExpiresAt: Date | null;
+} | null> {
   if (!userBillingTableReady()) return null;
 
   try {
@@ -94,7 +100,10 @@ async function resolveStoredPlan(clerkId: string): Promise<PlanId | null> {
       create: { clerkId, plan: "free" },
       update: {},
     });
-    return isPlanId(user.plan) ? user.plan : "free";
+    return {
+      plan: isPlanId(user.plan) ? user.plan : "free",
+      planExpiresAt: user.planExpiresAt,
+    };
   } catch {
     return null;
   }
@@ -146,14 +155,15 @@ export async function syncBillingPlanFromClerk(clerkId: string): Promise<PlanId>
     return clerkPlan;
   }
 
-  const storedPlan = await resolveStoredPlan(clerkId);
-  return storedPlan ?? "free";
+  const storedBilling = await resolveStoredBilling(clerkId);
+  return storedBilling?.plan ?? "free";
 }
 
 export async function getBillingProfile(clerkId: string): Promise<BillingProfile> {
   const devOverride = resolveDevPlanOverride();
   const clerkPlan = devOverride ? null : await resolvePlanFromClerk();
-  const storedPlan = devOverride ? null : await resolveStoredPlan(clerkId);
+  const storedBilling = devOverride ? null : await resolveStoredBilling(clerkId);
+  const storedPlan = storedBilling?.plan ?? null;
   const plan = devOverride ?? clerkPlan ?? storedPlan ?? "free";
 
   if (!devOverride && clerkPlan && clerkPlan !== storedPlan) {
@@ -161,7 +171,11 @@ export async function getBillingProfile(clerkId: string): Promise<BillingProfile
   }
 
   const cardCount = await countActiveCards(clerkId);
-  return buildBillingProfile(plan, cardCount);
+  return buildBillingProfile(
+    plan,
+    cardCount,
+    storedBilling?.planExpiresAt ?? null,
+  );
 }
 
 export async function assertCanCreateCards(

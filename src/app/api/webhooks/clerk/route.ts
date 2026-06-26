@@ -14,8 +14,13 @@ type BillingWebhookData = {
   status?: string;
   payer?: { user_id?: string };
   user_id?: string;
+  period_end?: number | null;
   plan?: { slug?: string } | null;
-  items?: Array<{ plan?: { slug?: string } | null; status?: string }>;
+  items?: Array<{
+    plan?: { slug?: string } | null;
+    status?: string;
+    period_end?: number | null;
+  }>;
 };
 
 function getWebhookSigningSecret() {
@@ -92,11 +97,20 @@ function resolvePlanFromEvent(event: WebhookEvent): PlanId | null {
   return null;
 }
 
+function getPlanRenewalDate(data: BillingWebhookData): Date | null {
+  const raw = data.period_end ?? data.items?.[0]?.period_end;
+  if (raw == null) return null;
+  return new Date(raw > 1e12 ? raw : raw * 1000);
+}
+
 function getSubscriptionMetadata(event: WebhookEvent) {
   const data = event.data as BillingWebhookData;
+  const planExpiresAt = getPlanRenewalDate(data);
+
   return {
     clerkSubscriptionId: data.id ?? null,
     clerkSubscriptionStatus: data.status ?? null,
+    ...(planExpiresAt ? { planExpiresAt } : {}),
   };
 }
 

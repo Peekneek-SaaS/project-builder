@@ -4,23 +4,33 @@ import { defaultTransition, fadeInUp, viewportOnce } from "@/lib/motion";
 import Logo from "../../public/Logo/Logo";
 
 export function MarketingFooter() {
+  const year = new Date().getFullYear();
   const cols = [
     {
       title: "Product",
       links: [
-        { label: "Product", href: "#features" },
-        { label: "How it works", href: "#how" },
-        { label: "Pricing", href: "#pricing" },
-        { label: "FAQ", href: "#faq" },
+        { label: "Product", href: "#features", target: "" },
+        { label: "How it works", href: "#how", target: "" },
+        { label: "Pricing", href: "#pricing", target: "" },
+        { label: "FAQ", href: "#faq", target: "" },
       ],
     },
     {
       title: "Social",
       links: [
-        { label: "LinkedIn", href: "#" },
-        { label: "X", href: "#" },
-        { label: "Reddit", href: "#" },
-        { label: "Instagram", href: "#" },
+        {
+          label: "LinkedIn",
+          href: "https://www.linkedin.com/in/neerajneerajweb/",
+          target: "_blank",
+        },
+        { label: "ProductHunt", href: "#", target: "_blank" },
+        {
+          label: "Gmail",
+          href: "mailto:nikatwork365@gmail.com",
+          target: "_blank",
+        },
+
+        // { label: "Instagram", href: "#" },
       ],
     },
     // {
@@ -58,11 +68,12 @@ export function MarketingFooter() {
             <div key={col.title} className="space-y-3">
               <h4 className="text-sm font-medium">{col.title}</h4>
               <ul className="space-y-2">
-                {col.links.map(({ label, href }) => (
+                {col.links.map(({ label, href, target }) => (
                   <li key={label}>
                     <Link
                       href={href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      target={target}
                     >
                       {label}
                     </Link>
@@ -73,7 +84,7 @@ export function MarketingFooter() {
           ))}
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center">
-          <p>© 2026 Kardably, Inc. All rights reserved.</p>
+          <p>© {year} Kardably, Inc. All rights reserved.</p>
           <p>Made for people who network.</p>
         </div>
       </div>

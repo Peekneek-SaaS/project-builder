@@ -489,7 +489,7 @@ function CTA() {
           Build your digital business card from your resume today — it only
           takes a minute.
         </p>
-        <Button asChild size="lg" variant="secondary" className="mt-8">
+        <Button asChild size="lg"  className="mt-8">
           <Link href="/create">
             Get started free
             <HugeiconsIcon icon={ArrowRight01Icon} />

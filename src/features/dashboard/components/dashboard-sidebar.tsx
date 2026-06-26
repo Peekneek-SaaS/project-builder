@@ -1,15 +1,34 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Chart03Icon,
+  Delete02Icon,
+  Home02Icon,
+  LockPasswordIcon,
+  PlusSignIcon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { SidebarPlanFooter } from "@/features/dashboard/components/sidebar-plan-footer";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
 import Logo from "../../../../public/Logo/Logo";
 
 const data = {
@@ -48,19 +67,7 @@ export function DashboardSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center justify-between py-2">
-            {/* <SidebarMenuButton asChild className="p-0!"> */}
-            {/* <Link href="/" className="flex items-center gap-2">
-                <HugeiconsIcon
-                  icon={CreditCardIcon}
-                  size={22}
-                  //   color="dark:blue white"
-                />
-                <p className="leading-7 text-sm font-semibold group-data-[collapsible=icon]:hidden!">
-                  Kardably
-                </p>
-              </Link> */}
             <Logo className2="group-data-[collapsible=icon]:hidden!" />
-            {/* </SidebarMenuButton> */}
             <SidebarTrigger size="lg" className="flex md:hidden" />
           </SidebarMenuItem>
         </SidebarMenu>
@@ -68,35 +75,11 @@ export function DashboardSidebar({
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
+      {/* <SidebarPlanFooter /> */}
     </Sidebar>
   );
 }
 
-import { Button } from "@/components/ui/button";
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import {
-  Chart03Icon,
-  CreditCardIcon,
-  DashboardSquare01Icon,
-  Delete02Icon,
-  Home02Icon,
-  LockIcon,
-  LockPasswordIcon,
-  PlusSignIcon,
-  Settings01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
-import { useTRPC } from "@/trpc/client";
 export function NavMain({
   items,
 }: {
