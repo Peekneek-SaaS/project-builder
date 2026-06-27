@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import type { CardData } from "@/lib/card-data";
 import type { CardLayout, CardTheme } from "@/lib/card-themes";
@@ -21,6 +23,7 @@ import {
 } from "@/features/builder/components/card-studio-shared";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
 import { layoutShell } from "@/features/builder/components/card-layout-utils";
+import { useCardPrintExport } from "@/features/builder/components/card-print-export-context";
 import { cn } from "@/lib/utils";
 
 type StudioProps = {
@@ -31,6 +34,7 @@ type StudioProps = {
   className?: string;
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
+  forPrint?: boolean;
 };
 
 function shell(
@@ -39,13 +43,14 @@ function shell(
   compact: boolean | undefined,
   side: "front" | "back",
   className?: string,
+  forPrint?: boolean,
 ) {
-  return layoutShell(styles, theme, compact, side, className);
+  return layoutShell(styles, theme, compact, side, className, forPrint);
 }
 
-function CohubFront({ data, theme, styles, compact, className }: StudioProps) {
+function CohubFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="absolute right-[10%] top-[12%] size-[18%] rounded-full bg-[#66BB6A]" />
       <div className="pointer-events-none absolute -left-[8%] top-[8%] font-serif text-[clamp(3rem,18vw,5rem)] leading-none opacity-90">
         {getInitials(data.name).slice(0, 1) || "C"}
@@ -57,9 +62,9 @@ function CohubFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function CohubBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function CohubBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="absolute left-[8%] top-1/2 size-[22%] -translate-y-1/2 rounded-full shadow-[inset_2px_2px_6px_rgba(0,0,0,0.12)]" />
       <div className="relative z-10 flex flex-1 flex-col p-[8%] pl-[34%]">
         <NameTitleBlock
@@ -99,9 +104,9 @@ function CohubBack({ data, theme, styles, compact, className, interactive, onLin
   );
 }
 
-function AusterlitzFront({ data, theme, styles, compact, className }: StudioProps) {
+function AusterlitzFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <FieldText data={data} fieldKey="company" className={cn("self-end font-semibold tracking-tight", tx(compact, "text-sm", "text-2xl"))}>
           {companyWord(data)}
@@ -115,17 +120,17 @@ function AusterlitzFront({ data, theme, styles, compact, className }: StudioProp
   );
 }
 
-function AusterlitzBack({ theme, styles, compact, className }: StudioProps) {
+function AusterlitzBack({ theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("p-0", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("p-0", className), forPrint)}>
       <BlueBlockPattern className="h-full w-full" />
     </div>
   );
 }
 
-function RocketFront({ data, theme, styles, compact, className }: StudioProps) {
+function RocketFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <OverlapSquares className="absolute -left-4 top-4 h-[55%] w-[45%] opacity-90" />
       <div className="relative z-10 flex flex-1 flex-col items-end justify-center p-[8%] text-right">
         <FieldText data={data} fieldKey="company" className={cn("font-bold uppercase tracking-[0.14em] text-[#2C3E50]", tx(compact, "text-[10px]", "text-base"))}>
@@ -146,9 +151,9 @@ function RocketFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function RocketBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function RocketBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <OverlapSquares className="absolute -right-3 bottom-3 h-[38%] w-[34%] opacity-80" />
       <div className="relative z-10 flex flex-1 flex-col justify-between p-[8%]">
         <NameTitleBlock
@@ -164,9 +169,9 @@ function RocketBack({ data, theme, styles, compact, className, interactive, onLi
   );
 }
 
-function BauhausFront({ data, theme, styles, compact, className }: StudioProps) {
+function BauhausFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-black text-white", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-black text-white", className), forPrint)}>
       <GeometricLineGrid className="absolute right-0 top-0 h-[48%] w-[42%] opacity-90" stroke="#FFFFFF" />
       <div className="absolute bottom-[10%] left-[8%] flex items-center gap-2">
         <span className={cn("grid place-items-center rounded-sm border border-white/80 font-bold uppercase", tx(compact, "size-6 text-[8px]", "size-8 text-[10px]"))}>
@@ -180,9 +185,9 @@ function BauhausFront({ data, theme, styles, compact, className }: StudioProps) 
   );
 }
 
-function BauhausBack({ data, theme, styles, compact, className }: StudioProps) {
+function BauhausBack({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-white text-black", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-white text-black", className), forPrint)}>
       <GeometricLineGrid className="absolute right-0 top-0 h-full w-[34%] opacity-80" stroke="#000000" />
       <div className="relative z-10 flex flex-1 flex-col justify-center gap-4 p-[8%]">
         <NameTitleBlock
@@ -208,9 +213,9 @@ function BauhausBack({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function GoldenWaveFront({ data, theme, styles, compact, className }: StudioProps) {
+function GoldenWaveFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <OrganicWave />
       <div className="relative z-10 flex flex-1 flex-col items-end justify-center gap-1 p-[8%] text-right">
         <div className={cn("grid place-items-center border-2 border-[#F5B800] bg-[#F5B800]/10", tx(compact, "size-8", "size-12"))}>
@@ -231,9 +236,9 @@ function GoldenWaveFront({ data, theme, styles, compact, className }: StudioProp
   );
 }
 
-function GoldenWaveBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function GoldenWaveBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <OrganicWave className="scale-x-[-1]" />
       <div className="relative z-10 flex flex-1 flex-col justify-between p-[8%]">
         <div className="flex flex-col gap-1.5">
@@ -251,10 +256,10 @@ function GoldenWaveBack({ data, theme, styles, compact, className, interactive, 
   );
 }
 
-function SarahFront({ data, theme, styles, compact, className }: StudioProps) {
+function SarahFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const first = data.name.split(/\s+/)[0] || data.name;
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="absolute right-0 top-0 h-full w-[52%] bg-[#8EBAFF]" style={{ borderRadius: "48% 42% 55% 45% / 50% 45% 55% 50%" }} />
       <div className="relative z-10 flex flex-1">
         <div className="flex w-[38%] items-end justify-center pb-[12%]">
@@ -273,9 +278,9 @@ function SarahFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function SarahBack({ data, theme, styles, compact, className }: StudioProps) {
+function SarahBack({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-[#8EBAFF]", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-[#8EBAFF]", className), forPrint)}>
       <div className="flex flex-1 flex-col p-[8%]">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
           <FieldText data={data} fieldKey="name" as="p" className={cn("font-bold leading-tight", tx(compact, "text-[10px]", "text-base"))}>
@@ -304,12 +309,12 @@ function SarahBack({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function FlorenceFront({ data, theme, styles, compact, className }: StudioProps) {
+function FlorenceFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const parts = data.name.trim().split(/\s+/);
   const first = parts.slice(0, -1).join(" ") || data.name;
   const last = parts.length > 1 ? `${parts.at(-1)}.` : "";
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-center gap-1 p-[8%] uppercase">
         <p className={cn("font-bold text-white mix-blend-difference", tx(compact, "text-[10px]", "text-sm"))}>Hi I&apos;m</p>
         <FieldText data={data} fieldKey="name" className={cn("font-bold", tx(compact, "text-xl", "text-4xl"))}>
@@ -324,9 +329,9 @@ function FlorenceFront({ data, theme, styles, compact, className }: StudioProps)
   );
 }
 
-function FlorenceBack({ data, theme, styles, compact, className }: StudioProps) {
+function FlorenceBack({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="uppercase tracking-[0.08em]" titleClassName="uppercase tracking-[0.2em]" />
         <div className="flex items-end justify-between gap-4">
@@ -346,9 +351,9 @@ function FlorenceBack({ data, theme, styles, compact, className }: StudioProps) 
   );
 }
 
-function AdventureFront({ data, theme, styles, compact, className }: StudioProps) {
+function AdventureFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="absolute right-0 top-0 h-full w-[42%] bg-[#D32F2F]">
         <svg viewBox="0 0 100 160" className="h-full w-full opacity-30" fill="none" aria-hidden>
           <path d="M10 10 H90 M10 50 H70 M30 90 H90 M10 130 H60" stroke="white" strokeWidth="1.2" />
@@ -372,9 +377,9 @@ function AdventureFront({ data, theme, styles, compact, className }: StudioProps
   );
 }
 
-function AdventureBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function AdventureBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="absolute right-0 top-0 h-full w-[28%] bg-[#D32F2F]/10">
         <svg viewBox="0 0 60 160" className="h-full w-full text-[#D32F2F]" fill="none" aria-hidden>
           <path d="M5 10 H55 M5 60 H40 M20 110 H55" stroke="currentColor" strokeWidth="1" />
@@ -396,10 +401,10 @@ function AdventureBack({ data, theme, styles, compact, className, interactive, o
   );
 }
 
-function PontoFront({ data, theme, styles, compact, className }: StudioProps) {
+function PontoFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const brand = companyWord(data).toLowerCase();
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <FieldText
         data={data}
         fieldKey="company"
@@ -418,9 +423,9 @@ function PontoFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function PontoBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function PontoBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} className="self-end text-right" />
         <LabeledContacts
@@ -435,9 +440,9 @@ function PontoBack({ data, theme, styles, compact, className, interactive, onLin
   );
 }
 
-function BusinessFront({ data, theme, styles, compact, className }: StudioProps) {
+function BusinessFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-black text-white", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-black text-white", className), forPrint)}>
       <GeometricLineGrid className="absolute left-0 top-0 h-[36%] w-[32%] opacity-70" stroke="#FFFFFF" />
       <GeometricLineGrid className="absolute bottom-0 right-0 h-[36%] w-[32%] opacity-70" stroke="#FFFFFF" />
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-2">
@@ -448,9 +453,9 @@ function BusinessFront({ data, theme, styles, compact, className }: StudioProps)
   );
 }
 
-function BusinessBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function BusinessBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-white text-black", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-white text-black", className), forPrint)}>
       <GeometricLineGrid className="absolute bottom-0 right-0 h-[42%] w-[36%] opacity-80" stroke="#000000" />
       <div className="relative z-10 flex flex-1 flex-col justify-between p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} className="self-end text-right uppercase" nameClassName="tracking-[0.08em]" titleClassName="tracking-[0.18em]" />
@@ -460,10 +465,10 @@ function BusinessBack({ data, theme, styles, compact, className, interactive, on
   );
 }
 
-function BillFront({ data, theme, styles, compact, className }: StudioProps) {
+function BillFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const word = companyWord(data).split(/\s+/)[0] || "Bill";
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#FFEF00] text-black", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#FFEF00] text-black", className), forPrint)}>
       <div className="flex flex-1 items-center justify-center p-[6%]">
         <p className={cn("font-black leading-none", tx(compact, "text-4xl", "text-7xl"))}>
           {word.charAt(0).toUpperCase()}
@@ -475,9 +480,9 @@ function BillFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function BillBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function BillBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-[#FFEF00] text-black", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-[#FFEF00] text-black", className), forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <div className="flex items-start justify-between gap-3">
           <svg viewBox="0 0 48 32" className={cn("shrink-0", tx(compact, "h-6 w-10", "h-10 w-16"))} aria-hidden>
@@ -502,10 +507,10 @@ function BillBack({ data, theme, styles, compact, className, interactive, onLink
   );
 }
 
-function RefreshFront({ data, theme, styles, compact, className }: StudioProps) {
+function RefreshFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const brand = companyWord(data).toLowerCase();
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#0040FF] text-white shadow-[10px_10px_0_rgba(0,0,0,0.45)]", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#0040FF] text-white shadow-[10px_10px_0_rgba(0,0,0,0.45)]", className), forPrint)}>
       <div className="flex flex-1 items-center justify-center">
         <p className={cn("relative font-black lowercase tracking-tight", tx(compact, "text-2xl", "text-5xl"))}>
           {brand.slice(0, 12)}
@@ -516,9 +521,9 @@ function RefreshFront({ data, theme, styles, compact, className }: StudioProps) 
   );
 }
 
-function RefreshBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function RefreshBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("text-[#0040FF] shadow-[10px_10px_0_rgba(0,0,0,0.35)]", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("text-[#0040FF] shadow-[10px_10px_0_rgba(0,0,0,0.35)]", className), forPrint)}>
       <div className="flex flex-1 flex-col p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="font-bold" />
         <span className="my-3 h-px w-full bg-[#0040FF]/80" />
@@ -534,10 +539,10 @@ function RefreshBack({ data, theme, styles, compact, className, interactive, onL
   );
 }
 
-function FloxFront({ data, theme, styles, compact, className }: StudioProps) {
+function FloxFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   const brand = companyWord(data).toUpperCase().slice(0, 4);
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#1E40FF]", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#1E40FF]", className), forPrint)}>
       <div className="flex flex-1 items-center justify-center p-[8%]">
         <p
           className={cn(
@@ -552,9 +557,9 @@ function FloxFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function FloxBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function FloxBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="absolute bottom-0 right-0 size-[45%] rounded-full bg-[#39FF14]/25 blur-2xl" />
       <div className={cn("relative z-10 flex flex-1 flex-col justify-between p-[8%] font-mono", tx(compact, "text-[6px]", "text-[9px]"))}>
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="font-bold" />
@@ -570,9 +575,9 @@ function FloxBack({ data, theme, styles, compact, className, interactive, onLink
   );
 }
 
-function HelloFront({ data, theme, styles, compact, className }: StudioProps) {
+function HelloFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#E31B23] text-white", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#E31B23] text-white", className), forPrint)}>
       <div className="flex flex-1 flex-col p-[8%]">
         <p className={cn("font-bold leading-none", tx(compact, "text-3xl", "text-6xl"))}>Hello.</p>
         <div className="mt-4 flex items-start gap-2">
@@ -590,9 +595,9 @@ function HelloFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function HelloBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function HelloBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("text-[#E31B23]", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("text-[#E31B23]", className), forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <div>
           <p className={cn("font-bold leading-none", tx(compact, "text-3xl", "text-6xl"))}>Hi!</p>
@@ -622,9 +627,9 @@ function HelloBack({ data, theme, styles, compact, className, interactive, onLin
   );
 }
 
-function ReviveFront({ data, theme, styles, compact, className }: StudioProps) {
+function ReviveFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#6B341F] text-white", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#6B341F] text-white", className), forPrint)}>
       <svg className="absolute left-[8%] top-[10%] h-[34%] w-[28%] opacity-95" viewBox="0 0 80 80" aria-hidden>
         <rect x="8" y="8" width="28" height="28" fill="white" />
         <rect x="24" y="24" width="28" height="28" fill="white" opacity="0.85" />
@@ -640,9 +645,9 @@ function ReviveFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function ReviveBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function ReviveBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%] text-[#6B341F]">
         <div className="flex items-start justify-between gap-3">
           <svg className={cn("shrink-0", tx(compact, "h-8 w-8", "h-12 w-12"))} viewBox="0 0 80 80" aria-hidden>
@@ -674,9 +679,9 @@ function ReviveBack({ data, theme, styles, compact, className, interactive, onLi
   );
 }
 
-function SouthernFront({ data, theme, styles, compact, className }: StudioProps) {
+function SouthernFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#6B7B5C] text-[#F5F0E6]", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#6B7B5C] text-[#F5F0E6]", className), forPrint)}>
       <div className="absolute inset-0 opacity-40">
         <svg viewBox="0 0 200 120" className="h-full w-full" fill="none" aria-hidden>
           <path d="M0 20 H80 M120 0 V60 M40 100 H160" stroke="currentColor" strokeWidth="0.8" />
@@ -696,9 +701,9 @@ function SouthernFront({ data, theme, styles, compact, className }: StudioProps)
   );
 }
 
-function SouthernBack({ data, theme, styles, compact, className }: StudioProps) {
+function SouthernBack({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-[#7A3B44] text-[#F5F0E6]", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-[#7A3B44] text-[#F5F0E6]", className), forPrint)}>
       <div className="absolute right-0 top-0 h-full w-[28%] bg-[#5E2E35]" />
       <div className="relative z-10 flex flex-1 flex-col justify-between p-[8%] pr-[34%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="font-serif italic" />
@@ -708,9 +713,9 @@ function SouthernBack({ data, theme, styles, compact, className }: StudioProps) 
   );
 }
 
-function SkildFront({ data, theme, styles, compact, className }: StudioProps) {
+function SkildFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#111111] text-white", className))}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#111111] text-white", className), forPrint)}>
       <div className="flex flex-1 flex-col items-center justify-center gap-2 p-[8%] text-center">
         <span className={cn("font-black uppercase tracking-[0.35em]", tx(compact, "text-lg", "text-3xl"))}>
           {companyWord(data).slice(0, 5).toUpperCase()}
@@ -723,9 +728,9 @@ function SkildFront({ data, theme, styles, compact, className }: StudioProps) {
   );
 }
 
-function SkildBack({ data, theme, styles, compact, className, interactive, onLinkClick }: StudioProps) {
+function SkildBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("bg-[#F4F4F4] text-black", className))}>
+    <div className={shell(styles, theme, compact, "back", cn("bg-[#F4F4F4] text-black", className), forPrint)}>
       <div className="flex flex-1 flex-col justify-between p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="uppercase tracking-[0.1em]" />
         <ContactList data={data} styles={styles} compact={compact} interactive={interactive} onLinkClick={onLinkClick} />
@@ -734,9 +739,9 @@ function SkildBack({ data, theme, styles, compact, className, interactive, onLin
   );
 }
 
-function FarmhouseFront({ data, theme, styles, compact, className }: StudioProps) {
+function FarmhouseFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "front", className)}>
+    <div className={shell(styles, theme, compact, "front", className, forPrint)}>
       <div className="absolute inset-x-0 top-0 h-[38%] bg-[#2F3E46]" />
       <div className="relative z-10 flex flex-1 flex-col justify-end gap-1.5 p-[8%]">
         <FieldText data={data} fieldKey="company" as="p" className={cn("font-serif italic leading-tight", tx(compact, "text-base", "text-2xl"))}>
@@ -750,9 +755,9 @@ function FarmhouseFront({ data, theme, styles, compact, className }: StudioProps
   );
 }
 
-function FarmhouseBack({ data, theme, styles, compact, className }: StudioProps) {
+function FarmhouseBack({ data, theme, styles, compact, className , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", className)}>
+    <div className={shell(styles, theme, compact, "back", className, forPrint)}>
       <div className="flex flex-1 flex-col justify-center gap-3 p-[8%]">
         <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="font-serif" />
         <LabeledContacts data={data} compact={compact} />
@@ -794,13 +799,15 @@ export function isStudioLayout(layout: CardLayout): boolean {
 }
 
 export function StudioCardFront(props: StudioProps) {
+  const forPrint = useCardPrintExport();
   const renderer = STUDIO_RENDERERS[props.theme.layout]?.front;
   if (!renderer) return null;
-  return <>{renderer(props)}</>;
+  return <>{renderer({ ...props, forPrint })}</>;
 }
 
 export function StudioCardBack(props: StudioProps) {
+  const forPrint = useCardPrintExport();
   const renderer = STUDIO_RENDERERS[props.theme.layout]?.back;
   if (!renderer) return null;
-  return <>{renderer(props)}</>;
+  return <>{renderer({ ...props, forPrint })}</>;
 }

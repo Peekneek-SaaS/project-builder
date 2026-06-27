@@ -116,8 +116,8 @@ export function PageEnter({ className, children, ...props }: MotionDivProps) {
 
   return (
     <motion.div
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={transition}
       className={cn(className)}
       {...props}

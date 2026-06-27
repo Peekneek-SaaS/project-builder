@@ -1,3 +1,5 @@
+"use client";
+
 import type { CardData } from "@/lib/card-data";
 import type { CardLayout, CardTheme } from "@/lib/card-themes";
 import { isFieldEnabled } from "@/lib/card-field-utils";
@@ -14,7 +16,7 @@ import {
   type LinkClickPayload,
 } from "@/features/builder/components/card-layouts";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
-import { layoutShell, tx } from "@/features/builder/components/card-layout-utils";
+import { useLayoutShell, tx } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
 
 function splitName(name: string) {
@@ -36,16 +38,6 @@ type JobBackProps = JobLayoutProps & {
   onLinkClick?: (payload: LinkClickPayload) => void;
 };
 
-function shell(
-  styles: ThemeStyleClasses,
-  theme: CardTheme,
-  compact: boolean | undefined,
-  side: "front" | "back",
-  className?: string,
-) {
-  return layoutShell(styles, theme, compact, side, className);
-}
-
 export function JobCardFront({
   data,
   theme,
@@ -53,6 +45,7 @@ export function JobCardFront({
   compact,
   className,
 }: JobLayoutProps) {
+  const shell = useLayoutShell();
   const layout = theme.layout;
   const box = shell(styles, theme, compact, "front", className);
 
@@ -675,6 +668,7 @@ export function JobCardBack({
   interactive = false,
   onLinkClick,
 }: JobBackProps) {
+  const shell = useLayoutShell();
   const layout = theme.layout;
   const box = shell(styles, theme, compact, "back", className);
 

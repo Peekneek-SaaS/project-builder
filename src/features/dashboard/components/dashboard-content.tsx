@@ -158,7 +158,7 @@ const DashboardContent = () => {
         </div>
       </FadeIn>
 
-      <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
+      <Stagger className="mt-6 grid gap-4 grid-cols-2 md:grid-cols-3">
         <StaggerItem>
           <Stat
             label="Total cards"

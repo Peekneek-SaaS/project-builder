@@ -1,3 +1,5 @@
+"use client";
+
 import type { CardData } from "@/lib/card-data";
 import type { CardLayout, CardTheme } from "@/lib/card-themes";
 import { isFieldEnabled } from "@/lib/card-field-utils";
@@ -13,7 +15,7 @@ import {
   ContactList,
   type LinkClickPayload,
 } from "@/features/builder/components/card-layouts";
-import { layoutShell, tx } from "@/features/builder/components/card-layout-utils";
+import { useLayoutShell, tx } from "@/features/builder/components/card-layout-utils";
 import {
   CirclePattern,
   DecorativeQrPlaceholder,
@@ -167,12 +169,13 @@ export function ModernCardFront({
   compact,
   className,
 }: ModernLayoutProps) {
+  const shell = useLayoutShell();
   const layout = theme.layout;
 
   switch (layout) {
     case "mod-rexora":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="max-w-[72%]">
               <NameTitleStack
@@ -221,7 +224,7 @@ export function ModernCardFront({
 
     case "mod-codai":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <CardWatermarkLogo
             data={data}
             theme={theme}
@@ -255,7 +258,7 @@ export function ModernCardFront({
 
     case "mod-rollux":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col p-[9%]">
             <div className="flex justify-end">
               <CardBrandMark
@@ -299,7 +302,7 @@ export function ModernCardFront({
     case "mod-taylor":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -323,7 +326,7 @@ export function ModernCardFront({
     case "mod-dentist":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -362,7 +365,7 @@ export function ModernCardFront({
 
     case "mod-vitvio":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="relative flex flex-1 flex-col p-[8%]">
             <div className="flex items-start justify-between gap-3">
               <div
@@ -426,7 +429,7 @@ export function ModernCardFront({
 
     case "mod-solara":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="flex items-start justify-between gap-3">
               <NameTitleStack
@@ -465,7 +468,7 @@ export function ModernCardFront({
 
     case "mod-solara-brand":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="flex items-center gap-2.5">
               <CardBrandMark
@@ -501,7 +504,7 @@ export function ModernCardFront({
 
     case "mod-zight":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="relative flex flex-1 flex-col justify-between p-[9%]">
             <CardBrandMark
               data={data}
@@ -536,7 +539,7 @@ export function ModernCardFront({
     case "mod-wedding":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -580,7 +583,7 @@ export function ModernCardFront({
     case "mod-cara":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -620,7 +623,7 @@ export function ModernCardFront({
 
     case "mod-alpha":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="relative flex flex-1 flex-col p-[8%]">
             <div className="flex items-start justify-between">
               <div>
@@ -679,7 +682,7 @@ export function ModernCardFront({
     case "mod-caleb":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -724,7 +727,7 @@ export function ModernCardFront({
     case "mod-naturopathy":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -772,7 +775,7 @@ export function ModernCardFront({
     case "mod-maya":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -804,7 +807,7 @@ export function ModernCardFront({
 
     case "mod-southern":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="absolute inset-y-0 right-0 w-[30%] bg-black/18" />
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute left-[70%] top-[10%] h-[80%] w-px bg-white/30" />
@@ -859,7 +862,7 @@ export function ModernCardFront({
 
     case "mod-riwo":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1">
             <div className="flex w-[36%] flex-col justify-between p-[8%]">
               <DecorativeQrPlaceholder className={cn(tx(compact, "h-11 w-11", "h-16 w-16"))} />
@@ -924,13 +927,14 @@ export function ModernCardBack({
   interactive,
   onLinkClick,
 }: ModernBackProps) {
+  const shell = useLayoutShell();
   const layout = theme.layout;
 
   switch (layout) {
     case "mod-rexora":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -962,7 +966,7 @@ export function ModernCardBack({
 
     case "mod-codai":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <CardWatermarkLogo
             data={data}
             theme={theme}
@@ -997,7 +1001,7 @@ export function ModernCardBack({
 
     case "mod-rollux":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <NameTitleStack
               data={data}
@@ -1033,7 +1037,7 @@ export function ModernCardBack({
 
     case "mod-taylor":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 items-end justify-between gap-6 p-[9%]">
             <div className="flex max-w-[48%] flex-col gap-0.5 text-left">
               <FieldText
@@ -1078,7 +1082,7 @@ export function ModernCardBack({
 
     case "mod-dentist":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div>
               <FieldText
@@ -1115,7 +1119,7 @@ export function ModernCardBack({
     case "mod-vitvio":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -1145,7 +1149,7 @@ export function ModernCardBack({
     case "mod-solara":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -1186,7 +1190,7 @@ export function ModernCardBack({
 
     case "mod-solara-brand":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -1244,7 +1248,7 @@ export function ModernCardBack({
     case "mod-zight":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -1267,7 +1271,7 @@ export function ModernCardBack({
 
     case "mod-wedding":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col p-[9%]">
             <div className="flex items-start gap-4">
               <span className={cn("font-serif font-bold leading-none", tx(compact, "text-[16px]", "text-3xl"))}>
@@ -1309,7 +1313,7 @@ export function ModernCardBack({
 
     case "mod-cara":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div
             aria-hidden
             className="absolute bottom-0 right-0 h-[44%] w-[40%] bg-[#4A5340]"
@@ -1386,7 +1390,7 @@ export function ModernCardBack({
     case "mod-alpha":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -1432,7 +1436,7 @@ export function ModernCardBack({
 
     case "mod-caleb":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <CardBrandWatermark
             data={data}
             theme={theme}
@@ -1481,7 +1485,7 @@ export function ModernCardBack({
 
     case "mod-naturopathy":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="relative flex flex-1 overflow-hidden">
             <div className="flex w-[64%] flex-col justify-between p-[9%]">
               <div>
@@ -1531,7 +1535,7 @@ export function ModernCardBack({
 
     case "mod-maya":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 p-[9%]">
             <div className="flex w-[58%] flex-col justify-between">
               <FieldText
@@ -1559,7 +1563,7 @@ export function ModernCardBack({
 
     case "mod-southern":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <CirclePattern className="opacity-[0.15]" color="white" />
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute left-[18%] top-[12%] h-[76%] w-px bg-white/28" />
@@ -1601,7 +1605,7 @@ export function ModernCardBack({
     case "mod-riwo":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,

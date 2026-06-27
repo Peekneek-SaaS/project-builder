@@ -68,6 +68,7 @@ export function ShareView({ cardId }: { cardId: string }) {
   );
   const [exportFront, setExportFront] = useState(true);
   const [exportBack, setExportBack] = useState(true);
+  const [exportRoundedCorners, setExportRoundedCorners] = useState(false);
   const [exportSidesInitialized, setExportSidesInitialized] = useState(false);
   const [embedFormat, setEmbedFormat] = useState<EmbedCodeFormat>("html");
 
@@ -348,6 +349,18 @@ export function ShareView({ cardId }: { cardId: string }) {
             />
             Back
           </label>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Corner
+          </p>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <Checkbox
+              checked={exportRoundedCorners}
+              onCheckedChange={(checked) =>
+                setExportRoundedCorners(checked === true)
+              }
+            />
+            Rounded
+          </label>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -414,6 +427,11 @@ export function ShareView({ cardId }: { cardId: string }) {
             / long-edge flip if your printer supports it.
           </li>
           <li>
+            <span className="font-medium text-foreground">Corners:</span> leave{" "}
+            <strong>rounded corners</strong> unchecked for square edges (best
+            for printing); check it to match the on-screen preview.
+          </li>
+          <li>
             <span className="font-medium text-foreground">Print shop:</span>{" "}
             send the PDF or PNG; files are exported at 6× resolution (~300 DPI).
           </li>
@@ -424,6 +442,7 @@ export function ShareView({ cardId }: { cardId: string }) {
         ref={cardExportRef}
         data={card.cardData}
         theme={theme}
+        roundedCorners={exportRoundedCorners}
       />
 
       <Tabs defaultValue="link" className="mt-8">

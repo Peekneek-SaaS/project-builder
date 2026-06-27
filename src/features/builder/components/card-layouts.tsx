@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CallIcon,
   Globe02Icon,
@@ -41,7 +43,7 @@ import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
-import { cardShellClasses } from "@/features/builder/components/card-layout-utils";
+import { useCardShellClasses } from "@/features/builder/components/card-layout-utils";
 import { usesInvertedCardSides } from "@/lib/card-side-inversion";
 import { cn } from "@/lib/utils";
 
@@ -147,9 +149,10 @@ export function CardFront({
   compact?: boolean;
   className?: string;
 }) {
+  const cardShell = useCardShellClasses();
   const sizeClass = getThemeSizeClasses(theme, compact);
 
-  const shell = cardShellClasses(styles, "front", className, sizeClass);
+  const shell = cardShell(styles, "front", className, sizeClass);
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);
@@ -435,9 +438,10 @@ export function CardBack({
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
 }) {
+  const cardShell = useCardShellClasses();
   const sizeClass = getThemeSizeClasses(theme, compact);
 
-  const shell = cardShellClasses(styles, "back", className, sizeClass);
+  const shell = cardShell(styles, "back", className, sizeClass);
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);

@@ -1,3 +1,5 @@
+"use client";
+
 import type { CardData } from "@/lib/card-data";
 import type { CardLayout, CardTheme } from "@/lib/card-themes";
 import { isFieldEnabled } from "@/lib/card-field-utils";
@@ -9,7 +11,7 @@ import {
 import { FieldText } from "@/features/builder/components/field-text";
 import { NameTitleStack } from "@/features/builder/components/card-name-title";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
-import { layoutShell, tx } from "@/features/builder/components/card-layout-utils";
+import { useLayoutShell, tx } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
 
 function PrismMark({ className }: { className?: string }) {
@@ -215,10 +217,12 @@ export function FreeCardFront({
   compact?: boolean;
   className?: string;
 }) {
+  const shell = useLayoutShell();
+
   switch (theme.layout) {
     case "free-serif-split":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 items-center justify-center p-8">
             <div className="flex flex-col items-center text-center">
               <FieldText
@@ -251,7 +255,7 @@ export function FreeCardFront({
     case "free-montreal-frame":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -286,7 +290,7 @@ export function FreeCardFront({
 
     case "free-prism-dark":
       return (
-        <div className={layoutShell(styles, theme, compact, "front", className)}>
+        <div className={shell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 items-center justify-center">
             {isFieldEnabled(data, "logo") && data.logoUrl ? (
               <img
@@ -323,10 +327,12 @@ export function FreeCardBack({
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
 }) {
+  const shell = useLayoutShell();
+
   switch (theme.layout) {
     case "free-serif-split":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1">
             <div className="flex w-1/2 flex-col items-end justify-center gap-1.5 border-r border-black/80 px-[8%] text-right">
               <NameTitleStack
@@ -353,7 +359,7 @@ export function FreeCardBack({
     case "free-montreal-frame":
       return (
         <div
-          className={layoutShell(
+          className={shell(
             styles,
             theme,
             compact,
@@ -367,7 +373,7 @@ export function FreeCardBack({
 
     case "free-prism-dark":
       return (
-        <div className={layoutShell(styles, theme, compact, "back", className)}>
+        <div className={shell(styles, theme, compact, "back", className)}>
           <div className="absolute left-[8%] top-[8%]">
             {isFieldEnabled(data, "logo") && data.logoUrl ? (
               <img
@@ -415,6 +421,7 @@ export function FreeCardBack({
               compact={compact}
               interactive={interactive}
               onLinkClick={onLinkClick}
+              className="text-end [&>a]:justify-end [&>div]:justify-end"
             />
           </div>
         </div>

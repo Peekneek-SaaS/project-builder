@@ -38,18 +38,19 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
         <SidebarProvider defaultOpen={defaultOpen}>
           <DashboardSidebar />
           <SidebarInset className="min-w-0">
-            <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background/80 px-4 backdrop-blur-md supports-backdrop-filter:bg-background/60 sm:px-6">
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <SidebarTrigger size="lg" />
+            <header className="sticky top-0 z-50 isolate flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4 sm:px-6">
+              <div className="relative z-50 flex min-w-0 flex-1 items-center gap-2">
+                <SidebarTrigger size="icon-lg" />
                 <Logo className="flex md:hidden" />
                 <DashboardCardSearch className="hidden md:flex" />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="relative z-50 flex items-center gap-2">
                 <ModeToggle />
                 <UserButton />
               </div>
             </header>
-            <div className="min-w-0 flex-1 overflow-x-hidden">
+            {/* <MobileExperienceBanner /> */}
+            <div className="relative z-0 min-w-0 flex-1 overflow-x-hidden">
               <PageEnter>{children}</PageEnter>
             </div>
           </SidebarInset>
