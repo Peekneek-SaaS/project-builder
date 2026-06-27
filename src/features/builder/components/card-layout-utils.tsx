@@ -13,6 +13,7 @@ export function tx(compact: boolean | undefined, sm: string, lg: string) {
 /** Shared outer chrome — single subtle edge + soft depth (no stacked ring). */
 export function cardShellChrome(isLight: boolean, forPrint?: boolean) {
   return cn(
+    "@container/card [container-type:size]",
     "relative flex flex-col overflow-hidden antialiased",
     forPrint ? "rounded-none" : "rounded-2xl",
     isLight

@@ -66,6 +66,7 @@ function ContactBlock({
   interactive,
   onLinkClick,
   className,
+  listClassName,
   align = "left",
 }: {
   data: CardData;
@@ -74,6 +75,7 @@ function ContactBlock({
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
   className?: string;
+  listClassName?: string;
   align?: "left" | "right";
 }) {
   return (
@@ -84,6 +86,7 @@ function ContactBlock({
         compact={compact}
         interactive={interactive}
         onLinkClick={onLinkClick}
+        className={listClassName}
       />
     </div>
   );
@@ -366,31 +369,15 @@ export function ModernCardFront({
     case "mod-vitvio":
       return (
         <div className={shell(styles, theme, compact, "front", className)}>
-          <div className="relative flex flex-1 flex-col p-[8%]">
+          <div className="relative flex flex-1 flex-col justify-between p-[8%]">
             <div className="flex items-start justify-between gap-3">
-              <div
-                className={cn(
-                  "rounded-[2px] bg-[#00D18B] px-2.5 py-2 text-black shadow-sm",
-                  tx(compact, "max-w-[58%]", "max-w-[52%]"),
-                )}
-              >
-                <FieldText
-                  data={data}
-                  fieldKey="name"
-                  className={cn("font-semibold leading-tight", tx(compact, "text-[7px]", "text-xs"))}
-                >
-                  {data.name}
-                </FieldText>
-                {isFieldEnabled(data, "title") && (
-                  <FieldText
-                    data={data}
-                    fieldKey="title"
-                    className={cn("mt-0.5 opacity-75", tx(compact, "text-[6px]", "text-[10px]"))}
-                  >
-                    {data.title}
-                  </FieldText>
-                )}
-              </div>
+              <NameTitleStack
+                data={data}
+                compact={compact}
+                styles={styles}
+                nameClassName={cn("font-semibold leading-tight", tx(compact, "text-[9px]", "text-sm"))}
+                titleClassName={cn("opacity-75", tx(compact, "text-[6px]", "text-[10px]"))}
+              />
               <div className="flex shrink-0 items-center gap-1.5">
                 <CardBrandMark
                   data={data}
@@ -486,48 +473,60 @@ export function ModernCardFront({
                 {data.company || companyWord(data)}
               </FieldText>
             </div>
-            {isFieldEnabled(data, "tagline") && (
+            {isFieldEnabled(data, "location") && data.location ? (
               <FieldText
                 data={data}
-                fieldKey="tagline"
+                fieldKey="location"
                 className={cn(
-                  "max-w-[68%] self-end text-right font-medium leading-snug",
+                  "max-w-[68%] self-end text-right font-medium leading-snug opacity-80",
                   tx(compact, "text-[6.5px]", "text-[11px]"),
                 )}
               >
-                {data.tagline}
+                {data.location}
               </FieldText>
-            )}
+            ) : null}
           </div>
         </div>
       );
 
     case "mod-zight":
       return (
-        <div className={shell(styles, theme, compact, "front", className)}>
-          <div className="relative flex flex-1 flex-col justify-between p-[9%]">
+        <div className={shell(styles, theme, compact, "front", cn("text-black", className))}>
+          <div className="relative flex flex-1 flex-col justify-between p-[9%] text-black">
             <CardBrandMark
               data={data}
               theme={theme}
               styles={styles}
               compact={compact}
               className={cn(
-                "absolute right-[9%] top-[9%]",
+                "absolute right-[9%] top-[9%] text-black",
                 tx(compact, "h-5 w-5", "h-7 w-7"),
               )}
             />
-            <FieldText
+            <NameTitleStack
               data={data}
-              fieldKey="name"
-              className={cn("font-medium", tx(compact, "text-[10px]", "text-base"))}
-            >
-              {data.name}
-            </FieldText>
-            <div className="flex items-end justify-between gap-4">
-              <ContactBlock data={data} styles={styles} compact={compact} className="opacity-90" />
+              compact={compact}
+              styles={styles}
+              nameClassName={cn(
+                "font-medium leading-tight text-black",
+                tx(compact, "text-[10px]", "text-base"),
+              )}
+              titleClassName={cn(
+                "mt-0.5 leading-tight text-black opacity-80",
+                tx(compact, "text-[7px]", "text-[11px]"),
+              )}
+            />
+            <div className="flex items-end justify-between gap-4 text-black">
+              <ContactBlock
+                data={data}
+                styles={styles}
+                compact={compact}
+                className="opacity-90"
+                listClassName="text-black [&_a]:text-black [&_svg]:text-black"
+              />
               <div
                 className={cn(
-                  "rounded-full bg-current",
+                  "rounded-full bg-black",
                   tx(compact, "mb-1 h-0.5 w-10", "mb-1.5 h-1 w-16"),
                 )}
               />
@@ -808,54 +807,21 @@ export function ModernCardFront({
     case "mod-southern":
       return (
         <div className={shell(styles, theme, compact, "front", className)}>
-          <div className="absolute inset-y-0 right-0 w-[30%] bg-black/18" />
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[70%] top-[10%] h-[80%] w-px bg-white/30" />
-            <div className="absolute left-[10%] top-[36%] h-px w-[60%] bg-white/22" />
-            <div className="absolute left-[70%] top-[36%] h-px w-[18%] bg-white/22" />
-            <div className="absolute left-[10%] top-[10%] h-[28%] w-px bg-white/22" />
-          </div>
-          <div className="relative flex flex-1">
-            <div className="flex w-[70%] flex-col justify-end p-[9%]">
-              <FieldText
-                data={data}
-                fieldKey="name"
-                className={cn("font-serif font-semibold", tx(compact, "text-[9px]", "text-sm"))}
-              >
-                {data.name}
-              </FieldText>
-              {isFieldEnabled(data, "title") && (
-                <FieldText
-                  data={data}
-                  fieldKey="title"
-                  className={cn("mt-1 opacity-75", tx(compact, "text-[6.5px]", "text-[10px]"))}
-                >
-                  {data.title}
-                </FieldText>
-              )}
-              <ContactBlock
-                data={data}
-                styles={styles}
-                compact={compact}
-                className="mt-3 opacity-80"
-              />
-            </div>
-            <div className="flex w-[30%] flex-col items-center justify-center px-[2%] text-center">
-              <CardBrandMark
-                data={data}
-                theme={theme}
-                styles={styles}
-                compact={compact}
-                className={cn("mb-2", tx(compact, "h-5 w-5", "h-8 w-8"))}
-              />
-              <FieldText
-                data={data}
-                fieldKey="company"
-                className={cn("font-medium lowercase", tx(compact, "text-[6px]", "text-[10px]"))}
-              >
-                {(data.company || companyWord(data)).toLowerCase()}
-              </FieldText>
-            </div>
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-[9%] text-center">
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              align="center"
+              nameClassName={cn("font-serif font-semibold", tx(compact, "text-[10px]", "text-base"))}
+              titleClassName={cn("opacity-75", tx(compact, "text-[7px]", "text-[11px]"))}
+            />
+            <ContactBlock
+              data={data}
+              styles={styles}
+              compact={compact}
+              className="opacity-85"
+            />
           </div>
         </div>
       );
@@ -863,50 +829,21 @@ export function ModernCardFront({
     case "mod-riwo":
       return (
         <div className={shell(styles, theme, compact, "front", className)}>
-          <div className="flex flex-1">
-            <div className="flex w-[36%] flex-col justify-between p-[8%]">
-              <DecorativeQrPlaceholder className={cn(tx(compact, "h-11 w-11", "h-16 w-16"))} />
-              <FieldText
-                data={data}
-                fieldKey="company"
-                className={cn("font-bold tracking-tight", tx(compact, "text-[10px]", "text-base"))}
-              >
-                {data.company || companyWord(data)}
-              </FieldText>
-            </div>
-            <div className="flex w-[64%] flex-col justify-between p-[8%] text-right">
-              {isFieldEnabled(data, "location") && (
-                <FieldText
-                  data={data}
-                  fieldKey="location"
-                  className={cn(
-                    "uppercase tracking-[0.12em] opacity-85",
-                    tx(compact, "text-[5px]", "text-[8px]"),
-                  )}
-                >
-                  {data.location}
-                </FieldText>
-              )}
-              <ContactBlock
-                data={data}
-                styles={styles}
-                compact={compact}
-                align="right"
-                className="uppercase tracking-[0.1em] opacity-85"
-              />
-              {isFieldEnabled(data, "tagline") && (
-                <FieldText
-                  data={data}
-                  fieldKey="tagline"
-                  className={cn(
-                    "leading-snug opacity-70",
-                    tx(compact, "text-[5px]", "text-[8px]"),
-                  )}
-                >
-                  {data.tagline}
-                </FieldText>
-              )}
-            </div>
+          <div className="flex flex-1 flex-col justify-between p-[8%]">
+            <ContactBlock
+              data={data}
+              styles={styles}
+              compact={compact}
+              align="right"
+              className="self-end uppercase tracking-[0.1em] opacity-90"
+            />
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              nameClassName={cn("font-bold leading-tight", tx(compact, "text-[10px]", "text-base"))}
+              titleClassName={cn("opacity-80", tx(compact, "text-[7px]", "text-[11px]"))}
+            />
           </div>
         </div>
       );
@@ -1002,16 +939,16 @@ export function ModernCardBack({
     case "mod-rollux":
       return (
         <div className={shell(styles, theme, compact, "back", className)}>
-          <div className="flex flex-1 flex-col justify-between p-[9%]">
+          <div className="flex flex-1 flex-col justify-between p-[9%] text-white">
             <NameTitleStack
               data={data}
               compact={compact}
               styles={styles}
               nameClassName={cn(
-                "font-medium tracking-wide opacity-30",
+                "font-medium tracking-wide text-white",
                 tx(compact, "text-[10px]", "text-base"),
               )}
-              titleClassName={cn("opacity-90", tx(compact, "text-[6.5px]", "text-[10px]"))}
+              titleClassName={cn("text-white/85", tx(compact, "text-[6.5px]", "text-[10px]"))}
             />
             <div className="flex items-end justify-between gap-4">
               <CardBrandMark
@@ -1028,7 +965,7 @@ export function ModernCardBack({
                 align="right"
                 interactive={interactive}
                 onLinkClick={onLinkClick}
-                className="opacity-90"
+                className="text-white/90"
               />
             </div>
           </div>
@@ -1127,7 +1064,7 @@ export function ModernCardBack({
             cn("items-center justify-center", className),
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center gap-2 px-[10%] text-center">
             <CardBrandMark
               data={data}
               theme={theme}
@@ -1193,24 +1130,13 @@ export function ModernCardBack({
         <div className={shell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 flex-col justify-between p-[9%]">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <FieldText
-                  data={data}
-                  fieldKey="name"
-                  className={cn("font-semibold", tx(compact, "text-[9px]", "text-sm"))}
-                >
-                  {data.name}
-                </FieldText>
-                {isFieldEnabled(data, "title") && (
-                  <FieldText
-                    data={data}
-                    fieldKey="title"
-                    className={cn("mt-1 opacity-70", tx(compact, "text-[6.5px]", "text-[10px]"))}
-                  >
-                    {data.title}
-                  </FieldText>
-                )}
-              </div>
+              <NameTitleStack
+                data={data}
+                compact={compact}
+                styles={styles}
+                nameClassName={cn("font-semibold leading-tight", tx(compact, "text-[9px]", "text-sm"))}
+                titleClassName={cn("opacity-70", tx(compact, "text-[6.5px]", "text-[10px]"))}
+              />
               <CardBrandMark
                 data={data}
                 theme={theme}
@@ -1219,28 +1145,14 @@ export function ModernCardBack({
                 className={cn(tx(compact, "h-5 w-5", "h-8 w-8"))}
               />
             </div>
-            <div className="flex items-end justify-between gap-4">
-              <ContactBlock
-                data={data}
-                styles={styles}
-                compact={compact}
-                interactive={interactive}
-                onLinkClick={onLinkClick}
-                className="opacity-90"
-              />
-              {isFieldEnabled(data, "location") && (
-                <FieldText
-                  data={data}
-                  fieldKey="location"
-                  className={cn(
-                    "max-w-[44%] text-right leading-snug opacity-70",
-                    tx(compact, "text-[5.5px]", "text-[9px]"),
-                  )}
-                >
-                  {data.location}
-                </FieldText>
-              )}
-            </div>
+            <ContactBlock
+              data={data}
+              styles={styles}
+              compact={compact}
+              interactive={interactive}
+              onLinkClick={onLinkClick}
+              className="opacity-90"
+            />
           </div>
         </div>
       );
@@ -1564,40 +1476,24 @@ export function ModernCardBack({
     case "mod-southern":
       return (
         <div className={shell(styles, theme, compact, "back", className)}>
-          <CirclePattern className="opacity-[0.15]" color="white" />
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[18%] top-[12%] h-[76%] w-px bg-white/28" />
-            <div className="absolute left-[18%] top-[12%] h-px w-[62%] bg-white/28" />
-            <div className="absolute left-[18%] bottom-[12%] h-px w-[48%] bg-white/28" />
-            <div className="absolute left-[18%] top-[12%] h-[22%] w-px bg-white/28" />
-          </div>
-          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-[12%] text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-[9%] text-center">
             <CardBrandMark
               data={data}
               theme={theme}
               styles={styles}
               compact={compact}
-              className={cn("mx-auto mb-3", tx(compact, "h-7 w-7", "h-11 w-11"))}
+              className={cn(tx(compact, "h-6 w-6", "h-9 w-9"))}
             />
             <FieldText
               data={data}
               fieldKey="company"
-              className={cn("font-medium lowercase", tx(compact, "text-[8px]", "text-sm"))}
+              className={cn(
+                "font-serif font-semibold lowercase",
+                tx(compact, "text-[11px]", "text-lg"),
+              )}
             >
               {(data.company || companyWord(data)).toLowerCase()}
             </FieldText>
-            {isFieldEnabled(data, "tagline") && (
-              <FieldText
-                data={data}
-                fieldKey="tagline"
-                className={cn(
-                  "mt-2 max-w-[90%] opacity-60",
-                  tx(compact, "text-[5.5px]", "text-[9px]"),
-                )}
-              >
-                {data.tagline}
-              </FieldText>
-            )}
           </div>
         </div>
       );

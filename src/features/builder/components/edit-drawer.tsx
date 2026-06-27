@@ -23,8 +23,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { CardData } from "@/lib/card-data";
 import {
+  CARD_FIELD_FONT_SIZES,
   type CardFieldKey,
   type CardFieldStyle,
   getFieldSettings,
@@ -108,7 +116,8 @@ export function EditCardPanel({
           supported={isSupported("logo")}
           onToggle={(enabled) => updateFieldStyle("logo", { enabled })}
           onStyleChange={(patch) => updateFieldStyle("logo", patch)}
-          showStyleControls={false}
+          showStyleControls
+          styleMode="logo"
         >
           {data.logoUrl ? (
             <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
@@ -298,59 +307,89 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function FieldStyleControls({
   settings,
   onChange,
+  styleMode = "text",
 }: {
   settings: CardFieldStyle;
   onChange: (patch: Partial<CardFieldStyle>) => void;
+  styleMode?: "text" | "logo";
 }) {
+  const fontSizeValue = settings.fontSize > 0 ? String(settings.fontSize) : "auto";
+
   return (
-    <div className="flex shrink-0 items-center gap-0.5">
-      <label
-        className="relative grid size-8 cursor-pointer place-items-center rounded-md border border-border hover:bg-muted"
-        title="Text color"
+    <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+      <Select
+        value={fontSizeValue}
+        onValueChange={(value) =>
+          onChange({ fontSize: value === "auto" ? 0 : Number(value) })
+        }
       >
-        <input
-          type="color"
-          value={settings.color || "#64748b"}
-          className="sr-only"
-          onChange={(e) => onChange({ color: e.target.value })}
-        />
-        <span
-          className={cn(
-            "size-4 rounded-full border border-border",
-            !settings.color && "bg-muted",
-          )}
-          style={
-            settings.color ? { backgroundColor: settings.color } : undefined
-          }
-        />
-      </label>
-      <Toggle
-        size="sm"
-        pressed={settings.bold}
-        onPressedChange={(pressed) => onChange({ bold: pressed })}
-        aria-label="Bold"
-        className="size-8 px-0"
-      >
-        <span className="text-xs font-bold">B</span>
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={settings.italic}
-        onPressedChange={(pressed) => onChange({ italic: pressed })}
-        aria-label="Italic"
-        className="size-8 px-0"
-      >
-        <span className="text-xs italic">I</span>
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={settings.uppercase}
-        onPressedChange={(pressed) => onChange({ uppercase: pressed })}
-        aria-label="Uppercase"
-        className="size-8 px-0"
-      >
-        <span className="text-[10px] font-medium">Aa</span>
-      </Toggle>
+        <SelectTrigger
+          size="sm"
+          className="h-8 w-[4.75rem] px-2 text-[11px]"
+          aria-label="Font size"
+        >
+          <SelectValue placeholder="Auto" />
+        </SelectTrigger>
+        <SelectContent align="end">
+          <SelectItem value="auto">Auto</SelectItem>
+          {CARD_FIELD_FONT_SIZES.map((size) => (
+            <SelectItem key={size} value={String(size)}>
+              {size}px
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {styleMode === "text" ? (
+        <>
+          <label
+            className="relative grid size-8 cursor-pointer place-items-center rounded-md border border-border hover:bg-muted"
+            title="Text color"
+          >
+            <input
+              type="color"
+              value={settings.color || "#64748b"}
+              className="sr-only"
+              onChange={(e) => onChange({ color: e.target.value })}
+            />
+            <span
+              className={cn(
+                "size-4 rounded-full border border-border",
+                !settings.color && "bg-muted",
+              )}
+              style={
+                settings.color ? { backgroundColor: settings.color } : undefined
+              }
+            />
+          </label>
+          <Toggle
+            size="sm"
+            pressed={settings.bold}
+            onPressedChange={(pressed) => onChange({ bold: pressed })}
+            aria-label="Bold"
+            className="size-8 px-0"
+          >
+            <span className="text-xs font-bold">B</span>
+          </Toggle>
+          <Toggle
+            size="sm"
+            pressed={settings.italic}
+            onPressedChange={(pressed) => onChange({ italic: pressed })}
+            aria-label="Italic"
+            className="size-8 px-0"
+          >
+            <span className="text-xs italic">I</span>
+          </Toggle>
+          <Toggle
+            size="sm"
+            pressed={settings.uppercase}
+            onPressedChange={(pressed) => onChange({ uppercase: pressed })}
+            aria-label="Uppercase"
+            className="size-8 px-0"
+          >
+            <span className="text-[10px] font-medium">Aa</span>
+          </Toggle>
+        </>
+      ) : null}
     </div>
   );
 }
@@ -364,6 +403,7 @@ function FieldRow({
   onToggle,
   onStyleChange,
   showStyleControls = true,
+  styleMode = "text",
 }: {
   fieldKey: CardFieldKey;
   label: string;
@@ -373,6 +413,7 @@ function FieldRow({
   onToggle: (enabled: boolean) => void;
   onStyleChange: (patch: Partial<CardFieldStyle>) => void;
   showStyleControls?: boolean;
+  styleMode?: "text" | "logo";
 }) {
   const settings = getFieldSettings(data, fieldKey);
 
@@ -401,7 +442,11 @@ function FieldRow({
           ) : null}
         </div>
         {showStyleControls && supported ? (
-          <FieldStyleControls settings={settings} onChange={onStyleChange} />
+          <FieldStyleControls
+            settings={settings}
+            onChange={onStyleChange}
+            styleMode={styleMode}
+          />
         ) : null}
       </div>
       {supported ? (

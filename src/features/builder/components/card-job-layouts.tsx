@@ -625,17 +625,10 @@ export function JobCardFront({
           <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
             <FieldText
               data={data}
-              fieldKey="name"
+              fieldKey="company"
               className={cn("font-bold uppercase", tx(compact, "text-[10px]", "text-lg"))}
             >
-              {data.name}
-            </FieldText>
-            <FieldText
-              data={data}
-              fieldKey="title"
-              className={tx(compact, "text-[8px]", "text-sm")}
-            >
-              {data.title}
+              {data.company || data.name}
             </FieldText>
             <span className={cn("mt-2 h-1 w-12 rounded-full", styles.accent)} />
           </div>
@@ -1127,7 +1120,6 @@ export function JobCardBack({
     case "job-zing-brand":
     case "job-terra-law":
     case "job-agency":
-    case "job-vibrant":
     case "job-hello-stack":
       return (
         <div className={box}>
@@ -1146,6 +1138,37 @@ export function JobCardBack({
             >
               {data.title}
             </FieldText>
+            <ContactList
+              data={data}
+              styles={styles}
+              compact={compact}
+              interactive={interactive}
+              onLinkClick={onLinkClick}
+            />
+          </div>
+        </div>
+      );
+
+    case "job-vibrant":
+      return (
+        <div className={box}>
+          <div className={cn("flex flex-1 flex-col justify-center p-5", tx(compact, "gap-3", "gap-5"))}>
+            <div className={cn("flex flex-col", tx(compact, "gap-0.5", "gap-1.5"))}>
+              <FieldText
+                data={data}
+                fieldKey="name"
+                className={cn("font-bold", tx(compact, "text-[10px]", "text-lg"))}
+              >
+                {data.name}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="title"
+                className={tx(compact, "text-[8px]", "text-sm")}
+              >
+                {data.title}
+              </FieldText>
+            </div>
             <ContactList
               data={data}
               styles={styles}

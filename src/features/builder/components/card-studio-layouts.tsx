@@ -508,12 +508,12 @@ function BillBack({ data, theme, styles, compact, className, interactive, onLink
 }
 
 function RefreshFront({ data, theme, styles, compact, className , forPrint }: StudioProps) {
-  const brand = companyWord(data).toLowerCase();
+  const word = companyWord(data).split(/\s+/)[0]?.toLowerCase() || "brand";
   return (
-    <div className={shell(styles, theme, compact, "front", cn("bg-[#0040FF] text-white shadow-[10px_10px_0_rgba(0,0,0,0.45)]", className), forPrint)}>
+    <div className={shell(styles, theme, compact, "front", cn("bg-[#0040FF] text-white", className), forPrint)}>
       <div className="flex flex-1 items-center justify-center">
         <p className={cn("relative font-black lowercase tracking-tight", tx(compact, "text-2xl", "text-5xl"))}>
-          {brand.slice(0, 12)}
+          {word}
           <span className={cn("absolute -right-3 -top-1", tx(compact, "text-[6px]", "text-[10px]"))}>TM</span>
         </p>
       </div>
@@ -523,9 +523,15 @@ function RefreshFront({ data, theme, styles, compact, className , forPrint }: St
 
 function RefreshBack({ data, theme, styles, compact, className, interactive, onLinkClick , forPrint }: StudioProps) {
   return (
-    <div className={shell(styles, theme, compact, "back", cn("text-[#0040FF] shadow-[10px_10px_0_rgba(0,0,0,0.35)]", className), forPrint)}>
+    <div className={shell(styles, theme, compact, "back", cn("text-[#0040FF]", className), forPrint)}>
       <div className="flex flex-1 flex-col p-[8%]">
-        <NameTitleBlock data={data} compact={compact} styles={styles} nameClassName="font-bold" />
+        <NameTitleBlock
+          data={data}
+          compact={compact}
+          styles={styles}
+          nameClassName={cn("font-bold leading-tight", tx(compact, "text-base", "text-3xl"))}
+          titleClassName={cn("mt-1 leading-tight", tx(compact, "text-[9px]", "text-lg"))}
+        />
         <span className="my-3 h-px w-full bg-[#0040FF]/80" />
         <ContactList
           data={data}

@@ -1,3 +1,5 @@
+"use client";
+
 import type { ElementType, ReactNode } from "react";
 
 import type { CardData } from "@/lib/card-data";
@@ -8,6 +10,7 @@ import {
   isFieldEnabled,
   type CardFieldKey,
 } from "@/lib/card-field-utils";
+import { cn } from "@/lib/utils";
 
 export function FieldText({
   data,
@@ -30,7 +33,10 @@ export function FieldText({
 
   return (
     <Component
-      className={getFieldClassName(settings, className)}
+      className={cn(
+        getFieldClassName(settings, className),
+        settings.fontSize > 0 && "min-w-0 max-w-full break-words",
+      )}
       style={getFieldInlineStyle(settings)}
     >
       {children}

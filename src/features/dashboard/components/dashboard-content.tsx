@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type MouseEvent } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,21 +16,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
-import { BusinessCard } from "@/features/builder/components/business-card";
-import { getCardBuilderLabel } from "@/lib/card-data";
+import { ThemePickerCardPreview } from "@/features/builder/components/theme-picker";
+import { getCardBuilderLabel, type CardDisplayMode } from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
-import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import { getTheme } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { useDashboardSearch } from "@/features/dashboard/context/dashboard-search-context";
 import type { AppRouter } from "@/trpc/routers/_app";
 import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
   BubblesIcon,
   Cancel01Icon,
   Chart03Icon,
   ClipboardIcon,
-  Clock01Icon,
   CreditCardNotFoundIcon,
   Delete02Icon,
   Edit02Icon,
@@ -227,7 +225,7 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <div className="grid  gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid  gap-3 grid-cols-1 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {visibleCards.map((card) => (
                 <CardTile
                   key={card.id}
@@ -342,18 +340,21 @@ function CardTile({
   selected: boolean;
   onSelectedChange: (checked: boolean) => void;
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [side, setSide] = useState<CardDisplayMode>("front");
 
   const theme = getTheme(card.themeId);
-  const styles = getThemeStyleClasses(theme.id);
-  const compactCardWidth = theme.orientation === "landscape" ? 148 : 100;
-  const compactCardHeight = theme.orientation === "landscape" ? 92 : 160;
   const builderHref = `/builder/${card.resumeId}?cards=${card.id}`;
   const shareHref = `/share/${card.id}`;
   const title = getCardBuilderLabel(card.cardData);
+
+  function showSide(next: CardDisplayMode, event: MouseEvent) {
+    event.stopPropagation();
+    setSide(next);
+  }
 
   const moveToTrash = useMutation(
     trpc.card.moveToTrash.mutationOptions({
@@ -373,61 +374,86 @@ function CardTile({
   return (
     <>
       <motion.div
-        className="group relative min-w-0 w-full overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg hover:shadow-black/5"
+        className="group relative min-w-0 w-full overflow-hidden rounded-xl border border-border bg-card transition-[border-color,box-shadow] duration-200 hover:border-primary hover:shadow-md hover:shadow-primary/10"
         whileHover={{ y: -2 }}
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Link href={shareHref} className="block">
-          <div className={cn("relative overflow-hidden", styles.frontSurface)}>
-            <div className="@container flex h-28 w-full items-center justify-center overflow-hidden sm:h-36 md:h-44">
-              <div
-                className="origin-center"
-                // style={{
-                //   transform: `scale(min(calc(100cqw / ${compactCardWidth}px), calc(100cqh / ${compactCardHeight}px)))`,
-                // }}
-              >
-                <BusinessCard
-                  data={card.cardData}
-                  theme={theme}
-                  displayMode="front"
-                  className="pointer-events-none shadow-none ring-0"
-                />
-              </div>
-            </div>
+        <div className="relative bg-muted/15 pb-11 pt-1 sm:pt-0">
+          <Link href={shareHref}>
+            <ThemePickerCardPreview
+              theme={theme}
+              previewData={card.cardData}
+              side={side}
+            />
+          </Link>
 
-            <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <div className="space-y-1 space-x-2 text-xs text-white/80">
-                <span className="flex items-center gap-1">
-                  <HugeiconsIcon icon={Clock01Icon} size={12} />
-                  Updated{" "}
-                  {formatDistanceToNow(card.updatedAt, { addSuffix: true })}
-                </span>
-              </div>
-            </div>
+          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
+            <button
+              type="button"
+              aria-label={`Show front of ${title}`}
+              aria-pressed={side === "front"}
+              onClick={(event) => showSide("front", event)}
+              className={cn(
+                "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+                side === "front"
+                  ? "border-primary/40 text-primary"
+                  : "border-border/80 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Show back of ${title}`}
+              aria-pressed={side === "back"}
+              onClick={(event) => showSide("back", event)}
+              className={cn(
+                "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+                side === "back"
+                  ? "border-primary/40 text-primary"
+                  : "border-border/80 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+            </button>
           </div>
-        </Link>
 
-        <div className="absolute top-2 right-2 z-10">
-          <Checkbox
-            checked={selected}
-            onCheckedChange={(value) => onSelectedChange(value === true)}
-            aria-label={`Select ${title}`}
-            className="border-primary"
-          />
+          {/* <div className="absolute top-2 right-2 z-10">
+            <Checkbox
+              checked={selected}
+              onCheckedChange={(value) => onSelectedChange(value === true)}
+              aria-label={`Select ${title}`}
+              className="border-primary bg-background/90 backdrop-blur-sm"
+            />
+          </div> */}
         </div>
 
-        <div className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:p-4">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{title}</p>
+        <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="min-w-0">
+            <span className="flex items-center gap-2">
+              {/* <Link
+              href={shareHref}
+              className="block truncate text-sm font-semibold hover:text-primary"
+              > */}
+              <Checkbox
+                checked={selected}
+                onCheckedChange={(value) => onSelectedChange(value === true)}
+                aria-label={`Select ${title}`}
+                className="border-border"
+              />
+              {title}
+              {/* </Link> */}
+            </span>
+
             <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-              <HugeiconsIcon icon={ViewIcon} size={14} />
+              <HugeiconsIcon icon={ViewIcon} size={13} className="shrink-0" />
               {card.viewCount.toLocaleString("en-US")} views
             </p>
           </div>
-          <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             <Badge
               className={cn(
-                "max-w-22 truncate px-1.5 text-[10px] sm:max-w-none sm:px-2 sm:text-xs",
+                "px-1.5 text-[10px] sm:text-xs",
                 card.published
                   ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
                   : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",

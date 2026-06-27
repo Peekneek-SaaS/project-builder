@@ -1,6 +1,6 @@
 import type { CardData } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
-import { isFieldEnabled } from "@/lib/card-field-utils";
+import { isFieldEnabled, getFieldSettings, getFieldInlineStyle, getLogoMarkSizeStyle } from "@/lib/card-field-utils";
 import {
   layoutHasBrandMark,
   ThemeBrandMark,
@@ -53,6 +53,8 @@ export function CardLogo({
 }) {
   if (!isFieldEnabled(data, "logo")) return null;
 
+  const logoSettings = getFieldSettings(data, "logo");
+  const logoSizeStyle = getLogoMarkSizeStyle(logoSettings.fontSize);
   const resolvedSize = compact ? "sm" : size;
   const dimension = logoHeights[resolvedSize];
 
@@ -61,27 +63,34 @@ export function CardLogo({
       <img
         src={data.logoUrl}
         alt={data.company || data.name}
-        className={cn("object-contain", dimension, className)}
+        className={cn("object-contain", !logoSizeStyle && dimension, className)}
+        style={logoSizeStyle}
       />
     );
   }
 
   const avatarSize =
-    resolvedSize === "sm"
-      ? "size-8 text-[9px]"
-      : resolvedSize === "lg" || resolvedSize === "watermark"
-        ? "size-16 text-lg"
-        : "size-12 text-sm";
+    logoSettings.fontSize > 0
+      ? undefined
+      : resolvedSize === "sm"
+        ? "size-8 text-[9px]"
+        : resolvedSize === "lg" || resolvedSize === "watermark"
+          ? "size-16 text-lg"
+          : "size-12 text-sm";
+
+  const initialsStyle = getFieldInlineStyle(logoSettings);
 
   return (
     <div
       className={cn(
         "grid shrink-0 place-items-center rounded-full font-semibold",
         avatarSize,
+        logoSettings.fontSize > 0 && "size-auto min-h-0 min-w-0 px-2 py-1",
         styles.accent,
         styles.initialsText,
         className,
       )}
+      style={initialsStyle}
     >
       {getInitials(data.name) || "?"}
     </div>

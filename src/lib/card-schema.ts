@@ -8,6 +8,7 @@ const cardFieldStyleSchema = z.object({
   uppercase: z.boolean(),
   bold: z.boolean(),
   italic: z.boolean(),
+  fontSize: z.number().int().min(0).max(24).optional().default(0),
 });
 
 const cardFieldSettingsSchema = z.object(

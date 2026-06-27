@@ -23,7 +23,13 @@ export type CardFieldStyle = {
   uppercase: boolean;
   bold: boolean;
   italic: boolean;
+  /** px; 0 = theme/layout default */
+  fontSize: number;
 };
+
+export const CARD_FIELD_FONT_SIZES = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24] as const;
+
+export type CardFieldFontSize = (typeof CARD_FIELD_FONT_SIZES)[number];
 
 export type CardFieldSettings = Record<CardFieldKey, CardFieldStyle>;
 
@@ -51,7 +57,29 @@ export function defaultFieldStyle(): CardFieldStyle {
     uppercase: false,
     bold: false,
     italic: false,
+    fontSize: 0,
   };
+}
+
+/** Caps user font size so text stays inside the card shell. */
+export function getFieldFontSizeCSSValue(fontSize: number): string {
+  return `min(${fontSize}px, 8.5cqw, 11cqh)`;
+}
+
+/** Caps logo mark dimensions relative to the card shell. */
+export function getLogoMarkSizeStyle(fontSize: number): CSSProperties | undefined {
+  if (fontSize <= 0) return undefined;
+  return {
+    maxHeight: `min(${fontSize * 2.5}px, 18cqh)`,
+    maxWidth: `min(${fontSize * 4}px, 32cqw)`,
+    width: "auto",
+    height: "auto",
+  };
+}
+
+export function normalizeFieldFontSize(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return 0;
+  return CARD_FIELD_FONT_SIZES.includes(value as CardFieldFontSize) ? value : 0;
 }
 
 export function createDefaultFieldSettings(): CardFieldSettings {
@@ -70,7 +98,11 @@ export function getFieldSettings(
   data: CardData,
   key: CardFieldKey,
 ): CardFieldStyle {
-  return data.fieldSettings?.[key] ?? defaultFieldStyle();
+  const settings = data.fieldSettings?.[key] ?? defaultFieldStyle();
+  return {
+    ...settings,
+    fontSize: normalizeFieldFontSize(settings.fontSize),
+  };
 }
 
 export function isFieldEnabled(data: CardData, key: CardFieldKey): boolean {
@@ -92,5 +124,10 @@ export function getFieldClassName(
 export function getFieldInlineStyle(
   settings: CardFieldStyle,
 ): CSSProperties | undefined {
-  return settings.color ? { color: settings.color } : undefined;
+  const style: CSSProperties = {};
+  if (settings.color) style.color = settings.color;
+  if (settings.fontSize > 0) {
+    style.fontSize = getFieldFontSizeCSSValue(settings.fontSize);
+  }
+  return Object.keys(style).length > 0 ? style : undefined;
 }

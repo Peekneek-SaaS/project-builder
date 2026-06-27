@@ -335,7 +335,9 @@ export function CardFront({
               {data.company}
             </FieldText>
           </div>
-          <div className={cn("absolute inset-x-8 bottom-6 h-px", styles.accent)} />
+          <div
+            className={cn("absolute inset-x-8 bottom-6 h-px", styles.accent)}
+          />
         </div>
       );
 
@@ -370,12 +372,26 @@ export function CardFront({
     case "arc-frame":
       return (
         <div className={shell}>
-          <div className={cn("pointer-events-none absolute -left-6 -top-6 size-24 rounded-full border-8 opacity-30", styles.accent)} />
-          <div className={cn("pointer-events-none absolute -bottom-8 -right-8 size-28 rounded-full border-8 opacity-30", styles.accent)} />
+          <div
+            className={cn(
+              "pointer-events-none absolute -left-6 -top-6 size-24 rounded-full border-8 opacity-30",
+              styles.accent,
+            )}
+          />
+          <div
+            className={cn(
+              "pointer-events-none absolute -bottom-8 -right-8 size-28 rounded-full border-8 opacity-30",
+              styles.accent,
+            )}
+          />
           <div className="relative flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <CardLogo data={data} styles={styles} compact={compact} />
             <BrandingName data={data} compact={compact} />
-            <BrandingTagline data={data} compact={compact} className="opacity-80" />
+            <BrandingTagline
+              data={data}
+              compact={compact}
+              className="opacity-80"
+            />
           </div>
         </div>
       );
@@ -407,7 +423,12 @@ export function CardFront({
             {!compact ? (
               <div className="flex gap-1.5">
                 <span className={cn("h-1 w-10 rounded-full", styles.accent)} />
-                <span className={cn("h-1 w-5 rounded-full opacity-50", styles.accentBarMuted)} />
+                <span
+                  className={cn(
+                    "h-1 w-5 rounded-full opacity-50",
+                    styles.accentBarMuted,
+                  )}
+                />
               </div>
             ) : null}
           </div>
@@ -541,14 +562,23 @@ export function CardBack({
     case "split-sidebar":
       return (
         <div className={cn(shell, "flex-row")}>
-          <div className={cn("flex w-[33%] flex-col items-center justify-center p-3", styles.accent, styles.initialsText)}>
+          <div
+            className={cn(
+              "flex w-[33%] flex-col items-center justify-center p-3",
+              styles.accent,
+              styles.initialsText,
+            )}
+          >
             <CardLogo data={data} styles={styles} compact />
             {isFieldEnabled(data, "company") && data.company ? (
               <FieldText
                 data={data}
                 fieldKey="company"
                 as="p"
-                className={cn("mt-2 text-center font-bold uppercase", compact ? "text-[6px]" : "text-[9px]")}
+                className={cn(
+                  "mt-2 text-center font-bold uppercase",
+                  compact ? "text-[6px]" : "text-[9px]",
+                )}
               >
                 {data.company.slice(0, 12)}
               </FieldText>
@@ -568,7 +598,10 @@ export function CardBack({
                 data={data}
                 fieldKey="title"
                 as="p"
-                className={cn(styles.subtext, compact ? "text-[8px]" : "text-xs")}
+                className={cn(
+                  styles.subtext,
+                  compact ? "text-[8px]" : "text-xs",
+                )}
               >
                 {data.title}
               </FieldText>
@@ -604,7 +637,10 @@ export function CardBack({
                 data={data}
                 fieldKey="name"
                 as="p"
-                className={cn("font-bold uppercase", compact ? "text-[9px]" : "text-sm")}
+                className={cn(
+                  "font-bold uppercase",
+                  compact ? "text-[9px]" : "text-sm",
+                )}
               >
                 {data.name}
               </FieldText>
@@ -617,7 +653,13 @@ export function CardBack({
                 {data.title}
               </FieldText>
             </div>
-            <div className={cn("space-y-0.5 text-right", compact ? "text-[7px]" : "text-[10px]", styles.subtext)}>
+            <div
+              className={cn(
+                "space-y-0.5 text-right",
+                compact ? "text-[7px]" : "text-[10px]",
+                styles.subtext,
+              )}
+            >
               {isFieldEnabled(data, "website") && data.website ? (
                 <FieldText data={data} fieldKey="website" as="p">
                   {data.website}
@@ -641,12 +683,20 @@ export function CardBack({
     case "band-header":
       return (
         <div className={shell}>
-          <div className={cn("border-b border-black/10 bg-white px-4 py-3", compact ? "py-2" : "py-4")}>
+          <div
+            className={cn(
+              "border-b border-black/10 bg-white px-4 py-3",
+              compact ? "py-2" : "py-4",
+            )}
+          >
             <FieldText
               data={data}
               fieldKey="name"
               as="p"
-              className={cn("font-bold uppercase text-slate-900", compact ? "text-[9px]" : "text-sm")}
+              className={cn(
+                "font-bold uppercase text-slate-900",
+                compact ? "text-[9px]" : "text-sm",
+              )}
             >
               {data.name}
             </FieldText>
@@ -654,7 +704,10 @@ export function CardBack({
               data={data}
               fieldKey="title"
               as="p"
-              className={cn("text-slate-600", compact ? "text-[7px]" : "text-xs")}
+              className={cn(
+                "text-slate-600",
+                compact ? "text-[7px]" : "text-xs",
+              )}
             >
               {data.title}
             </FieldText>
@@ -675,11 +728,7 @@ export function CardBack({
       return (
         <div className={shell}>
           <div className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2">
-            <CardWatermarkLogo
-              data={data}
-              theme={theme}
-              opacity={0.07}
-            />
+            <CardWatermarkLogo data={data} theme={theme} opacity={0.07} />
           </div>
           <div className="relative flex flex-1 flex-col justify-between p-4">
             <div>
@@ -687,7 +736,10 @@ export function CardBack({
                 data={data}
                 fieldKey="name"
                 as="p"
-                className={cn("font-semibold", compact ? "text-[10px]" : "text-base")}
+                className={cn(
+                  "font-semibold",
+                  compact ? "text-[10px]" : "text-base",
+                )}
               >
                 {data.name}
               </FieldText>
@@ -695,7 +747,11 @@ export function CardBack({
                 data={data}
                 fieldKey="title"
                 as="p"
-                className={cn("uppercase tracking-wide", styles.subtext, compact ? "text-[7px]" : "text-[10px]")}
+                className={cn(
+                  "uppercase tracking-wide",
+                  styles.subtext,
+                  compact ? "text-[7px]" : "text-[10px]",
+                )}
               >
                 {data.title}
               </FieldText>
@@ -714,7 +770,13 @@ export function CardBack({
     case "horizontal":
       return (
         <div className={cn(shell, "flex-row items-stretch")}>
-          <div className={cn("flex w-[35%] items-center justify-center p-3", styles.accent, styles.initialsText)}>
+          <div
+            className={cn(
+              "flex w-[35%] items-center justify-center p-3",
+              styles.accent,
+              styles.initialsText,
+            )}
+          >
             <CardLogo data={data} styles={styles} compact />
           </div>
           <div className="flex flex-1 flex-col justify-center gap-2 p-4">
@@ -723,7 +785,10 @@ export function CardBack({
                 data={data}
                 fieldKey="name"
                 as="p"
-                className={cn("font-bold uppercase tracking-wide", compact ? "text-[9px]" : "text-sm")}
+                className={cn(
+                  "font-bold uppercase tracking-wide",
+                  compact ? "text-[9px]" : "text-sm",
+                )}
               >
                 {data.name}
               </FieldText>
@@ -731,7 +796,11 @@ export function CardBack({
                 data={data}
                 fieldKey="title"
                 as="p"
-                className={cn("uppercase", styles.subtext, compact ? "text-[7px]" : "text-[10px]")}
+                className={cn(
+                  "uppercase",
+                  styles.subtext,
+                  compact ? "text-[7px]" : "text-[10px]",
+                )}
               >
                 {data.title}
               </FieldText>
@@ -785,7 +854,13 @@ export function CardBack({
               </FieldText>
             </div>
             <div className="flex items-end justify-between gap-4">
-              <div className={cn("space-y-0.5", compact ? "text-[7px]" : "text-[10px]", styles.subtext)}>
+              <div
+                className={cn(
+                  "space-y-0.5",
+                  compact ? "text-[7px]" : "text-[10px]",
+                  styles.subtext,
+                )}
+              >
                 {isFieldEnabled(data, "location") && data.location ? (
                   <FieldText data={data} fieldKey="location" as="p">
                     {data.location}
@@ -837,7 +912,10 @@ export function CardBack({
                 data={data}
                 fieldKey="name"
                 as="p"
-                className={cn("font-semibold", compact ? "text-[10px]" : "text-base")}
+                className={cn(
+                  "font-semibold",
+                  compact ? "text-[10px]" : "text-base",
+                )}
               >
                 {data.name}
               </FieldText>
@@ -889,7 +967,10 @@ export function CardBack({
                 data={data}
                 fieldKey="name"
                 as="p"
-                className={cn("font-bold uppercase", compact ? "text-[10px]" : "text-lg")}
+                className={cn(
+                  "font-bold uppercase",
+                  compact ? "text-[10px]" : "text-lg",
+                )}
               >
                 {data.name}
               </FieldText>
@@ -897,7 +978,10 @@ export function CardBack({
                 data={data}
                 fieldKey="title"
                 as="p"
-                className={cn(styles.subtext, compact ? "text-[8px]" : "text-xs")}
+                className={cn(
+                  styles.subtext,
+                  compact ? "text-[8px]" : "text-xs",
+                )}
               >
                 {data.title}
               </FieldText>
@@ -921,14 +1005,22 @@ export function CardBack({
     default:
       return (
         <div className={shell}>
-          <div className={cn("flex flex-1 flex-col", compact ? "gap-2 p-3" : "gap-4 p-6")}>
+          <div
+            className={cn(
+              "flex flex-1 flex-col",
+              compact ? "gap-2 p-3" : "gap-4 p-6",
+            )}
+          >
             <div className="flex items-start justify-between gap-2">
               <div>
                 <FieldText
                   data={data}
                   fieldKey="name"
                   as="h3"
-                  className={cn("font-semibold tracking-tight", compact ? "text-[11px]" : "text-xl")}
+                  className={cn(
+                    "font-semibold tracking-tight",
+                    compact ? "text-[11px]" : "text-xl",
+                  )}
                 >
                   {data.name}
                 </FieldText>
@@ -936,7 +1028,10 @@ export function CardBack({
                   data={data}
                   fieldKey="title"
                   as="p"
-                  className={cn(compact ? "text-[9px]" : "text-sm", styles.subtext)}
+                  className={cn(
+                    compact ? "text-[9px]" : "text-sm",
+                    styles.subtext,
+                  )}
                 >
                   {data.title}
                 </FieldText>
@@ -1008,7 +1103,13 @@ function BotanicalContactList({
   }
 
   return (
-    <div className={cn("grid gap-2", compact ? "text-[7px]" : "text-[10px]", styles.subtext)}>
+    <div
+      className={cn(
+        "grid gap-2",
+        compact ? "text-[7px]" : "text-[10px]",
+        styles.subtext,
+      )}
+    >
       {rows.map(([key, icon, value, label]) => {
         const href = getHref(key, value);
         const content = (
@@ -1073,16 +1174,14 @@ export function ContactList({
       ["phone", CallIcon, data.phone, "Phone"] as const,
       ["location", Location01Icon, data.location, "Location"] as const,
       ["website", Globe02Icon, data.website, "Website"] as const,
-    ] satisfies readonly [
-      keyof CardData,
-      IconSvgElement,
-      string,
-      string,
-    ][]
+    ] satisfies readonly [keyof CardData, IconSvgElement, string, string][]
   )
-    .filter(([key, , value]) =>
-      isFieldEnabled(data, key as "email" | "phone" | "location" | "website") &&
-      value,
+    .filter(
+      ([key, , value]) =>
+        isFieldEnabled(
+          data,
+          key as "email" | "phone" | "location" | "website",
+        ) && value,
     )
     .map(([key, icon, value, label]) => ({
       key: key as "email" | "phone" | "location" | "website",

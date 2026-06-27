@@ -430,7 +430,7 @@ function themeForPickerPreview(theme: CardTheme, isMobile: boolean): CardTheme {
   return { ...theme, size: targetSize };
 }
 
-function ThemePickerCardPreview({
+export function ThemePickerCardPreview({
   theme,
   previewData,
   side,
