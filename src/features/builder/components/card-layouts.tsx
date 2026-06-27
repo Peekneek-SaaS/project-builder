@@ -41,6 +41,7 @@ import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
+import { cardShellClasses } from "@/features/builder/components/card-layout-utils";
 import { usesInvertedCardSides } from "@/lib/card-side-inversion";
 import { cn } from "@/lib/utils";
 
@@ -148,14 +149,7 @@ export function CardFront({
 }) {
   const sizeClass = getThemeSizeClasses(theme, compact);
 
-  const shell = cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    styles.frontSurface,
-    styles.frontText,
-    styles.isLightFront && "ring-black/10",
-    className,
-    sizeClass,
-  );
+  const shell = cardShellClasses(styles, "front", className, sizeClass);
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);
@@ -290,7 +284,7 @@ export function CardFront({
       return (
         <div className={shell}>
           <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent" />
-          <div className="relative flex flex-1 items-center justify-center p-6">
+          <div className="relative flex flex-1 flex-col items-center justify-center gap-2 p-6">
             <CardBrandMark
               data={data}
               theme={theme}
@@ -298,6 +292,18 @@ export function CardFront({
               compact={compact}
               markSize={compact ? "sm" : "lg"}
             />
+            <FieldText
+              data={data}
+              fieldKey="company"
+              as="p"
+              className={cn(
+                "font-bold uppercase tracking-[0.18em]",
+                compact ? "text-[8px]" : "text-xs",
+                styles.frontText,
+              )}
+            >
+              {data.company}
+            </FieldText>
           </div>
         </div>
       );
@@ -313,33 +319,18 @@ export function CardFront({
               compact={compact}
               markSize={compact ? "sm" : "md"}
             />
-            <div>
-              <FieldText
-                data={data}
-                fieldKey="name"
-                as="p"
-                className={cn(
-                  "font-medium",
-                  compact ? "text-[10px]" : "text-base",
-                  styles.frontText,
-                )}
-              >
-                {data.name}
-              </FieldText>
-              <FieldText
-                data={data}
-                fieldKey="title"
-                as="p"
-                className={cn(
-                  "mt-1 uppercase tracking-[0.25em]",
-                  compact ? "text-[7px]" : "text-[10px]",
-                  styles.frontText,
-                  "opacity-90",
-                )}
-              >
-                {data.title}
-              </FieldText>
-            </div>
+            <FieldText
+              data={data}
+              fieldKey="company"
+              as="p"
+              className={cn(
+                "font-medium uppercase tracking-[0.2em]",
+                compact ? "text-[9px]" : "text-sm",
+                styles.frontText,
+              )}
+            >
+              {data.company}
+            </FieldText>
           </div>
           <div className={cn("absolute inset-x-8 bottom-6 h-px", styles.accent)} />
         </div>
@@ -357,16 +348,18 @@ export function CardFront({
               compact={compact}
               markSize={compact ? "sm" : "md"}
             />
-            <BrandingName
+            <FieldText
               data={data}
-              compact={compact}
-              className="tracking-[0.18em]"
-            />
-            <BrandingTagline
-              data={data}
-              compact={compact}
-              className="uppercase tracking-[0.22em] opacity-70"
-            />
+              fieldKey="company"
+              as="p"
+              className={cn(
+                "font-bold uppercase tracking-[0.18em]",
+                compact ? "text-[10px]" : "text-sm",
+                styles.frontText,
+              )}
+            >
+              {data.company}
+            </FieldText>
           </div>
         </div>
       );
@@ -444,14 +437,7 @@ export function CardBack({
 }) {
   const sizeClass = getThemeSizeClasses(theme, compact);
 
-  const shell = cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    styles.surface,
-    styles.text,
-    styles.isLightSurface && "ring-black/10",
-    className,
-    sizeClass,
-  );
+  const shell = cardShellClasses(styles, "back", className, sizeClass);
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);
@@ -801,6 +787,11 @@ export function CardBack({
                     {data.location}
                   </FieldText>
                 ) : null}
+                {isFieldEnabled(data, "website") && data.website ? (
+                  <FieldText data={data} fieldKey="website" as="p">
+                    {data.website}
+                  </FieldText>
+                ) : null}
               </div>
               <div
                 className={cn(
@@ -809,14 +800,14 @@ export function CardBack({
                   styles.subtext,
                 )}
               >
+                {isFieldEnabled(data, "phone") && data.phone ? (
+                  <FieldText data={data} fieldKey="phone" as="p">
+                    {data.phone}
+                  </FieldText>
+                ) : null}
                 {isFieldEnabled(data, "email") && data.email ? (
                   <FieldText data={data} fieldKey="email" as="p">
                     {data.email}
-                  </FieldText>
-                ) : null}
-                {isFieldEnabled(data, "website") && data.website ? (
-                  <FieldText data={data} fieldKey="website" as="p">
-                    {data.website}
                   </FieldText>
                 ) : null}
               </div>
@@ -888,8 +879,8 @@ export function CardBack({
               className={styles.text}
             />
           </div>
-          <div className="flex flex-1 flex-col justify-center gap-2 p-4">
-            <div>
+          <div className="flex flex-1 flex-col justify-center gap-5 p-4">
+            <div className="flex flex-col gap-1.5">
               <FieldText
                 data={data}
                 fieldKey="name"
@@ -992,8 +983,9 @@ function BotanicalContactList({
       ["phone", CallIcon, data.phone, "Phone"] as const,
       ["email", Mail01Icon, data.email, "Email"] as const,
       ["website", Globe02Icon, data.website, "Website"] as const,
+      ["location", Location01Icon, data.location, "Address"] as const,
     ] satisfies readonly [
-      "phone" | "email" | "website",
+      "phone" | "email" | "website" | "location",
       IconSvgElement,
       string,
       string,
@@ -1062,12 +1054,14 @@ export function ContactList({
   compact,
   interactive = false,
   onLinkClick,
+  className,
 }: {
   data: CardData;
   styles: ThemeStyleClasses;
   compact?: boolean;
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
+  className?: string;
 }) {
   const rows = (
     [
@@ -1105,7 +1099,14 @@ export function ContactList({
   }
 
   return (
-    <div className={cn("grid gap-1.5", compact ? "text-[8px]" : "text-sm", styles.subtext)}>
+    <div
+      className={cn(
+        "grid gap-1.5",
+        compact ? "text-[8px]" : "text-sm",
+        styles.subtext,
+        className,
+      )}
+    >
       {rows.map(({ key, icon, value, label }) => {
         const href = getHref(key, value);
         const content = (

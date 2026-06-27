@@ -10,6 +10,12 @@ type CardPreviewScalerProps = {
   minHeightClass?: string;
   /** Single card side — fills the preview with tighter padding. */
   variant?: "default" | "single";
+  /** How to compute scale. `fillWidth` grows cards to use horizontal space (public share). */
+  fitMode?: "contain" | "fillWidth";
+  /** Upper bound when scaling up (fillWidth). */
+  maxScale?: number;
+  padding?: number;
+  clipContent?: boolean;
 };
 
 type Layout = {
@@ -26,12 +32,16 @@ export function CardPreviewScaler({
   className,
   minHeightClass = "min-h-[min(640px,calc(100vh-14rem))]",
   variant = "default",
+  fitMode = "contain",
+  maxScale,
+  padding: paddingProp,
+  clipContent = true,
 }: CardPreviewScalerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState<Layout | null>(null);
 
-  const padding = variant === "single" ? 12 : 20;
+  const padding = paddingProp ?? (variant === "single" ? 12 : 20);
 
   function computeScale(
     container: HTMLElement,
@@ -40,13 +50,22 @@ export function CardPreviewScaler({
   ) {
     const availableWidth = Math.max(0, container.clientWidth - padding * 2);
     const availableHeight = Math.max(0, container.clientHeight - padding * 2);
-    if (availableWidth <= 0 || availableHeight <= 0) return 1;
+    if (availableWidth <= 0 || naturalHeight <= 0) return 1;
 
-    const scale = Math.min(
-      availableWidth / naturalWidth,
-      availableHeight / naturalHeight,
-    );
-    return Number.isFinite(scale) && scale > 0 ? scale : 1;
+    const widthScale = availableWidth / naturalWidth;
+    const heightScale =
+      availableHeight > 0 ? availableHeight / naturalHeight : widthScale;
+
+    const scale =
+      fitMode === "fillWidth"
+        ? widthScale
+        : Math.min(widthScale, heightScale);
+
+    let clamped = Math.max(scale, 0.5);
+    if (maxScale !== undefined) {
+      clamped = Math.min(clamped, maxScale);
+    }
+    return Number.isFinite(clamped) && clamped > 0 ? clamped : 1;
   }
 
   // Re-measure when card content changes.
@@ -100,7 +119,7 @@ export function CardPreviewScaler({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [layout, children, variant, padding]);
+  }, [layout, children, variant, padding, fitMode, maxScale]);
 
   const scaledWidth = layout ? layout.naturalWidth * layout.scale : 0;
   const scaledHeight = layout ? layout.naturalHeight * layout.scale : 0;
@@ -125,10 +144,14 @@ export function CardPreviewScaler({
       {/* Visible scaled card — centered by grid once dimensions are known */}
       {layout ? (
         <div
-          className="shrink-0 overflow-hidden"
+          className={cn(
+            "shrink-0 rounded-2xl",
+            clipContent ? "overflow-hidden" : "overflow-visible",
+          )}
           style={{ width: scaledWidth, height: scaledHeight }}
         >
           <div
+            className="rounded-2xl"
             style={{
               width: layout.naturalWidth,
               height: layout.naturalHeight,

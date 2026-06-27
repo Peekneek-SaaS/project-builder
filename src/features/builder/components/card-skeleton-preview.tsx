@@ -5,6 +5,7 @@ import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
+import { cardShellClasses } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
 import {
   CardBrandMark,
@@ -66,14 +67,7 @@ export function CardFrontSkeleton({
   className?: string;
 }) {
   const sizeClass = getThemeSizeClasses(theme, false);
-  const shell = cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    styles.frontSurface,
-    styles.frontText,
-    styles.isLightFront && "ring-black/10",
-    className,
-    sizeClass,
-  );
+  const shell = cardShellClasses(styles, "front", className, sizeClass);
 
   if (
     isJobLayout(theme.layout) ||
@@ -240,14 +234,7 @@ export function CardBackSkeleton({
   className?: string;
 }) {
   const sizeClass = getThemeSizeClasses(theme, false);
-  const shell = cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    styles.surface,
-    styles.text,
-    styles.isLightSurface && "ring-black/10",
-    className,
-    sizeClass,
-  );
+  const shell = cardShellClasses(styles, "back", className, sizeClass);
 
   if (
     isJobLayout(theme.layout) ||
@@ -504,6 +491,7 @@ export function skeletonPreviewData(name: string): CardData {
     location: "",
     website: "",
     bio: "",
+    experience: "",
     skills: [],
     links: [],
     fieldSettings: createDefaultFieldSettings(),

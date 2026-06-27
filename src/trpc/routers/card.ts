@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { extractedCardDataSchema } from "@/features/create/types";
+import { parseExtractedCardData } from "@/features/create/types";
 import {
   cloneCardData,
   extractedToCardData,
@@ -163,7 +163,7 @@ export const cardRouter = createTRPCRouter({
         });
       }
 
-      const extracted = extractedCardDataSchema.parse(resume.extractedData);
+      const extracted = parseExtractedCardData(resume.extractedData);
       const baseData = extractedToCardData(extracted);
       const cardSetId = crypto.randomUUID();
 

@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
 import { CardExportSurface } from "@/features/share/components/card-export-surface";
+import { ShareProfileEditor } from "@/features/share/components/share-profile-editor";
 import { getCardBuilderLabel, type CardDisplayMode } from "@/lib/card-data";
 import { ShareQrCode } from "@/features/share/components/share-qr-code";
 import { downloadCard, type CardDownloadFormat } from "@/lib/card-export";
@@ -300,7 +301,7 @@ export function ShareView({ cardId }: { cardId: string }) {
           </div>
         ) : null}
         <CardPreviewScaler
-          className="min-w-0 max-w-full rounded-xl border border-border dark:bg-white"
+          className="min-w-0 max-w-full rounded-xl border border-border"
           minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[min(480px,55vh)]"
         >
           <BusinessCard
@@ -312,6 +313,8 @@ export function ShareView({ cardId }: { cardId: string }) {
           />
         </CardPreviewScaler>
       </div>
+
+      <ShareProfileEditor cardId={card.id} cardData={card.cardData} />
 
       <section className="mt-8 rounded-xl border border-border bg-card p-5 sm:p-6">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">

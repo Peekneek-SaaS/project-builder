@@ -123,7 +123,7 @@ export const cardThemes: CardTheme[] = [
     category: "free",
     preview: {
       layout: "typography",
-      fields: ["name", "divider"],
+      fields: ["name", "title", "divider"],
     },
     layout: "free-serif-split",
     orientation: "landscape",

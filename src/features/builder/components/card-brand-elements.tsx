@@ -27,6 +27,17 @@ export function getInitials(name: string) {
     .toUpperCase();
 }
 
+/** First letter of every name word — used for Serif Monogram front. */
+export function getMonogramInitials(name: string, lowercase = true) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0] ?? "")
+    .join("");
+
+  return lowercase ? initials.toLowerCase() : initials.toUpperCase();
+}
+
 export function CardLogo({
   data,
   styles,

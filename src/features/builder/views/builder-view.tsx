@@ -289,9 +289,10 @@ export default function BuilderView() {
       website: data.website || fallbackPreview.website,
       tagline: data.tagline || fallbackPreview.tagline,
       logoUrl: data.logoUrl || fallbackPreview.logoUrl,
-      bio: "",
-      skills: [],
-      links: [],
+      bio: data.bio,
+      experience: data.experience,
+      skills: data.skills,
+      links: data.links,
       fieldSettings: data.fieldSettings,
     };
   }

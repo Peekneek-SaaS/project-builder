@@ -62,9 +62,11 @@ const CreateForm = ({ className }: { className: string }) => {
     trpc.resume.createBlank.mutationOptions(),
   );
   const createCards = useMutation(trpc.card.createBatch.mutationOptions());
-  const { data: resumeHistory = [], isLoading: historyLoading } = useQuery(
-    trpc.resume.list.queryOptions(),
-  );
+  const {
+    data: resumeHistory = [],
+    isLoading: historyLoading,
+    isError: historyError,
+  } = useQuery(trpc.resume.list.queryOptions());
   const uploadErrorRef = useRef<string | null>(null);
   const { startUpload, isUploading } = useUploadThing("resumeUploader", {
     onUploadError: (error) => {
@@ -311,6 +313,7 @@ const CreateForm = ({ className }: { className: string }) => {
               fromHistory={fromHistory}
               resumeHistory={resumeHistory}
               historyLoading={historyLoading}
+              historyError={historyError}
               selectedHistory={selectedHistory}
               onSelectHistory={handleSelectHistory}
               onFile={handleFile}
@@ -392,6 +395,7 @@ function StepUpload({
   fromHistory,
   resumeHistory,
   historyLoading,
+  historyError,
   selectedHistory,
   onSelectHistory,
   onFile,
@@ -406,6 +410,7 @@ function StepUpload({
   fromHistory: boolean;
   resumeHistory: ResumeHistoryItem[];
   historyLoading: boolean;
+  historyError: boolean;
   selectedHistory: ResumeHistoryItem | null;
   onSelectHistory: (resume: ResumeHistoryItem | null) => void;
   onFile: (file: File) => void;
@@ -488,7 +493,9 @@ function StepUpload({
               const resume = resumeHistory.find((item) => item.id === id);
               if (resume) onSelectHistory(resume);
             }}
-            disabled={historyLoading || resumeHistory.length === 0}
+            disabled={
+              historyLoading || historyError || resumeHistory.length === 0
+            }
           >
             <SelectTrigger
               className="h-10 w-full text-sm data-[size=default]:h-10"
@@ -496,11 +503,22 @@ function StepUpload({
             >
               <SelectValue
                 placeholder={
-                  historyLoading
-                    ? "Loading saved resumes…"
-                    : resumeHistory.length === 0
-                      ? "No saved resumes yet"
-                      : "Select from previous history"
+                  historyLoading ? (
+                    <span className="flex items-center gap-1">
+                      <HugeiconsIcon
+                        icon={Loading03Icon}
+                        className="animate-spin"
+                        size={18}
+                      />
+                      Loading saved resumes
+                    </span>
+                  ) : historyError ? (
+                    "Could not load saved resumes"
+                  ) : resumeHistory.length === 0 ? (
+                    "No saved resumes yet"
+                  ) : (
+                    "Select from previous history"
+                  )
                 }
               />
             </SelectTrigger>
@@ -517,7 +535,9 @@ function StepUpload({
                 >
                   <span className="flex min-w-0 flex-col gap-0.5 pr-4">
                     <span className="truncate font-medium">
-                      {item.extractedData.name.trim()}
+                      {item.extractedData.name.trim() ||
+                        item.extractedData.title.trim() ||
+                        item.fileName}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
                       {item.fileName}
@@ -527,6 +547,11 @@ function StepUpload({
               ))}
             </SelectContent>
           </Select>
+          {historyError ? (
+            <p className="text-center text-xs text-destructive">
+              Saved resumes failed to load. Upload again or refresh the page.
+            </p>
+          ) : null}
         </>
       ) : (
         <ResumeExtractedPanel

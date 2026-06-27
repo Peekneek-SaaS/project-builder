@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import {
-  extractedCardDataSchema,
+  parseExtractedCardData,
   type ExtractedCardData,
 } from "@/features/create/types";
 import { prisma } from "@/lib/db";
@@ -19,6 +19,9 @@ const blankExtractedData = {
   location: "",
   company: "",
   website: "",
+  aboutYou: "",
+  experience: "",
+  skills: [],
 } satisfies ExtractedCardData;
 
 const parseResumeInput = z.object({
@@ -138,7 +141,7 @@ export const resumeRouter = createTRPCRouter({
         id: resume.id,
         fileName: resume.fileName,
         fileUrl: resume.fileUrl,
-        extractedData: extractedCardDataSchema.parse(resume.extractedData),
+        extractedData: parseExtractedCardData(resume.extractedData),
       };
     }),
 
@@ -165,7 +168,7 @@ export const resumeRouter = createTRPCRouter({
     return resumes
       .map((resume) => ({
         ...resume,
-        extractedData: extractedCardDataSchema.parse(
+        extractedData: parseExtractedCardData(
           resume.extractedData,
         ) satisfies ExtractedCardData,
       }))

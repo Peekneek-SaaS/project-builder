@@ -20,7 +20,7 @@ import {
   websiteDisplay,
 } from "@/features/builder/components/card-studio-shared";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
-import { getThemeSizeClasses } from "@/lib/card-theme-utils";
+import { layoutShell } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
 
 type StudioProps = {
@@ -40,17 +40,7 @@ function shell(
   side: "front" | "back",
   className?: string,
 ) {
-  const surface = side === "front" ? styles.frontSurface : styles.surface;
-  const text = side === "front" ? styles.frontText : styles.text;
-  const isLight = side === "front" ? styles.isLightFront : styles.isLightSurface;
-  return cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    surface,
-    text,
-    isLight && "ring-black/10",
-    getThemeSizeClasses(theme, compact),
-    className,
-  );
+  return layoutShell(styles, theme, compact, side, className);
 }
 
 function CohubFront({ data, theme, styles, compact, className }: StudioProps) {
@@ -406,12 +396,20 @@ function AdventureBack({ data, theme, styles, compact, className, interactive, o
   );
 }
 
-function PontoFront({ theme, styles, compact, className }: StudioProps) {
+function PontoFront({ data, theme, styles, compact, className }: StudioProps) {
+  const brand = companyWord(data).toLowerCase();
   return (
     <div className={shell(styles, theme, compact, "front", className)}>
-      <p className={cn("absolute left-[8%] top-[10%] font-bold lowercase", tx(compact, "text-sm", "text-xl"))}>
-        ponto
-      </p>
+      <FieldText
+        data={data}
+        fieldKey="company"
+        className={cn(
+          "absolute left-[8%] top-[10%] font-bold lowercase",
+          tx(compact, "text-sm", "text-xl"),
+        )}
+      >
+        {brand}
+      </FieldText>
       <div
         className="absolute left-1/2 top-1/2 h-[42%] w-[38%] -translate-x-1/2 -translate-y-1/2 bg-[#2E5BFF]"
         style={{ borderRadius: "46% 54% 42% 58% / 58% 42% 58% 42%" }}

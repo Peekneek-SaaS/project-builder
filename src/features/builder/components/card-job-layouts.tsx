@@ -14,12 +14,8 @@ import {
   type LinkClickPayload,
 } from "@/features/builder/components/card-layouts";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
-import { getThemeSizeClasses } from "@/lib/card-theme-utils";
+import { layoutShell, tx } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
-
-function tx(compact: boolean | undefined, sm: string, lg: string) {
-  return compact ? sm : lg;
-}
 
 function splitName(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -47,17 +43,7 @@ function shell(
   side: "front" | "back",
   className?: string,
 ) {
-  const isFront = side === "front";
-  return cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5 antialiased",
-    isFront ? styles.frontSurface : styles.surface,
-    isFront ? styles.frontText : styles.text,
-    isFront
-      ? styles.isLightFront && "ring-black/10"
-      : styles.isLightSurface && "ring-black/10",
-    className,
-    getThemeSizeClasses(theme, compact),
-  );
+  return layoutShell(styles, theme, compact, side, className);
 }
 
 export function JobCardFront({

@@ -7,6 +7,34 @@ export function tx(compact: boolean | undefined, sm: string, lg: string) {
   return compact ? sm : lg;
 }
 
+/** Shared outer chrome — single subtle edge + soft depth (no stacked ring). */
+export function cardShellChrome(isLight: boolean) {
+  return cn(
+    "relative flex flex-col overflow-hidden rounded-2xl antialiased",
+    isLight
+      ? "border border-black/[0.07] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.04),0_12px_28px_-10px_rgba(0,0,0,0.07)]"
+      : "border border-white/[0.09] shadow-[0_1px_1px_rgba(0,0,0,0.28),0_10px_28px_-8px_rgba(0,0,0,0.55)]",
+  );
+}
+
+export function cardShellClasses(
+  styles: ThemeStyleClasses,
+  side: "front" | "back",
+  className?: string,
+  sizeClass?: string,
+) {
+  const isFront = side === "front";
+  const isLight = isFront ? styles.isLightFront : styles.isLightSurface;
+
+  return cn(
+    cardShellChrome(isLight),
+    isFront ? styles.frontSurface : styles.surface,
+    isFront ? styles.frontText : styles.text,
+    className,
+    sizeClass,
+  );
+}
+
 export function layoutShell(
   styles: ThemeStyleClasses,
   theme: CardTheme,
@@ -14,14 +42,9 @@ export function layoutShell(
   side: "front" | "back",
   className?: string,
 ) {
-  const isFront = side === "front";
-  return cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5 antialiased",
-    isFront ? styles.frontSurface : styles.surface,
-    isFront ? styles.frontText : styles.text,
-    isFront
-      ? styles.isLightFront && "ring-black/10"
-      : styles.isLightSurface && "ring-black/10",
+  return cardShellClasses(
+    styles,
+    side,
     className,
     getThemeSizeClasses(theme, compact),
   );

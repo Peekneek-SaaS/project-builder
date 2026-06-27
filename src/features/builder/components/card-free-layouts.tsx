@@ -1,7 +1,7 @@
 import type { CardData } from "@/lib/card-data";
 import type { CardLayout, CardTheme } from "@/lib/card-themes";
 import { isFieldEnabled } from "@/lib/card-field-utils";
-import { getInitials } from "@/features/builder/components/card-brand-elements";
+import { getInitials, getMonogramInitials } from "@/features/builder/components/card-brand-elements";
 import {
   ContactList,
   type LinkClickPayload,
@@ -9,33 +9,8 @@ import {
 import { FieldText } from "@/features/builder/components/field-text";
 import { NameTitleStack } from "@/features/builder/components/card-name-title";
 import type { ThemeStyleClasses } from "@/lib/card-theme-utils";
-import { getThemeSizeClasses } from "@/lib/card-theme-utils";
+import { layoutShell, tx } from "@/features/builder/components/card-layout-utils";
 import { cn } from "@/lib/utils";
-
-function tx(compact: boolean | undefined, sm: string, lg: string) {
-  return compact ? sm : lg;
-}
-
-function layoutShell(
-  styles: ThemeStyleClasses,
-  theme: CardTheme,
-  compact: boolean | undefined,
-  side: "front" | "back",
-  className?: string,
-) {
-  const surface = side === "front" ? styles.frontSurface : styles.surface;
-  const text = side === "front" ? styles.frontText : styles.text;
-  const isLight = side === "front" ? styles.isLightFront : styles.isLightSurface;
-
-  return cn(
-    "relative flex flex-col overflow-hidden rounded-2xl border border-black/5 shadow-xl shadow-black/5 ring-1 ring-black/5",
-    surface,
-    text,
-    isLight && "ring-black/10",
-    getThemeSizeClasses(theme, compact),
-    className,
-  );
-}
 
 function PrismMark({ className }: { className?: string }) {
   return (
@@ -245,16 +220,30 @@ export function FreeCardFront({
       return (
         <div className={layoutShell(styles, theme, compact, "front", className)}>
           <div className="flex flex-1 items-center justify-center p-8">
-            <FieldText
-              data={data}
-              fieldKey="name"
-              className={cn(
-                "font-serif font-normal tracking-tight",
-                tx(compact, "text-3xl", "text-5xl"),
-              )}
-            >
-              {getInitials(data.name) || "ML"}
-            </FieldText>
+            <div className="flex flex-col items-center text-center">
+              <FieldText
+                data={data}
+                fieldKey="name"
+                className={cn(
+                  "font-serif font-normal leading-none tracking-tight",
+                  tx(compact, "text-3xl", "text-5xl"),
+                )}
+              >
+                {getMonogramInitials(data.name, false) || "ML"}
+              </FieldText>
+              <FieldText
+                data={data}
+                fieldKey="company"
+                as="p"
+                className={cn(
+                  "mt-2 font-sans font-medium uppercase tracking-[0.14em]",
+                  styles.subtext,
+                  tx(compact, "text-[8px]", "text-[11px]"),
+                )}
+              >
+                {data.company}
+              </FieldText>
+            </div>
           </div>
         </div>
       );
@@ -267,20 +256,20 @@ export function FreeCardFront({
             theme,
             compact,
             "front",
-            cn("bg-white p-[6%]", className),
+            cn("flex min-h-0 flex-1 flex-col bg-white p-[6%]", className),
           )}
         >
-          <div className="relative flex flex-1 flex-col bg-neutral-100 p-[8%]">
+          <div className="relative flex min-h-0 w-full flex-1 flex-col bg-neutral-100 p-[8%]">
             <div className="absolute right-[8%] top-[8%]">
               <MontrealLogoMark data={data} compact={compact} />
             </div>
-            <div className="mt-auto max-w-[72%]">
+            <div className="mt-auto min-w-0 max-w-[72%] pr-[4%]">
               <NameTitleStack
                 data={data}
                 compact={compact}
                 styles={styles}
                 nameClassName={cn(
-                  "font-normal font-sans tracking-tight",
+                  "min-w-0 break-words font-normal font-sans tracking-tight",
                   tx(compact, "text-[11px]", "text-xl"),
                 )}
                 titleClassName={cn("font-serif", tx(compact, "text-[8px]", "text-xs"))}
@@ -390,17 +379,17 @@ export function FreeCardBack({
               <PrismMark className={tx(compact, "size-8", "size-10")} />
             )}
           </div>
-          {isFieldEnabled(data, "website") && data.website ? (
+          {isFieldEnabled(data, "company") && data.company.trim() ? (
             <FieldText
               data={data}
-              fieldKey="website"
+              fieldKey="company"
               className={cn(
-                "absolute bottom-[8%] left-[8%] font-sans",
+                "absolute bottom-[8%] left-[8%] max-w-[40%] truncate font-sans font-medium",
                 styles.subtext,
                 tx(compact, "text-[7px]", "text-[10px]"),
               )}
             >
-              {data.website.replace(/^https?:\/\//, "")}
+              {data.company}
             </FieldText>
           ) : null}
           <div
@@ -415,7 +404,10 @@ export function FreeCardBack({
               styles={styles}
               align="end"
               className="mb-2"
-              nameClassName={tx(compact, "text-[8px]", "text-xs")}
+              nameClassName={cn(
+                "min-w-0 break-words",
+                tx(compact, "text-[8px]", "text-xs"),
+              )}
             />
             <ContactList
               data={data}

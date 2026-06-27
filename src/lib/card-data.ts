@@ -3,6 +3,7 @@ import {
   createDefaultFieldSettings,
   type CardFieldSettings,
 } from "@/lib/card-field-utils";
+import { clampProfileFields } from "@/lib/profile-limits";
 
 export type { CardFieldKey, CardFieldSettings, CardFieldStyle } from "@/lib/card-field-utils";
 export { createDefaultFieldSettings, defaultFieldStyle } from "@/lib/card-field-utils";
@@ -27,6 +28,7 @@ export type CardData = {
   location: string;
   website: string;
   bio: string;
+  experience: string;
   skills: string[];
   links: CardLink[];
   fieldSettings: CardFieldSettings;
@@ -45,6 +47,12 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
     links.push({ label: "Website", href: extracted.website });
   }
 
+  const profile = clampProfileFields({
+    bio: extracted.aboutYou,
+    experience: extracted.experience,
+    skills: extracted.skills,
+  });
+
   return {
     name: extracted.name,
     builderLabel: "",
@@ -56,8 +64,9 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
     phone: extracted.phone,
     location: extracted.location,
     website: extracted.website,
-    bio: "",
-    skills: [],
+    bio: profile.bio,
+    experience: profile.experience,
+    skills: profile.skills,
     links,
     fieldSettings: createDefaultFieldSettings(),
   };
@@ -104,6 +113,7 @@ export function buildThemePreviewData(
       location: "San Francisco, CA",
       website: "jordanavery.design",
       bio: "",
+      experience: "",
       skills: [],
       links: [],
       fieldSettings: createDefaultFieldSettings(),
@@ -116,8 +126,6 @@ export function buildThemePreviewData(
 
   return {
     ...base,
-    bio: "",
-    skills: [],
     links: [],
     name: base.name || "Your Name",
     title,

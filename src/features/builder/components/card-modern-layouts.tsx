@@ -309,13 +309,13 @@ export function ModernCardFront({
         >
           <FieldText
             data={data}
-            fieldKey="name"
+            fieldKey="company"
             className={cn(
               "font-serif lowercase tracking-tight",
               tx(compact, "text-[20px]", "text-[2.75rem]"),
             )}
           >
-            {firstName(data.name)}
+            {(data.company || companyWord(data)).toLowerCase()}
           </FieldText>
         </div>
       );
@@ -1035,11 +1035,15 @@ export function ModernCardBack({
       return (
         <div className={layoutShell(styles, theme, compact, "back", className)}>
           <div className="flex flex-1 items-end justify-between gap-6 p-[9%]">
-            <div className="max-w-[48%]">
+            <div className="flex max-w-[48%] flex-col gap-0.5 text-left">
               <FieldText
                 data={data}
                 fieldKey="name"
-                className={cn("font-medium leading-snug", tx(compact, "text-[8px]", "text-sm"))}
+                as="p"
+                className={cn(
+                  "font-medium leading-tight",
+                  tx(compact, "text-[8px]", "text-sm"),
+                )}
               >
                 {data.name}
               </FieldText>
@@ -1047,20 +1051,26 @@ export function ModernCardBack({
                 <FieldText
                   data={data}
                   fieldKey="title"
-                  className={cn("mt-1 opacity-70", tx(compact, "text-[6px]", "text-[10px]"))}
+                  as="p"
+                  className={cn(
+                    "leading-tight opacity-70",
+                    tx(compact, "text-[6px]", "text-[10px]"),
+                  )}
                 >
                   {data.title}
                 </FieldText>
               )}
             </div>
-            <ContactBlock
+            <ContactList
               data={data}
               styles={styles}
               compact={compact}
-              align="right"
               interactive={interactive}
               onLinkClick={onLinkClick}
-              className="opacity-90"
+              className={cn(
+                "text-right opacity-90 [&>a]:justify-end [&>div]:justify-end",
+                tx(compact, "text-[5px] leading-relaxed", "text-[8px] leading-relaxed"),
+              )}
             />
           </div>
         </div>

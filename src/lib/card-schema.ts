@@ -32,8 +32,9 @@ export const cardDataSchema = z.object({
   phone: z.string(),
   location: z.string(),
   website: z.string(),
-  bio: z.string(),
-  skills: z.array(z.string()),
+  bio: z.string().optional().default(""),
+  experience: z.string().optional().default(""),
+  skills: z.array(z.string()).optional().default([]),
   links: z.array(cardLinkSchema),
   fieldSettings: cardFieldSettingsSchema,
 });
