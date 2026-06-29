@@ -38,8 +38,12 @@ export function DeleteCardDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg">{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle className="min-w-0 truncate text-lg">
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="wrap-anywhere">
+            {description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>

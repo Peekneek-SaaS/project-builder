@@ -101,6 +101,12 @@ export function getCardBuilderLabel(
   return "Design";
 }
 
+/** Clamp a label for inline display inside sentences / dialog copy. */
+export function truncateLabel(label: string, max = 60): string {
+  const trimmed = label.trim();
+  return trimmed.length > max ? `${trimmed.slice(0, max).trimEnd()}…` : trimmed;
+}
+
 export function cloneCardData(data: CardData): CardData {
   return {
     ...data,

@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { ThemePickerCardPreview } from "@/features/builder/components/theme-picker";
-import { getCardBuilderLabel, type CardDisplayMode } from "@/lib/card-data";
+import {
+  getCardBuilderLabel,
+  truncateLabel,
+  type CardDisplayMode,
+} from "@/lib/card-data";
 import { filterCardsByQuery } from "@/lib/card-search";
 import { getTheme } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
@@ -445,7 +449,7 @@ function CardTile({
 
         <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="min-w-0">
-            <span className="flex items-center gap-2">
+            <span className="flex min-w-0 items-center gap-2">
               {/* <Link
               href={shareHref}
               className="block truncate text-sm font-semibold hover:text-primary"
@@ -454,9 +458,11 @@ function CardTile({
                 checked={selected}
                 onCheckedChange={(value) => onSelectedChange(value === true)}
                 aria-label={`Select ${title}`}
-                className="border-border"
+                className="shrink-0 border-border"
               />
-              {title}
+              <span className="min-w-0 truncate text-sm font-semibold">
+                {title}
+              </span>
               {/* </Link> */}
             </span>
 
@@ -521,7 +527,7 @@ function CardTile({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Are you sure?"
-        description={`"${title}" will be moved to trash. You can recover it within 30 days before it's permanently deleted.`}
+        description={`"${truncateLabel(title)}" will be moved to trash. You can recover it within 30 days before it's permanently deleted.`}
         confirmLabel="Delete"
         loading={moveToTrash.isPending}
         onConfirm={() => moveToTrash.mutate({ id: card.id })}

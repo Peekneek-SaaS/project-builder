@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -11,7 +11,11 @@ import { Button } from "@/components/ui/button";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
-import { CardDisplayMode, getCardBuilderLabel } from "@/lib/card-data";
+import {
+  CardDisplayMode,
+  getCardBuilderLabel,
+  truncateLabel,
+} from "@/lib/card-data";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import {
   TRASH_RETENTION_DAYS,
@@ -25,6 +29,7 @@ import type { AppRouter } from "@/trpc/routers/_app";
 import {
   ArrowLeft01Icon,
   ArrowMoveUpLeftIcon,
+  ArrowRight01Icon,
   DashboardSquare01Icon,
   Delete01Icon,
   Delete02Icon,
@@ -44,9 +49,12 @@ export function TrashContent() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [emptyTrashOpen, setEmptyTrashOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => setHasMounted(true), []);
   const { data: cards = [], isLoading } = useQuery(
     trpc.card.listTrash.queryOptions(),
   );
+  const showLoading = !hasMounted || isLoading;
   const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
 
   const emptyTrash = useMutation(
@@ -86,7 +94,7 @@ export function TrashContent() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {cards.length > 0 ? (
+          {hasMounted && cards.length > 0 ? (
             <Button
               variant="outline"
               className="flex items-center gap-2"
@@ -110,7 +118,7 @@ export function TrashContent() {
       </div> */}
 
       <div className="mt-8">
-        {isLoading ? (
+        {showLoading ? (
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             <HugeiconsIcon
               icon={Loading03Icon}
@@ -214,8 +222,8 @@ function TrashCardTile({
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div
           className={cn(
-            "relative overflow-hidden opacity-70 px-2",
-            styles.frontSurface,
+            "relative overflow-hidden opacity-70 px-2 bg-muted/15 pb-11 pt-1 sm:pt-0",
+            // styles.frontSurface,
           )}
         >
           {/* <CardPreviewScaler
@@ -236,6 +244,36 @@ function TrashCardTile({
             side={side}
             showWatermark={showWatermark}
           />
+          <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
+            <button
+              type="button"
+              aria-label={`Show front of ${title}`}
+              aria-pressed={side === "front"}
+              onClick={(event) => showSide("front", event)}
+              className={cn(
+                "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+                side === "front"
+                  ? "border-primary/40 text-primary"
+                  : "border-border/80 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Show back of ${title}`}
+              aria-pressed={side === "back"}
+              onClick={(event) => showSide("back", event)}
+              className={cn(
+                "grid size-7 place-items-center rounded-full border bg-background/95 shadow-sm backdrop-blur-sm transition-colors",
+                side === "back"
+                  ? "border-primary/40 text-primary"
+                  : "border-border/80 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3 p-4">
@@ -278,7 +316,7 @@ function TrashCardTile({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Delete permanently?"
-        description={`"${title}" will be deleted forever. This action cannot be undone.`}
+        description={`"${truncateLabel(title)}" will be deleted forever. This action cannot be undone.`}
         confirmLabel="Delete forever"
         loading={permanentDelete.isPending}
         onConfirm={() => permanentDelete.mutate({ id: card.id })}
