@@ -10,15 +10,17 @@ export function tx(compact: boolean | undefined, sm: string, lg: string) {
   return compact ? sm : lg;
 }
 
-/** Shared outer chrome — single subtle edge + soft depth (no stacked ring). */
+/** Shared outer chrome — single subtle edge + soft layered depth (no stacked ring). */
 export function cardShellChrome(isLight: boolean, forPrint?: boolean) {
   return cn(
     "@container/card [container-type:size]",
     "relative flex flex-col overflow-hidden antialiased",
+    // Crisp, consistent text rendering across every theme.
+    "[text-rendering:optimizeLegibility] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]",
     forPrint ? "rounded-none" : "rounded-2xl",
     isLight
-      ? "border border-black/[0.07] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.04),0_12px_28px_-10px_rgba(0,0,0,0.07)]"
-      : "border border-white/[0.09] shadow-[0_1px_1px_rgba(0,0,0,0.28),0_10px_28px_-8px_rgba(0,0,0,0.55)]",
+      ? "border border-black/[0.06] shadow-[0_1px_1px_rgba(17,17,17,0.04),0_3px_8px_-2px_rgba(17,17,17,0.06),0_16px_32px_-12px_rgba(17,17,17,0.10)]"
+      : "border border-white/[0.10] shadow-[0_1px_1px_rgba(0,0,0,0.30),0_4px_12px_-2px_rgba(0,0,0,0.40),0_16px_36px_-12px_rgba(0,0,0,0.55)]",
   );
 }
 

@@ -32,6 +32,10 @@ export async function resolveQrRedirect(
     return { status: "not_found" };
   }
 
-  const { slug } = await ensureCardLiveForQr(card);
-  return { status: "redirect", slug };
+  const live = await ensureCardLiveForQr(card);
+  if (!live) {
+    return { status: "not_found" };
+  }
+
+  return { status: "redirect", slug: live.slug };
 }

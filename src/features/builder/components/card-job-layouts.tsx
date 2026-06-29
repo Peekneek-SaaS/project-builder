@@ -891,6 +891,49 @@ export function JobCardBack({
       );
 
     case "job-electric-plug":
+      return (
+        <div className={box}>
+          <div className="relative flex flex-1 flex-col justify-between p-6">
+            <CardBrandMark
+              data={data}
+              theme={theme}
+              styles={styles}
+              compact={compact}
+              markSize={compact ? "sm" : "md"}
+              className="absolute right-6 top-6 opacity-95"
+            />
+            <NameTitleStack
+              data={data}
+              compact={compact}
+              styles={styles}
+              nameClassName={cn(
+                "font-bold uppercase leading-tight tracking-wide",
+                tx(compact, "text-[10px]", "text-base"),
+              )}
+              titleClassName={cn(
+                "uppercase tracking-[0.2em] opacity-70",
+                tx(compact, "text-[7px]", "text-[10px]"),
+              )}
+            />
+            <div className="flex items-end justify-between gap-4">
+              <ContactList
+                data={data}
+                styles={styles}
+                compact={compact}
+                interactive={interactive}
+                onLinkClick={onLinkClick}
+              />
+              <div
+                className={cn(
+                  "shrink-0 rounded-full bg-current opacity-60",
+                  tx(compact, "mb-1 h-0.5 w-10", "mb-1.5 h-1 w-14"),
+                )}
+              />
+            </div>
+          </div>
+        </div>
+      );
+
     case "job-electric-service":
       return (
         <div className={box}>

@@ -60,8 +60,19 @@ const DashboardContent = () => {
   const { data: cards = [], isLoading } = useQuery(
     trpc.card.list.queryOptions(),
   );
+  const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
+  const [hasMounted, setHasMounted] = useState(false);
 
-  const filteredCards = filterCardsByQuery(cards, debouncedQuery);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Prefetched tRPC data hydrates after the first paint — keep SSR and the
+  // initial client render on the same empty snapshot to avoid mismatches.
+  const readyCards = hasMounted ? cards : [];
+  const showCardLoading = !hasMounted || isLoading;
+
+  const filteredCards = filterCardsByQuery(readyCards, debouncedQuery);
   const isFiltering = debouncedQuery.trim().length > 0;
 
   const {
@@ -71,8 +82,8 @@ const DashboardContent = () => {
     sentinelRef,
   } = useInfiniteScroll(filteredCards, { resetKey: debouncedQuery });
 
-  const publishedCount = cards.filter((card) => card.published).length;
-  const totalViews = cards.reduce((sum, card) => sum + card.viewCount, 0);
+  const publishedCount = readyCards.filter((card) => card.published).length;
+  const totalViews = readyCards.reduce((sum, card) => sum + card.viewCount, 0);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -130,11 +141,11 @@ const DashboardContent = () => {
           {selectedCount > 0 ? (
             <>
               <Button
-                variant="link"
+                variant="destructive"
                 onClick={() => setSelectedIds(new Set())}
                 className="text-red-500"
               >
-                Clear
+                <HugeiconsIcon icon={Cancel01Icon} />
               </Button>
               <Button
                 variant="destructive"
@@ -160,21 +171,21 @@ const DashboardContent = () => {
         <StaggerItem>
           <Stat
             label="Total cards"
-            value={String(cards.length)}
+            value={hasMounted ? String(readyCards.length) : "—"}
             variant="cards"
           />
         </StaggerItem>
         <StaggerItem>
           <Stat
             label="Published"
-            value={String(publishedCount)}
+            value={hasMounted ? String(publishedCount) : "—"}
             variant="published"
           />
         </StaggerItem>
         <StaggerItem>
           <Stat
             label="Total views"
-            value={totalViews.toLocaleString("en-US")}
+            value={hasMounted ? totalViews.toLocaleString("en-US") : "—"}
             variant="views"
           />
         </StaggerItem>
@@ -185,12 +196,12 @@ const DashboardContent = () => {
       </div>
 
       <div className="">
-        {isLoading ? (
+        {showCardLoading ? (
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             <HugeiconsIcon icon={Loading03Icon} className="animate-spin" />
             Loading cards
           </p>
-        ) : cards.length === 0 ? (
+        ) : readyCards.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/50 p-10 flex flex-col gap-4 items-center">
             <HugeiconsIcon icon={CreditCardNotFoundIcon} size="40" />
             <div className="flex flex-col items-center">
@@ -225,12 +236,13 @@ const DashboardContent = () => {
                 {debouncedQuery}&rdquo;
               </p>
             ) : null}
-            <div className="grid  gap-3 grid-cols-1 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-3 grid-cols-1 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {visibleCards.map((card) => (
                 <CardTile
                   key={card.id}
                   card={card}
                   selected={selectedIds.has(card.id)}
+                  showWatermark={!billing?.isPro}
                   onSelectedChange={(checked) =>
                     toggleCardSelection(card.id, checked)
                   }
@@ -334,10 +346,12 @@ function StatDecoration({ variant }: { variant: StatVariant }) {
 function CardTile({
   card,
   selected,
+  showWatermark = false,
   onSelectedChange,
 }: {
   card: DashboardCard;
   selected: boolean;
+  showWatermark?: boolean;
   onSelectedChange: (checked: boolean) => void;
 }) {
   // const router = useRouter();
@@ -374,16 +388,17 @@ function CardTile({
   return (
     <>
       <motion.div
-        className="group relative min-w-0 w-full overflow-hidden rounded-xl border border-border bg-card transition-[border-color,box-shadow] duration-200 hover:border-primary hover:shadow-md hover:shadow-primary/10"
+        className="group relative min-w-0 w-full overflow-hidden rounded-xl border border-border bg-card transition-[border-color,box-shadow] duration-200 hover:border-primary hover:shadow-md hover:shadow-primary/10 px-2 shrink-0"
         whileHover={{ y: -2 }}
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="relative bg-muted/15 pb-11 pt-1 sm:pt-0">
+        <div className="relative bg-muted/15 pb-11 pt-1 sm:pt-0 ">
           <Link href={shareHref}>
             <ThemePickerCardPreview
               theme={theme}
               previewData={card.cardData}
               side={side}
+              showWatermark={showWatermark}
             />
           </Link>
 

@@ -33,6 +33,7 @@ export function FieldText({
 
   return (
     <Component
+      data-card-field={fieldKey}
       className={cn(
         getFieldClassName(settings, className),
         settings.fontSize > 0 && "min-w-0 max-w-full break-words",

@@ -29,7 +29,8 @@ export async function loadPublicCardByQrCodeId(
 
   if (!card) return null;
 
-  await ensureCardLiveForQr(card);
+  const live = await ensureCardLiveForQr(card);
+  if (!live) return null;
 
   const fresh = await prisma.card.findUnique({ where: { id: card.id } });
   if (!fresh?.published || !fresh.slug) return null;

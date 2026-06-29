@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import {
   parseExtractedCardData,
+  extractedCardDataSchema,
   type ExtractedCardData,
 } from "@/features/create/types";
 import { prisma } from "@/lib/db";
@@ -126,6 +127,30 @@ export const resumeRouter = createTRPCRouter({
     };
   }),
 
+  updateExtracted: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        extractedData: extractedCardDataSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const resume = await prisma.resume.findFirst({
+        where: { id: input.id, userId: ctx.userId },
+      });
+
+      if (!resume) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Resume not found." });
+      }
+
+      await prisma.resume.update({
+        where: { id: input.id },
+        data: { extractedData: input.extractedData },
+      });
+
+      return { extractedData: input.extractedData };
+    }),
+
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -181,4 +206,47 @@ export const resumeRouter = createTRPCRouter({
         createdAt,
       }));
   }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const resume = await prisma.resume.findFirst({
+        where: { id: input.id, userId: ctx.userId },
+      });
+
+      if (!resume) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Resume not found." });
+      }
+
+      const historyItem = {
+        fileName: resume.fileName,
+        fileUrl: resume.fileUrl,
+        fileKey: resume.fileKey,
+        rawText: resume.rawText,
+        extractedData: parseExtractedCardData(resume.extractedData),
+      };
+
+      if (!isUploadedResumeHistoryItem(historyItem)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This resume cannot be removed from history.",
+        });
+      }
+
+      const linkedCards = await prisma.card.count({
+        where: { resumeId: input.id, userId: ctx.userId },
+      });
+
+      if (linkedCards > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "This resume is linked to existing cards. Delete those cards from your dashboard first.",
+        });
+      }
+
+      await prisma.resume.delete({ where: { id: input.id } });
+
+      return { ok: true as const };
+    }),
 });

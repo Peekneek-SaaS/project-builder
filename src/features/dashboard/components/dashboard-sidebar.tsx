@@ -95,6 +95,11 @@ export function NavMain({
   const pathname = usePathname();
   const trpc = useTRPC();
   const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
+  const [hasMounted, setHasMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   function isNavActive(url: string) {
     return pathname === url || pathname.startsWith(`${url}/`);
@@ -102,6 +107,8 @@ export function NavMain({
 
   function isLocked(item: (typeof items)[number]) {
     if (!item.proOnly) return false;
+    // Keep SSR and the first client render identical until billing hydrates.
+    if (!hasMounted) return true;
     if (!billing) return true;
     return !billing.analyticsEnabled;
   }

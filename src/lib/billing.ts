@@ -3,7 +3,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 
 import {
-  canUseTheme,
+  canPublish,
   FREE_PLAN_SLUG,
   isPlanId,
   isProPlan,
@@ -21,6 +21,7 @@ export type BillingProfile = {
     cards: number;
   };
   canCreateCard: boolean;
+  canPublish: boolean;
   cardsRemaining: number | null;
   analyticsEnabled: boolean;
   planRenewsAt: string | null;
@@ -76,6 +77,7 @@ function buildBillingProfile(
     limits,
     usage: { cards: cardCount },
     canCreateCard: isPro || cardCount < limits.maxCards,
+    canPublish: canPublish(plan),
     cardsRemaining,
     analyticsEnabled: limits.analytics,
     planRenewsAt: planRenewsAt?.toISOString() ?? null,
@@ -188,12 +190,6 @@ export async function assertCanCreateCards(
     throw new Error("Select at least one theme.");
   }
 
-  for (const themeId of themeIds) {
-    if (!canUseTheme(billing.plan, themeId)) {
-      throw new Error("Upgrade to Pro to use this theme.");
-    }
-  }
-
   if (billing.isPro) {
     return billing;
   }
@@ -205,7 +201,9 @@ export async function assertCanCreateCards(
   }
 
   if (themeIds.length > billing.limits.maxThemesPerBatch) {
-    throw new Error("Free plan includes 1 theme per card. Upgrade to Pro.");
+    throw new Error(
+      "Free plan includes 1 card at a time. Upgrade to Pro for multiple cards in one batch.",
+    );
   }
 
   const cardsToCreate = themeIds.length;
@@ -218,11 +216,11 @@ export async function assertCanCreateCards(
   return billing;
 }
 
-export async function assertCanUseTheme(clerkId: string, themeId: string) {
+export async function assertCanPublish(clerkId: string) {
   const billing = await getBillingProfile(clerkId);
 
-  if (!canUseTheme(billing.plan, themeId)) {
-    throw new Error("Upgrade to Pro to use this theme.");
+  if (!billing.canPublish) {
+    throw new Error("Upgrade to Pro to publish your card.");
   }
 
   return billing;

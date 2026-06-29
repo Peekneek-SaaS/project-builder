@@ -77,6 +77,7 @@ export function EmbedCardView({ slug }: { slug: string }) {
         theme={theme}
         displayMode={card.displayMode}
         showSideLabels={false}
+        showWatermark={card.showBranding}
         interactive
         onLinkClick={handleLinkClick}
         className="w-full max-w-[920px] flex-col items-center gap-4 md:flex-row md:items-center md:justify-center md:gap-8"

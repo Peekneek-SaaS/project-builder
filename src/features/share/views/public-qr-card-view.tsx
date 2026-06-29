@@ -52,6 +52,7 @@ export function PublicQrCardView({ card }: { card: PublicCardPayload }) {
         data={card.cardData}
         theme={theme}
         displayMode={card.displayMode}
+        showWatermark={card.showBranding}
         interactive
         onLinkClick={handleLinkClick}
       />

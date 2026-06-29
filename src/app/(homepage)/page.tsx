@@ -197,7 +197,7 @@ function HowItWorks() {
     {
       icon: PaintBoardIcon,
       title: "Pick a theme & build",
-      desc: "Choose a look, fine-tune any field, and publish your card instantly.",
+      desc: "Choose any theme, fine-tune any field, then publish when you are ready.",
     },
   ];
   return (
@@ -255,7 +255,7 @@ function Features() {
     {
       icon: PaintBoardIcon,
       title: "Beautiful themes",
-      desc: "Hand-crafted card themes for every personality. Pro unlocks the full collection.",
+      desc: "Hand-crafted card themes for every personality — all included on every plan.",
     },
     {
       icon: Share08Icon,
@@ -323,9 +323,9 @@ function Pricing() {
       desc: "Everything you need to launch one card.",
       features: [
         "1 business card",
-        "3 starter themes",
-        "Shareable link",
-        "Basic view counts",
+        "Every theme",
+        "Build & edit forever",
+        "Publish with Pro",
       ],
       cta: "Get started",
       highlighted: false,
@@ -337,7 +337,8 @@ function Pricing() {
       desc: "For people who network seriously.",
       features: [
         "Unlimited cards",
-        "All premium themes",
+        "Publish & share live",
+        "No Kardably watermark",
         "QR codes + custom URL",
         "Full analytics suite",
         "Remove Kardably branding",
@@ -365,7 +366,7 @@ function Pricing() {
       <SectionHeading
         eyebrow="Pricing"
         title="Simple pricing that scales with you"
-        subtitle="Start free. Upgrade when you want more cards, themes, and insight."
+        subtitle="Start free with any theme. Upgrade to Pro when you want to publish and scale."
       />
       <motion.div
         className="relative z-[60] mt-12"
@@ -437,7 +438,7 @@ function FAQ() {
     },
     {
       q: "Is there a free plan?",
-      a: "Yes. You can build and share one card for free, forever. Upgrade to Pro for more cards and themes.",
+      a: "Yes. You can build one card with any theme for free. Upgrade to Pro to publish it, create unlimited cards, and unlock analytics.",
     },
     {
       q: "How do analytics work?",

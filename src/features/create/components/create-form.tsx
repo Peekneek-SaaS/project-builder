@@ -19,6 +19,7 @@ import {
   CheckIcon,
   CloudUploadIcon,
   CursorMagicSelection03Icon,
+  Delete02Icon,
   File01Icon,
   GoogleDocIcon,
   Loading03Icon,
@@ -32,20 +33,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useMemo } from "react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 import { cardThemes, type CardTheme } from "@/lib/card-themes";
-import { canUseTheme } from "@/lib/plan";
 import { ThemePickerGrid } from "@/features/builder/components/theme-picker";
 import { buildThemePreviewData } from "@/lib/card-data";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type step = 1 | 2;
+
+type EditableExtractedField =
+  | "name"
+  | "title"
+  | "company"
+  | "email"
+  | "phone"
+  | "location"
+  | "website";
 
 type ResumeHistoryItem =
   inferRouterOutputs<AppRouter>["resume"]["list"][number];
@@ -61,7 +67,11 @@ const CreateForm = ({ className }: { className: string }) => {
   const createBlankResume = useMutation(
     trpc.resume.createBlank.mutationOptions(),
   );
+  const updateExtracted = useMutation(
+    trpc.resume.updateExtracted.mutationOptions(),
+  );
   const createCards = useMutation(trpc.card.createBatch.mutationOptions());
+  const deleteResume = useMutation(trpc.resume.delete.mutationOptions());
   const {
     data: resumeHistory = [],
     isLoading: historyLoading,
@@ -85,6 +95,8 @@ const CreateForm = ({ className }: { className: string }) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [fromHistory, setFromHistory] = useState(false);
   const [selectedHistory, setSelectedHistory] =
+    useState<ResumeHistoryItem | null>(null);
+  const [deleteHistoryTarget, setDeleteHistoryTarget] =
     useState<ResumeHistoryItem | null>(null);
 
   async function handleFile(file: File) {
@@ -161,8 +173,8 @@ const CreateForm = ({ className }: { className: string }) => {
 
       setResumeId(result.id);
       setExtractedData(result.extractedData);
-      setFileName("No resume uploaded");
       setParsed(true);
+      setStep(2);
       await queryClient.invalidateQueries(trpc.resume.list.queryFilter());
     } catch (error) {
       setFileName(null);
@@ -208,12 +220,65 @@ const CreateForm = ({ className }: { className: string }) => {
     setParsing(false);
   }
 
-  function toggleTheme(theme: CardTheme) {
-    if (!canUseTheme(isProPlan ? "pro" : "free", theme.id)) {
-      toast.error("Upgrade to Pro to use this theme.");
-      return;
-    }
+  async function confirmDeleteHistory() {
+    if (!deleteHistoryTarget) return;
 
+    try {
+      await deleteResume.mutateAsync({ id: deleteHistoryTarget.id });
+
+      if (resumeId === deleteHistoryTarget.id) {
+        handleClear();
+      }
+
+      setDeleteHistoryTarget(null);
+      await queryClient.invalidateQueries(trpc.resume.list.queryFilter());
+      toast.success("Resume removed from history.");
+    } catch (error) {
+      const message =
+        error instanceof TRPCClientError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Failed to delete resume.";
+
+      toast.error(message);
+    }
+  }
+
+  function updateExtractedField(field: EditableExtractedField, value: string) {
+    setExtractedData((current) =>
+      current ? { ...current, [field]: value } : current,
+    );
+  }
+
+  async function persistExtractedData() {
+    if (!resumeId || !extractedData) return;
+
+    await updateExtracted.mutateAsync({
+      id: resumeId,
+      extractedData,
+    });
+  }
+
+  async function handleContinue() {
+    if (!parsed || !resumeId || !extractedData) return;
+
+    try {
+      await persistExtractedData();
+      setStep(2);
+    } catch (error) {
+      const message =
+        error instanceof TRPCClientError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Failed to save your details.";
+
+      toast.error(message);
+    }
+  }
+
+  function toggleTheme(theme: CardTheme) {
     setSelected((prev) => {
       if (prev.includes(theme.id)) {
         return prev.filter((id) => id !== theme.id);
@@ -234,6 +299,8 @@ const CreateForm = ({ className }: { className: string }) => {
     }
 
     try {
+      await persistExtractedData();
+
       const result = await createCards.mutateAsync({
         resumeId,
         themeIds: selected,
@@ -261,6 +328,7 @@ const CreateForm = ({ className }: { className: string }) => {
     isUploading ||
     parseResume.isPending ||
     createBlankResume.isPending ||
+    updateExtracted.isPending ||
     createCards.isPending;
 
   return (
@@ -316,9 +384,16 @@ const CreateForm = ({ className }: { className: string }) => {
               historyError={historyError}
               selectedHistory={selectedHistory}
               onSelectHistory={handleSelectHistory}
+              onDeleteHistoryRequest={setDeleteHistoryTarget}
+              deletingResumeId={
+                deleteResume.isPending
+                  ? (deleteHistoryTarget?.id ?? null)
+                  : null
+              }
               onFile={handleFile}
               onClear={handleClear}
               onSkip={() => void handleSkip()}
+              onFieldChange={updateExtractedField}
               skipping={createBlankResume.isPending}
             />
           ) : (
@@ -354,8 +429,16 @@ const CreateForm = ({ className }: { className: string }) => {
             </Button>
           )}
           {step === 1 ? (
-            <Button disabled={!parsed || !resumeId} onClick={() => setStep(2)}>
-              Continue
+            <Button
+              disabled={
+                !parsed ||
+                !resumeId ||
+                !extractedData ||
+                updateExtracted.isPending
+              }
+              onClick={() => void handleContinue()}
+            >
+              {updateExtracted.isPending ? "Saving…" : "Continue"}
             </Button>
           ) : (
             <Button
@@ -381,6 +464,22 @@ const CreateForm = ({ className }: { className: string }) => {
           )}
         </div>
       </footer>
+
+      <DeleteCardDialog
+        open={deleteHistoryTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleteResume.isPending) setDeleteHistoryTarget(null);
+        }}
+        title="Delete saved resume?"
+        description={
+          deleteHistoryTarget
+            ? `"${deleteHistoryTarget.extractedData.name.trim() || deleteHistoryTarget.fileName}" will be removed from your upload history. This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        loading={deleteResume.isPending}
+        onConfirm={() => void confirmDeleteHistory()}
+      />
     </div>
   );
 };
@@ -398,9 +497,12 @@ function StepUpload({
   historyError,
   selectedHistory,
   onSelectHistory,
+  onDeleteHistoryRequest,
+  deletingResumeId,
   onFile,
   onClear,
   onSkip,
+  onFieldChange,
   skipping,
 }: {
   fileName: string | null;
@@ -413,9 +515,12 @@ function StepUpload({
   historyError: boolean;
   selectedHistory: ResumeHistoryItem | null;
   onSelectHistory: (resume: ResumeHistoryItem | null) => void;
+  onDeleteHistoryRequest: (resume: ResumeHistoryItem) => void;
+  deletingResumeId: string | null;
   onFile: (file: File) => void;
   onClear: () => void;
   onSkip: () => void;
+  onFieldChange: (field: EditableExtractedField, value: string) => void;
   skipping: boolean;
 }) {
   const [dragging, setDragging] = useState(false);
@@ -482,76 +587,31 @@ function StepUpload({
                 disabled={parsing || skipping}
                 onClick={onSkip}
               >
-                {skipping ? "Skipping" : "Skip"}
+                {skipping ? (
+                  <span className="flex items-center gap-1">
+                    <HugeiconsIcon
+                      icon={Loading03Icon}
+                      className="animate-spin dark:text-muted-foreground"
+                    />
+                    Skipping
+                  </span>
+                ) : (
+                  "Skip"
+                )}
               </Button>
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <Select
-            value={selectedHistory?.id ?? undefined}
-            onValueChange={(id) => {
-              const resume = resumeHistory.find((item) => item.id === id);
-              if (resume) onSelectHistory(resume);
-            }}
-            disabled={
-              historyLoading || historyError || resumeHistory.length === 0
-            }
-          >
-            <SelectTrigger
-              className="h-10 w-full text-sm data-[size=default]:h-10"
-              aria-label="Select a saved resume"
-            >
-              <SelectValue
-                placeholder={
-                  historyLoading ? (
-                    <span className="flex items-center gap-1">
-                      <HugeiconsIcon
-                        icon={Loading03Icon}
-                        className="animate-spin"
-                        size={18}
-                      />
-                      Loading saved resumes
-                    </span>
-                  ) : historyError ? (
-                    "Could not load saved resumes"
-                  ) : resumeHistory.length === 0 ? (
-                    "No saved resumes yet"
-                  ) : (
-                    "Select from previous history"
-                  )
-                }
-              />
-            </SelectTrigger>
-            <SelectContent
-              position="popper"
-              align="start"
-              className="max-h-72 w-[var(--radix-select-trigger-width)]"
-            >
-              {resumeHistory.map((item) => (
-                <SelectItem
-                  key={item.id}
-                  value={item.id}
-                  className="min-h-0 items-start py-2.5 text-sm"
-                >
-                  <span className="flex min-w-0 flex-col gap-0.5 pr-4">
-                    <span className="truncate font-medium">
-                      {item.extractedData.name.trim() ||
-                        item.extractedData.title.trim() ||
-                        item.fileName}
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {item.fileName}
-                    </span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {historyError ? (
-            <p className="text-center text-xs text-destructive">
-              Saved resumes failed to load. Upload again or refresh the page.
-            </p>
-          ) : null}
+          <ResumeHistoryPanel
+            resumeHistory={resumeHistory}
+            historyLoading={historyLoading}
+            historyError={historyError}
+            selectedHistory={selectedHistory}
+            disabled={parsing || skipping}
+            deletingResumeId={deletingResumeId}
+            onSelectHistory={onSelectHistory}
+            onDeleteHistoryRequest={onDeleteHistoryRequest}
+          />
         </>
       ) : (
         <ResumeExtractedPanel
@@ -560,10 +620,136 @@ function StepUpload({
           parsed={parsed}
           extractedData={extractedData}
           fromHistory={fromHistory}
-          skipped={fileName === "No resume uploaded"}
           onClear={onClear}
+          onFieldChange={onFieldChange}
         />
       )}
+    </div>
+  );
+}
+
+function ResumeHistoryPanel({
+  resumeHistory,
+  historyLoading,
+  historyError,
+  selectedHistory,
+  disabled,
+  deletingResumeId,
+  onSelectHistory,
+  onDeleteHistoryRequest,
+}: {
+  resumeHistory: ResumeHistoryItem[];
+  historyLoading: boolean;
+  historyError: boolean;
+  selectedHistory: ResumeHistoryItem | null;
+  disabled: boolean;
+  deletingResumeId: string | null;
+  onSelectHistory: (resume: ResumeHistoryItem) => void;
+  onDeleteHistoryRequest: (resume: ResumeHistoryItem) => void;
+}) {
+  if (historyLoading) {
+    return (
+      <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+      </div>
+    );
+  }
+
+  if (historyError) {
+    return (
+      <p className="text-center text-xs text-destructive">
+        Saved resumes failed to load. Upload again or refresh the page.
+      </p>
+    );
+  }
+
+  if (resumeHistory.length === 0) {
+    return (
+      <p className="text-center text-xs text-muted-foreground">
+        No saved resumes yet — uploads you parse will appear here.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <p className="border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground">
+        Previous uploads
+      </p>
+      <ul className="max-h-44 divide-y divide-border overflow-y-auto">
+        {resumeHistory.map((item) => {
+          const isSelected = selectedHistory?.id === item.id;
+          const isDeleting = deletingResumeId === item.id;
+          const label =
+            item.extractedData.name.trim() ||
+            item.extractedData.title.trim() ||
+            item.fileName;
+
+          return (
+            <li key={item.id} className="flex items-stretch">
+              <button
+                type="button"
+                disabled={disabled || isDeleting}
+                onClick={() => onSelectHistory(item)}
+                className={cn(
+                  "flex min-w-0 flex-1 items-start gap-2 px-3 py-2.5 text-left text-sm transition-colors",
+                  isSelected
+                    ? "bg-primary/5 text-foreground"
+                    : "hover:bg-muted/50",
+                  disabled && "pointer-events-none opacity-60",
+                )}
+              >
+                <HugeiconsIcon
+                  icon={File01Icon}
+                  size={16}
+                  className="mt-0.5 shrink-0 text-muted-foreground"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{label}</span>
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                    {item.fileName} ·{" "}
+                    {formatDistanceToNow(new Date(item.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </span>
+                {isSelected ? (
+                  <HugeiconsIcon
+                    icon={CheckIcon}
+                    size={14}
+                    className="mt-1 shrink-0 text-primary"
+                  />
+                ) : null}
+              </button>
+              <button
+                type="button"
+                disabled={disabled || isDeleting}
+                className={cn(
+                  "flex w-[4.5rem] shrink-0 flex-col items-center justify-center gap-0.5 self-stretch border-l border-border px-1 py-2 text-[11px] font-medium leading-none text-muted-foreground transition-colors hover:bg-destructive/5 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                  disabled && "pointer-events-none opacity-60",
+                )}
+                aria-label={`Delete ${label} from history`}
+                onClick={() => onDeleteHistoryRequest(item)}
+              >
+                {isDeleting ? (
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    size={14}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <>
+                    <HugeiconsIcon icon={Delete02Icon} size={14} />
+                    <span>Delete</span>
+                  </>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -574,32 +760,41 @@ function ResumeExtractedPanel({
   parsed,
   extractedData,
   fromHistory,
-  skipped,
   onClear,
+  onFieldChange,
 }: {
   fileName: string;
   parsing: boolean;
   parsed: boolean;
   extractedData: ExtractedCardData | null;
   fromHistory: boolean;
-  skipped?: boolean;
   onClear: () => void;
+  onFieldChange: (field: EditableExtractedField, value: string) => void;
 }) {
-  const fields = extractedData
-    ? [
-        ["Name", extractedData.name],
-        ["Title", extractedData.title],
-        ["Email", extractedData.email || "—"],
-        ["Phone", extractedData.phone || "—"],
-        ["Location", extractedData.location || "—"],
-      ]
-    : [
-        ["Name", ""],
-        ["Title", ""],
-        ["Email", ""],
-        ["Phone", ""],
-        ["Location", ""],
-      ];
+  const fields: {
+    key: EditableExtractedField;
+    label: string;
+    placeholder: string;
+    type?: string;
+  }[] = [
+    { key: "name", label: "Name", placeholder: "Your name" },
+    { key: "title", label: "Title", placeholder: "Job title" },
+    { key: "company", label: "Company", placeholder: "Company name" },
+    {
+      key: "email",
+      label: "Email",
+      placeholder: "you@email.com",
+      type: "email",
+    },
+    { key: "phone", label: "Phone", placeholder: "+1 (555) 000-0000" },
+    { key: "location", label: "Location", placeholder: "City, State" },
+    {
+      key: "website",
+      label: "Website",
+      placeholder: "yoursite.com",
+      type: "url",
+    },
+  ];
 
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
@@ -612,11 +807,9 @@ function ResumeExtractedPanel({
               ? "Uploading and extracting information…"
               : fromHistory
                 ? "Loaded from saved history"
-                : skipped
-                  ? "Start from scratch — edit in the builder"
-                  : parsed
-                    ? "Ready"
-                    : "Uploaded"}
+                : parsed
+                  ? "Ready"
+                  : "Uploaded"}
           </p>
         </div>
         <Button
@@ -636,7 +829,7 @@ function ResumeExtractedPanel({
           parsed ? "border-primary/30 bg-primary/5" : "border-border bg-card",
         )}
       >
-        <div className="mb-2 flex items-center gap-2">
+        <div className="mb-3 flex items-center gap-2">
           <HugeiconsIcon
             icon={parsing ? Loading03Icon : SparklesIcon}
             size={20}
@@ -645,34 +838,43 @@ function ResumeExtractedPanel({
           <p className="text-sm font-medium">
             {parsing
               ? "AI is reading your resume…"
-              : skipped
-                ? "Ready to build your card"
-                : "Information extracted"}
+              : "Review extracted details"}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {fields.map(([label, value]) => (
+        <div className="grid grid-cols-2 gap-3">
+          {fields.map(({ key, label, placeholder, type }) => (
             <div
-              key={label}
+              key={key}
               className={cn(
-                "rounded-lg border border-border bg-background px-3 py-2 transition-opacity",
-                parsing && "opacity-40",
+                "space-y-1.5",
+                // key === "name" && "sm:col-span-2",
               )}
             >
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              <Label
+                htmlFor={`extracted-${key}`}
+                className="text-[11px] uppercase tracking-wide text-muted-foreground"
+              >
                 {label}
-              </p>
-              <div className="truncate text-sm font-medium">
-                {parsing ? <Skeleton className="h-4 w-full" /> : value || "—"}
-              </div>
+              </Label>
+              {parsing || !extractedData ? (
+                <Skeleton className="h-9 w-full" />
+              ) : (
+                <Input
+                  id={`extracted-${key}`}
+                  type={type ?? "text"}
+                  value={extractedData[key]}
+                  placeholder={placeholder}
+                  disabled={!parsed}
+                  onChange={(event) => onFieldChange(key, event.target.value)}
+                  className="h-9 bg-background text-sm"
+                />
+              )}
             </div>
           ))}
         </div>
-        {parsed && (
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            {skipped
-              ? "You can add your details in the builder after choosing a theme."
-              : "You can edit any of these details in the next step."}
+        {parsed && !parsing && (
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Looks off? Fix it now, or adjust later in the builder
           </p>
         )}
       </div>

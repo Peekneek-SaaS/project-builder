@@ -40,6 +40,11 @@ import {
   isModernLayout,
 } from "@/features/builder/components/card-modern-layouts";
 import {
+  ProCardBack,
+  ProCardFront,
+  isProLayout,
+} from "@/features/builder/components/card-pro-layouts";
+import {
   getThemeSizeClasses,
   type ThemeStyleClasses,
 } from "@/lib/card-theme-utils";
@@ -113,29 +118,6 @@ function BrandingName({
   return null;
 }
 
-function BrandingTagline({
-  data,
-  className,
-  compact,
-}: {
-  data: CardData;
-  className?: string;
-  compact?: boolean;
-}) {
-  if (!data.tagline) return null;
-
-  return (
-    <FieldText
-      data={data}
-      fieldKey="tagline"
-      as="p"
-      className={cn(compact ? "text-[8px]" : "text-xs", className)}
-    >
-      {data.tagline}
-    </FieldText>
-  );
-}
-
 export function CardFront({
   data,
   theme,
@@ -153,6 +135,18 @@ export function CardFront({
   const sizeClass = getThemeSizeClasses(theme, compact);
 
   const shell = cardShell(styles, "front", className, sizeClass);
+
+  if (isProLayout(theme.layout)) {
+    return (
+      <ProCardFront
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+      />
+    );
+  }
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);
@@ -237,11 +231,6 @@ export function CardFront({
             <CardLogo data={data} styles={styles} compact={compact} />
             <div>
               <BrandingName data={data} compact={compact} />
-              <BrandingTagline
-                data={data}
-                compact={compact}
-                className="mt-1 opacity-80"
-              />
             </div>
           </div>
           <div className={cn("relative px-4 py-3", styles.accent)}>
@@ -273,11 +262,6 @@ export function CardFront({
               data={data}
               compact={compact}
               className="tracking-[0.2em]"
-            />
-            <BrandingTagline
-              data={data}
-              compact={compact}
-              className="uppercase tracking-widest opacity-70"
             />
           </div>
         </div>
@@ -387,11 +371,6 @@ export function CardFront({
           <div className="relative flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <CardLogo data={data} styles={styles} compact={compact} />
             <BrandingName data={data} compact={compact} />
-            <BrandingTagline
-              data={data}
-              compact={compact}
-              className="opacity-80"
-            />
           </div>
         </div>
       );
@@ -413,11 +392,6 @@ export function CardFront({
                 data={data}
                 compact={compact}
                 className={compact ? "text-[10px]" : "text-base"}
-              />
-              <BrandingTagline
-                data={data}
-                compact={compact}
-                className="mt-1.5 opacity-75"
               />
             </div>
             {!compact ? (
@@ -463,6 +437,20 @@ export function CardBack({
   const sizeClass = getThemeSizeClasses(theme, compact);
 
   const shell = cardShell(styles, "back", className, sizeClass);
+
+  if (isProLayout(theme.layout)) {
+    return (
+      <ProCardBack
+        data={data}
+        theme={theme}
+        styles={styles}
+        compact={compact}
+        className={className}
+        interactive={interactive}
+        onLinkClick={onLinkClick}
+      />
+    );
+  }
 
   if (isModernLayout(theme.layout)) {
     const invert = usesInvertedCardSides(theme.layout);
@@ -1042,7 +1030,10 @@ export function CardBack({
                   fieldKey="company"
                   as="span"
                   className={cn(
-                    "rounded-full bg-black/10 px-2 py-0.5 text-[10px] font-medium uppercase",
+                    "shrink-0 whitespace-nowrap rounded-full bg-current/10 font-medium uppercase tracking-wide",
+                    compact
+                      ? "px-1.5 py-0.5 text-[7px]"
+                      : "px-2 py-0.5 text-[10px]",
                     styles.subtext,
                   )}
                 >
@@ -1105,7 +1096,7 @@ function BotanicalContactList({
   return (
     <div
       className={cn(
-        "grid gap-2",
+        "grid gap-2 [font-variant-numeric:tabular-nums]",
         compact ? "text-[7px]" : "text-[10px]",
         styles.subtext,
       )}
@@ -1135,7 +1126,7 @@ function BotanicalContactList({
               href={href}
               target={key === "website" ? "_blank" : undefined}
               rel={key === "website" ? "noreferrer" : undefined}
-              className="flex items-center gap-2 transition-opacity hover:opacity-80"
+              className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
               onClick={() => onLinkClick?.({ label, href: value })}
             >
               {content}
@@ -1144,7 +1135,7 @@ function BotanicalContactList({
         }
 
         return (
-          <div key={value} className="flex items-center gap-2">
+          <div key={value} className="flex min-w-0 items-center gap-2">
             {content}
           </div>
         );
@@ -1204,7 +1195,7 @@ export function ContactList({
   return (
     <div
       className={cn(
-        "grid gap-1.5",
+        "grid gap-1.5 [font-variant-numeric:tabular-nums]",
         compact ? "text-[8px]" : "text-sm",
         styles.subtext,
         className,
@@ -1214,7 +1205,11 @@ export function ContactList({
         const href = getHref(key, value);
         const content = (
           <>
-            <HugeiconsIcon icon={icon} size={compact ? 10 : 14} />
+            <HugeiconsIcon
+              icon={icon}
+              size={compact ? 10 : 14}
+              className="shrink-0 opacity-80"
+            />
             <FieldText data={data} fieldKey={key} className="truncate">
               {value}
             </FieldText>
@@ -1228,7 +1223,7 @@ export function ContactList({
               href={href}
               target={key === "website" ? "_blank" : undefined}
               rel={key === "website" ? "noreferrer" : undefined}
-              className="flex items-center gap-2 transition-opacity hover:opacity-80"
+              className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
               onClick={() => onLinkClick?.({ label, href: value })}
             >
               {content}
@@ -1237,7 +1232,7 @@ export function ContactList({
         }
 
         return (
-          <div key={value} className="flex items-center gap-2">
+          <div key={value} className="flex min-w-0 items-center gap-2">
             {content}
           </div>
         );

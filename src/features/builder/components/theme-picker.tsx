@@ -4,7 +4,6 @@ import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   CheckIcon,
-  LockPasswordIcon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -17,7 +16,6 @@ import {
   type ReactNode,
 } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -434,10 +432,12 @@ export function ThemePickerCardPreview({
   theme,
   previewData,
   side,
+  showWatermark = false,
 }: {
   theme: CardTheme;
   previewData: CardData;
   side: CardDisplayMode;
+  showWatermark?: boolean;
 }) {
   const isMobile = useIsMobile();
   const previewTheme = useMemo(
@@ -466,7 +466,8 @@ export function ThemePickerCardPreview({
         return;
       }
 
-      setScale(Math.min(1, availableWidth / naturalWidth));
+      // setScale(Math.min(1, availableWidth / naturalWidth));
+      setScale(Math.max(0.85, Math.min(1, availableWidth / naturalWidth)));
       setReady(true);
     };
 
@@ -486,7 +487,7 @@ export function ThemePickerCardPreview({
   return (
     <div
       ref={containerRef}
-      className="flex w-full min-w-0 justify-center px-2 py-3 sm:px-4 sm:py-4"
+      className="flex w-full min-w-0 justify-center px-2 py-3 sm:px-4 sm:py-4 shrink-0"
     >
       <div
         className={cn(
@@ -501,6 +502,7 @@ export function ThemePickerCardPreview({
             theme={previewTheme}
             displayMode={side}
             showSideLabels={false}
+            showWatermark={showWatermark}
           />
         </div>
       </div>
@@ -513,11 +515,13 @@ export function ThemePickerCard({
   previewData,
   selected,
   onSelect,
+  showWatermark = false,
 }: {
   theme: CardTheme;
   previewData: CardData;
   selected: boolean;
   onSelect: () => void;
+  showWatermark?: boolean;
 }) {
   const [side, setSide] = useState<CardDisplayMode>("front");
 
@@ -550,6 +554,7 @@ export function ThemePickerCard({
           theme={theme}
           previewData={previewData}
           side={side}
+          showWatermark={showWatermark}
         />
 
         <div className="absolute inset-x-0 bottom-2 flex items-center justify-center gap-1.5">
@@ -597,12 +602,6 @@ export function ThemePickerCard({
             {theme.description}
           </p>
         </div>
-        {theme.pro ? (
-          <Badge variant="secondary" className="shrink-0 gap-1 px-2">
-            <HugeiconsIcon icon={LockPasswordIcon} size={12} />
-            Pro
-          </Badge>
-        ) : null}
       </div>
     </div>
   );
@@ -638,7 +637,7 @@ export function ThemePickerGrid({
     >
       <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 pb-3 pt-1 backdrop-blur-sm">
         <div className="flex flex-col items-stretch gap-2 sm:gap-3 md:flex-row md:items-center md:justify-end">
-          <p className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+          <div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
             {isProPlan ? (
               <>
                 Select one or more themes.{" "}
@@ -647,15 +646,15 @@ export function ThemePickerGrid({
                 </span>
               </>
             ) : (
-              <div className="text-center text-sm text-muted-foreground py-2">
-                Want to build multiple cards at once?{" "}
+              <p className="py-2 text-center text-sm text-muted-foreground">
+                Free includes 1 card and every theme.{" "}
                 <Link href="/#pricing" className="font-medium text-primary">
                   Upgrade to Pro
                 </Link>{" "}
-                to select & unlock several themes.
-              </div>
+                to publish, create unlimited cards, and unlock analytics.
+              </p>
             )}
-          </p>
+          </div>
           <div className="relative w-full md:max-w-xs">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -707,6 +706,7 @@ export function ThemePickerGrid({
                         previewData={previewData}
                         selected={selected.includes(theme.id)}
                         onSelect={() => onToggle(theme)}
+                        showWatermark={!isProPlan}
                       />
                     ))}
                   </div>

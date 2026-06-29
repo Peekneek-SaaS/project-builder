@@ -87,6 +87,7 @@ export function PublicCardView({ slug }: { slug: string }) {
               data={card.cardData}
               theme={theme}
               displayMode={card.displayMode}
+              showWatermark={card.showBranding}
               interactive
               onLinkClick={handleLinkClick}
             />

@@ -1,13 +1,17 @@
 import type { CardData, CardDisplayMode } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
-import { CARD_EXPORT_ATTR } from "@/lib/card-export";
-import { getThemeStyleClasses } from "@/lib/card-theme-utils";
+import {
+  applyColorOverrides,
+  cardSideColorVars,
+  getThemeStyleClasses,
+} from "@/lib/card-theme-utils";
 import { cn } from "@/lib/utils";
 import {
   CardBack,
   CardFront,
   type LinkClickPayload,
 } from "@/features/builder/components/card-layouts";
+import { CardSideFrame } from "@/features/builder/components/card-plan-watermark";
 
 export type { LinkClickPayload };
 
@@ -18,6 +22,7 @@ export function BusinessCard({
   compact = false,
   displayMode = "pair",
   showSideLabels = true,
+  showWatermark = false,
   interactive = false,
   onLinkClick,
 }: {
@@ -28,14 +33,27 @@ export function BusinessCard({
   displayMode?: CardDisplayMode;
   /** Show Front / Back labels above each side in pair mode. */
   showSideLabels?: boolean;
+  /** Free-plan edge watermark on each card side. */
+  showWatermark?: boolean;
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
 }) {
-  const styles = getThemeStyleClasses(theme.id);
+  const styles = applyColorOverrides(
+    getThemeStyleClasses(theme.id),
+    theme,
+    data.customColors,
+  );
+  const frontVars = cardSideColorVars(data.customColors, "front");
+  const backVars = cardSideColorVars(data.customColors, "back");
 
   if (displayMode === "front") {
     return (
-      <div className="w-fit max-w-full" {...{ [CARD_EXPORT_ATTR]: "front" }}>
+      <CardSideFrame
+        side="front"
+        showWatermark={showWatermark}
+        theme={theme}
+        style={frontVars}
+      >
         <CardFront
           data={data}
           theme={theme}
@@ -43,13 +61,18 @@ export function BusinessCard({
           compact={compact}
           className={className}
         />
-      </div>
+      </CardSideFrame>
     );
   }
 
   if (displayMode === "back") {
     return (
-      <div className="w-fit max-w-full" {...{ [CARD_EXPORT_ATTR]: "back" }}>
+      <CardSideFrame
+        side="back"
+        showWatermark={showWatermark}
+        theme={theme}
+        style={backVars}
+      >
         <CardBack
           data={data}
           theme={theme}
@@ -59,13 +82,18 @@ export function BusinessCard({
           interactive={interactive}
           onLinkClick={onLinkClick}
         />
-      </div>
+      </CardSideFrame>
     );
   }
 
   if (compact) {
     return (
-      <div {...{ [CARD_EXPORT_ATTR]: "front" }}>
+      <CardSideFrame
+        side="front"
+        showWatermark={showWatermark}
+        theme={theme}
+        style={frontVars}
+      >
         <CardFront
           data={data}
           theme={theme}
@@ -73,7 +101,7 @@ export function BusinessCard({
           compact
           className={className}
         />
-      </div>
+      </CardSideFrame>
     );
   }
 
@@ -85,9 +113,14 @@ export function BusinessCard({
             Front
           </span>
         ) : null}
-        <div {...{ [CARD_EXPORT_ATTR]: "front" }}>
+        <CardSideFrame
+          side="front"
+          showWatermark={showWatermark}
+          theme={theme}
+          style={frontVars}
+        >
           <CardFront data={data} theme={theme} styles={styles} />
-        </div>
+        </CardSideFrame>
       </div>
       <div className="flex flex-col items-center gap-2">
         {showSideLabels ? (
@@ -95,7 +128,12 @@ export function BusinessCard({
             Back
           </span>
         ) : null}
-        <div {...{ [CARD_EXPORT_ATTR]: "back" }}>
+        <CardSideFrame
+          side="back"
+          showWatermark={showWatermark}
+          theme={theme}
+          style={backVars}
+        >
           <CardBack
             data={data}
             theme={theme}
@@ -103,7 +141,7 @@ export function BusinessCard({
             interactive={interactive}
             onLinkClick={onLinkClick}
           />
-        </div>
+        </CardSideFrame>
       </div>
     </div>
   );

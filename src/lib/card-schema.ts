@@ -8,7 +8,7 @@ const cardFieldStyleSchema = z.object({
   uppercase: z.boolean(),
   bold: z.boolean(),
   italic: z.boolean(),
-  fontSize: z.number().int().min(0).max(24).optional().default(0),
+  fontSize: z.number().int().min(0).max(50).optional().default(0),
 });
 
 const cardFieldSettingsSchema = z.object(
@@ -22,12 +22,24 @@ export const cardLinkSchema = z.object({
   href: z.string(),
 });
 
+const cardSideColorsSchema = z.object({
+  background: z.string().optional(),
+  text: z.string().optional(),
+});
+
+export const cardColorOverridesSchema = z
+  .object({
+    front: cardSideColorsSchema.optional(),
+    back: cardSideColorsSchema.optional(),
+    accent: z.string().optional(),
+  })
+  .optional();
+
 export const cardDataSchema = z.object({
   name: z.string(),
   builderLabel: z.string().optional().default(""),
   title: z.string(),
   company: z.string(),
-  tagline: z.string(),
   logoUrl: z.string(),
   email: z.string(),
   phone: z.string(),
@@ -38,6 +50,7 @@ export const cardDataSchema = z.object({
   skills: z.array(z.string()).optional().default([]),
   links: z.array(cardLinkSchema),
   fieldSettings: cardFieldSettingsSchema,
+  customColors: cardColorOverridesSchema,
 });
 
 export const cardDisplayModeSchema = z.enum(["pair", "front", "back"]);

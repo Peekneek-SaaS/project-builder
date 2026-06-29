@@ -1,7 +1,6 @@
 import type { CardTheme } from "@/lib/card-themes";
 
 export const THEME_CATEGORY_ORDER = [
-  "free",
   "minimalist",
   "modern",
   "professional",
@@ -51,7 +50,6 @@ export type ThemePreviewConfig = {
 };
 
 export const CATEGORY_LABELS: Record<ThemeCategory, string> = {
-  free: "Free",
   minimalist: "Minimalist",
   modern: "Modern",
   professional: "Professional",
@@ -70,7 +68,6 @@ export const CATEGORY_LABELS: Record<ThemeCategory, string> = {
 };
 
 export const CATEGORY_DESCRIPTIONS: Record<ThemeCategory, string> = {
-  free: "Included with every account — pick one to get started.",
   minimalist: "Clean lines, quiet accents, nothing extra.",
   modern: "Contemporary layouts with confident color.",
   professional: "Polished and credible for work.",
@@ -92,7 +89,6 @@ export const DEFAULT_CATEGORY_PREVIEW: Record<
   ThemeCategory,
   ThemePreviewConfig
 > = {
-  free: { layout: "minimal", fields: ["initials", "name", "divider"] },
   minimalist: { layout: "minimal", fields: ["name", "accentBar"] },
   modern: { layout: "stacked", fields: ["initials", "name", "accentBar"] },
   professional: {

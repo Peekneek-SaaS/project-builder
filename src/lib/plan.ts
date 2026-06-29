@@ -1,4 +1,4 @@
-import { cardThemes, getTheme, type CardTheme } from "@/lib/card-themes";
+import { cardThemes, type CardTheme } from "@/lib/card-themes";
 
 export const PLAN_IDS = ["free", "pro"] as const;
 export type PlanId = (typeof PLAN_IDS)[number];
@@ -39,10 +39,12 @@ export function getFreeThemeIds(themes: CardTheme[] = cardThemes): string[] {
   return getFreeThemes(themes).map((theme) => theme.id);
 }
 
-export function canUseTheme(plan: PlanId, themeId: string): boolean {
-  if (plan === "pro") return true;
-  const theme = getTheme(themeId);
-  return !theme.pro;
+export function canUseTheme(_plan: PlanId, _themeId: string): boolean {
+  return true;
+}
+
+export function canPublish(plan: PlanId): boolean {
+  return isProPlan(plan);
 }
 
 export function canAccessAnalytics(plan: PlanId): boolean {

@@ -15,13 +15,30 @@ export type CardLink = {
 
 export type CardDisplayMode = "pair" | "front" | "back";
 
+/** Per-side surface + text color overrides. Empty = theme default. */
+export type CardSideColorOverrides = {
+  /** Card surface (background) color, any CSS color. */
+  background?: string;
+  /** Primary text color. */
+  text?: string;
+};
+
+/** Per-card color overrides that replace the theme's surface/text/accent. */
+export type CardColorOverrides = {
+  /** Visual front side overrides. */
+  front?: CardSideColorOverrides;
+  /** Visual back side overrides. */
+  back?: CardSideColorOverrides;
+  /** Accent color, applied to the whole card. */
+  accent?: string;
+};
+
 export type CardData = {
   name: string;
   /** Builder-only display name (breadcrumb/tab). Does not appear on the card. */
   builderLabel: string;
   title: string;
   company: string;
-  tagline: string;
   logoUrl: string;
   email: string;
   phone: string;
@@ -32,6 +49,8 @@ export type CardData = {
   skills: string[];
   links: CardLink[];
   fieldSettings: CardFieldSettings;
+  /** Optional per-card color overrides. */
+  customColors?: CardColorOverrides;
 };
 
 export type BuilderCard = {
@@ -58,7 +77,6 @@ export function extractedToCardData(extracted: ExtractedCardData): CardData {
     builderLabel: "",
     title: extracted.title,
     company: extracted.company,
-    tagline: "",
     logoUrl: "",
     email: extracted.email,
     phone: extracted.phone,
@@ -88,6 +106,17 @@ export function cloneCardData(data: CardData): CardData {
     ...data,
     skills: [...data.skills],
     links: data.links.map((link) => ({ ...link })),
+    customColors: data.customColors
+      ? {
+          front: data.customColors.front
+            ? { ...data.customColors.front }
+            : undefined,
+          back: data.customColors.back
+            ? { ...data.customColors.back }
+            : undefined,
+          accent: data.customColors.accent,
+        }
+      : undefined,
     fieldSettings: Object.fromEntries(
       Object.entries(data.fieldSettings ?? createDefaultFieldSettings()).map(
         ([key, value]) => [key, { ...value }],
@@ -106,7 +135,6 @@ export function buildThemePreviewData(
       builderLabel: "",
       title: "Senior Product Designer",
       company: "Northwind Studio",
-      tagline: "Design that defines you",
       logoUrl: "",
       email: "jordan@northwind.studio",
       phone: "+1 (415) 555-0142",
@@ -130,7 +158,6 @@ export function buildThemePreviewData(
     name: base.name || "Your Name",
     title,
     company,
-    tagline: base.tagline || `${company} — professional branding`,
     email: base.email || "you@email.com",
     phone: base.phone || "+1 (555) 000-0000",
     location: base.location || "Your City",

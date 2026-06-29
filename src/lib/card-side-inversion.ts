@@ -12,6 +12,7 @@ export const INVERTED_CARD_SIDES = new Set<CardLayout>([
   "mod-southern",
   "mod-riwo",
   "mod-alpha",
+  "mod-solara",
   "studio-austerlitz",
 ]);
 

@@ -136,11 +136,6 @@ function RocketFront({ data, theme, styles, compact, className , forPrint }: Stu
         <FieldText data={data} fieldKey="company" className={cn("font-bold uppercase tracking-[0.14em] text-[#2C3E50]", tx(compact, "text-[10px]", "text-base"))}>
           {companyWord(data).toUpperCase()}
         </FieldText>
-        {isFieldEnabled(data, "tagline") && data.tagline ? (
-          <FieldText data={data} fieldKey="tagline" className={cn("mt-1 uppercase tracking-[0.18em] text-[#D5D8DC]", tx(compact, "text-[7px]", "text-[10px]"))}>
-            {data.tagline}
-          </FieldText>
-        ) : null}
         {isFieldEnabled(data, "website") && data.website ? (
           <FieldText data={data} fieldKey="website" className={cn("mt-4 uppercase tracking-[0.2em] text-[#D5D8DC]", tx(compact, "text-[6px]", "text-[8px]"))}>
             {websiteDisplay(data.website).toUpperCase()}
@@ -226,11 +221,6 @@ function GoldenWaveFront({ data, theme, styles, compact, className , forPrint }:
         <FieldText data={data} fieldKey="company" className={cn("font-bold uppercase tracking-[0.14em]", tx(compact, "text-[9px]", "text-sm"))}>
           {companyWord(data)}
         </FieldText>
-        {isFieldEnabled(data, "tagline") && data.tagline ? (
-          <FieldText data={data} fieldKey="tagline" className={cn("uppercase tracking-[0.18em]", styles.subtext, tx(compact, "text-[6px]", "text-[8px]"))}>
-            {data.tagline}
-          </FieldText>
-        ) : null}
       </div>
     </div>
   );
@@ -367,11 +357,6 @@ function AdventureFront({ data, theme, styles, compact, className , forPrint }: 
         <FieldText data={data} fieldKey="company" className={cn("font-bold uppercase tracking-[0.16em]", tx(compact, "text-[9px]", "text-sm"))}>
           {companyWord(data)}
         </FieldText>
-        {isFieldEnabled(data, "tagline") && data.tagline ? (
-          <FieldText data={data} fieldKey="tagline" className={cn("mt-1 uppercase tracking-[0.18em]", tx(compact, "text-[6px]", "text-[8px]"))}>
-            {data.tagline}
-          </FieldText>
-        ) : null}
       </div>
     </div>
   );
@@ -613,11 +598,6 @@ function HelloBack({ data, theme, styles, compact, className, interactive, onLin
               <FieldText data={data} fieldKey="company" as="p" className={cn("font-bold leading-tight", tx(compact, "text-[10px]", "text-sm"))}>
                 {companyWord(data)}
               </FieldText>
-              {isFieldEnabled(data, "tagline") && data.tagline ? (
-                <FieldText data={data} fieldKey="tagline" as="p" className={cn("leading-snug", styles.subtext, tx(compact, "text-[7px]", "text-[10px]"))}>
-                  {data.tagline}
-                </FieldText>
-              ) : null}
             </div>
           </div>
         </div>
@@ -662,23 +642,19 @@ function ReviveBack({ data, theme, styles, compact, className, interactive, onLi
           </svg>
           <NameTitleBlock data={data} compact={compact} styles={styles} className="text-right" />
         </div>
-        <div className={cn("grid grid-cols-2 gap-3", tx(compact, "text-[6px]", "text-[9px]"))}>
-          <div>
-            {isFieldEnabled(data, "location") && data.location ? (
-              <FieldText data={data} fieldKey="location">{data.location}</FieldText>
-            ) : null}
-            {isFieldEnabled(data, "website") && data.website ? (
-              <FieldText data={data} fieldKey="website">{websiteDisplay(data.website)}</FieldText>
-            ) : null}
-          </div>
-          <div className="text-right">
-            {isFieldEnabled(data, "phone") && data.phone ? (
-              <FieldText data={data} fieldKey="phone">{data.phone}</FieldText>
-            ) : null}
-            {isFieldEnabled(data, "email") && data.email ? (
-              <FieldText data={data} fieldKey="email">{data.email}</FieldText>
-            ) : null}
-          </div>
+        <div className={cn("flex flex-col gap-1 [font-variant-numeric:tabular-nums]", tx(compact, "text-[6px]", "text-[9px]"))}>
+          {isFieldEnabled(data, "phone") && data.phone ? (
+            <FieldText data={data} fieldKey="phone">{data.phone}</FieldText>
+          ) : null}
+          {isFieldEnabled(data, "email") && data.email ? (
+            <FieldText data={data} fieldKey="email">{data.email}</FieldText>
+          ) : null}
+          {isFieldEnabled(data, "website") && data.website ? (
+            <FieldText data={data} fieldKey="website">{websiteDisplay(data.website)}</FieldText>
+          ) : null}
+          {isFieldEnabled(data, "location") && data.location ? (
+            <FieldText data={data} fieldKey="location">{data.location}</FieldText>
+          ) : null}
         </div>
       </div>
     </div>
@@ -697,11 +673,6 @@ function SouthernFront({ data, theme, styles, compact, className , forPrint }: S
         <FieldText data={data} fieldKey="company" as="p" className={cn("font-bold lowercase leading-tight", tx(compact, "text-sm", "text-xl"))}>
           {companyWord(data).toLowerCase()}
         </FieldText>
-        {isFieldEnabled(data, "tagline") && data.tagline ? (
-          <FieldText data={data} fieldKey="tagline" as="p" className={cn("uppercase leading-snug tracking-[0.24em]", tx(compact, "text-[6px]", "text-[8px]"))}>
-            {data.tagline}
-          </FieldText>
-        ) : null}
       </div>
     </div>
   );
@@ -726,9 +697,9 @@ function SkildFront({ data, theme, styles, compact, className , forPrint }: Stud
         <span className={cn("font-black uppercase tracking-[0.35em]", tx(compact, "text-lg", "text-3xl"))}>
           {companyWord(data).slice(0, 5).toUpperCase()}
         </span>
-        <FieldText data={data} fieldKey="tagline" className={cn("uppercase tracking-[0.28em] text-white/60", tx(compact, "text-[6px]", "text-[8px]"))}>
-          {isFieldEnabled(data, "tagline") && data.tagline ? data.tagline : "Passionate agency"}
-        </FieldText>
+        <p className={cn("uppercase tracking-[0.28em] text-white/60", tx(compact, "text-[6px]", "text-[8px]"))}>
+          Passionate agency
+        </p>
       </div>
     </div>
   );

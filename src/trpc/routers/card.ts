@@ -15,7 +15,7 @@ import { prisma } from "@/lib/db";
 import { recordCardLinkClick, recordCardView } from "@/lib/card-analytics-server";
 import {
   assertCanCreateCards,
-  assertCanUseTheme,
+  assertCanPublish,
   getBillingProfile,
 } from "@/lib/billing";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../init";
@@ -250,20 +250,6 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await getOwnedActiveCard(ctx.userId, input.id);
 
-      if (input.themeId) {
-        try {
-          await assertCanUseTheme(ctx.userId, input.themeId);
-        } catch (error) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message:
-              error instanceof Error
-                ? error.message
-                : "Your plan does not allow this theme.",
-          });
-        }
-      }
-
       const card = await prisma.card.update({
         where: { id: input.id },
         data: {
@@ -368,6 +354,18 @@ export const cardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      try {
+        await assertCanPublish(ctx.userId);
+      } catch (error) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Upgrade to Pro to publish your card.",
+        });
+      }
+
       const existing = await getOwnedActiveCard(ctx.userId, input.id);
 
       const cardsToPublish = input.publishSet
@@ -409,6 +407,20 @@ export const cardRouter = createTRPCRouter({
     .input(z.object({ id: z.string(), published: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const existing = await getOwnedActiveCard(ctx.userId, input.id);
+
+      if (input.published) {
+        try {
+          await assertCanPublish(ctx.userId);
+        } catch (error) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Upgrade to Pro to publish your card.",
+          });
+        }
+      }
 
       let slug = existing.slug;
       if (input.published && !slug) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
@@ -12,6 +13,7 @@ type ShareQrCodeProps = {
   qrCodeId: string;
   downloadName: string;
   published: boolean;
+  canPublish?: boolean;
   publishPending?: boolean;
   onPublish?: () => void;
 };
@@ -20,6 +22,7 @@ export function ShareQrCode({
   qrCodeId,
   downloadName,
   published,
+  canPublish = true,
   publishPending = false,
   onPublish,
 }: ShareQrCodeProps) {
@@ -74,23 +77,34 @@ export function ShareQrCode({
     return (
       <div className="mt-6 flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
         <p className="max-w-sm text-sm text-muted-foreground">
-          Publish your card first to activate the QR code. The link is permanent
-          once generated — publishing does not change the encoded URL.
+          {canPublish
+            ? "Publish your card first to activate the QR code. The link is permanent once generated — publishing does not change the encoded URL."
+            : "Upgrade to Pro to publish your card and activate the QR code."}
         </p>
-        <Button
-          type="button"
-          disabled={publishPending}
-          onClick={() => onPublish?.()}
-        >
-          {publishPending ? (
-            <>
-              <HugeiconsIcon icon={Loading03Icon} size={14} className="animate-spin" />
-              Publishing…
-            </>
-          ) : (
-            "Publish & show QR code"
-          )}
-        </Button>
+        {canPublish ? (
+          <Button
+            type="button"
+            disabled={publishPending}
+            onClick={() => onPublish?.()}
+          >
+            {publishPending ? (
+              <>
+                <HugeiconsIcon
+                  icon={Loading03Icon}
+                  size={14}
+                  className="animate-spin"
+                />
+                Publishing…
+              </>
+            ) : (
+              "Publish & show QR code"
+            )}
+          </Button>
+        ) : (
+          <Button type="button" asChild>
+            <Link href="/settings#pricing-plans">Upgrade to Pro</Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -124,7 +138,11 @@ export function ShareQrCode({
         onClick={() => void handleDownload()}
       >
         {downloading ? (
-          <HugeiconsIcon icon={Loading03Icon} size={14} className="animate-spin" />
+          <HugeiconsIcon
+            icon={Loading03Icon}
+            size={14}
+            className="animate-spin"
+          />
         ) : (
           <HugeiconsIcon icon={Download01Icon} size={14} />
         )}

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { DeleteCardDialog } from "@/features/dashboard/components/delete-card-dialog";
 import { BusinessCard } from "@/features/builder/components/business-card";
 import { CardPreviewScaler } from "@/features/builder/components/card-preview-scaler";
-import { getCardBuilderLabel } from "@/lib/card-data";
+import { CardDisplayMode, getCardBuilderLabel } from "@/lib/card-data";
 import { getThemeStyleClasses } from "@/lib/card-theme-utils";
 import {
   TRASH_RETENTION_DAYS,
@@ -36,6 +36,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { inferRouterOutputs } from "@trpc/server";
 import { FadeIn } from "@/components/motion";
+import { ThemePickerCardPreview } from "@/features/builder/components/theme-picker";
 
 type TrashedCard = inferRouterOutputs<AppRouter>["card"]["listTrash"][number];
 
@@ -46,6 +47,7 @@ export function TrashContent() {
   const { data: cards = [], isLoading } = useQuery(
     trpc.card.listTrash.queryOptions(),
   );
+  const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
 
   const emptyTrash = useMutation(
     trpc.card.emptyTrash.mutationOptions({
@@ -136,7 +138,11 @@ export function TrashContent() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {cards.map((card) => (
-              <TrashCardTile key={card.id} card={card} />
+              <TrashCardTile
+                key={card.id}
+                card={card}
+                showWatermark={!billing?.isPro}
+              />
             ))}
           </div>
         )}
@@ -155,10 +161,21 @@ export function TrashContent() {
   );
 }
 
-function TrashCardTile({ card }: { card: TrashedCard }) {
+function TrashCardTile({
+  card,
+  showWatermark = false,
+}: {
+  card: TrashedCard;
+  showWatermark?: boolean;
+}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [side, setSide] = useState<CardDisplayMode>("front");
+  function showSide(next: CardDisplayMode, event: MouseEvent) {
+    event.stopPropagation();
+    setSide(next);
+  }
 
   const theme = getTheme(card.themeId);
   const styles = getThemeStyleClasses(theme.id);
@@ -197,11 +214,11 @@ function TrashCardTile({ card }: { card: TrashedCard }) {
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div
           className={cn(
-            "relative overflow-hidden opacity-70",
+            "relative overflow-hidden opacity-70 px-2",
             styles.frontSurface,
           )}
         >
-          <CardPreviewScaler
+          {/* <CardPreviewScaler
             className="border-0 bg-transparent p-2"
             minHeightClass="h-44"
           >
@@ -212,7 +229,13 @@ function TrashCardTile({ card }: { card: TrashedCard }) {
               compact
               className="pointer-events-none shadow-none ring-0"
             />
-          </CardPreviewScaler>
+          </CardPreviewScaler> */}
+          <ThemePickerCardPreview
+            theme={theme}
+            previewData={card.cardData}
+            side={side}
+            showWatermark={showWatermark}
+          />
         </div>
 
         <div className="space-y-3 p-4">

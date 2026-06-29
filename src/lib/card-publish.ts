@@ -15,25 +15,25 @@ export async function uniqueCardSlug(name: string): Promise<string> {
   return `${generateCardSlug(name)}-${Date.now().toString(36)}`;
 }
 
-/** Ensure a card reachable via QR has a slug and is published. */
+/** Ensure a published card reachable via QR has a slug. */
 export async function ensureCardLiveForQr(card: {
   id: string;
   slug: string | null;
   published: boolean;
   publishedAt: Date | null;
   cardData: unknown;
-}): Promise<{ slug: string }> {
+}): Promise<{ slug: string } | null> {
+  if (!card.published) {
+    return null;
+  }
+
   const cardData = cardDataSchema.parse(card.cardData);
   const slug = card.slug ?? (await uniqueCardSlug(cardData.name));
 
-  if (!card.published || !card.slug) {
+  if (!card.slug) {
     await prisma.card.update({
       where: { id: card.id },
-      data: {
-        published: true,
-        publishedAt: card.publishedAt ?? new Date(),
-        slug,
-      },
+      data: { slug },
     });
   }
 

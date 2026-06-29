@@ -89,6 +89,9 @@ export function ShareView({ cardId }: { cardId: string }) {
         );
         void queryClient.invalidateQueries(trpc.card.list.queryFilter());
       },
+      onError: (error) => {
+        toast.error(error.message || "Failed to update publish status.");
+      },
     }),
   );
 
@@ -157,8 +160,24 @@ export function ShareView({ cardId }: { cardId: string }) {
 
   const editHref = `/builder/${card.resumeId}?cards=${card.id}`;
   const downloadName = cardTitle;
+  const canPublish = billing?.canPublish ?? false;
+  const canDownload = billing?.isPro ?? false;
+
+  function handlePublishToggle(published: boolean) {
+    if (published && !canPublish) {
+      toast.error("Upgrade to Pro to publish your card.");
+      return;
+    }
+
+    setPublished.mutate({ id: cardId, published });
+  }
 
   async function handleDownload(format: CardDownloadFormat) {
+    if (!canDownload) {
+      toast.error("Upgrade to Pro to download or print your card.");
+      return;
+    }
+
     const element = cardExportRef.current;
     if (!element) {
       toast.error("Card export is not ready yet. Please wait a moment.");
@@ -264,12 +283,19 @@ export function ShareView({ cardId }: { cardId: string }) {
             <Switch
               checked={card.published}
               disabled={setPublished.isPending}
-              onCheckedChange={(published) =>
-                setPublished.mutate({ id: card.id, published })
-              }
+              onCheckedChange={handlePublishToggle}
               aria-label="Toggle published"
             />
           </div>
+          {!canPublish && !card.published ? (
+            <p className="w-full text-xs text-muted-foreground sm:w-auto">
+              Publishing requires{" "}
+              <Link href="/settings#pricing-plans" className="text-primary">
+                Pro
+              </Link>
+              .
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -310,6 +336,7 @@ export function ShareView({ cardId }: { cardId: string }) {
             theme={theme}
             displayMode="pair"
             showSideLabels={false}
+            showWatermark={!billing?.isPro}
             className="flex-col md:flex-row items-center justify-center gap-8 md:gap-12"
           />
         </CardPreviewScaler>
@@ -331,119 +358,143 @@ export function ShareView({ cardId }: { cardId: string }) {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Sides
-          </p>
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={exportFront}
-              onCheckedChange={(checked) => setExportFront(checked === true)}
-            />
-            Front
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={exportBack}
-              onCheckedChange={(checked) => setExportBack(checked === true)}
-            />
-            Back
-          </label>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Corner
-          </p>
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={exportRoundedCorners}
-              onCheckedChange={(checked) =>
-                setExportRoundedCorners(checked === true)
-              }
-            />
-            Rounded
-          </label>
-        </div>
+        {canDownload ? (
+          <>
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Sides
+              </p>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox
+                  checked={exportFront}
+                  onCheckedChange={(checked) =>
+                    setExportFront(checked === true)
+                  }
+                />
+                Front
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox
+                  checked={exportBack}
+                  onCheckedChange={(checked) => setExportBack(checked === true)}
+                />
+                Back
+              </label>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Corner
+              </p>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox
+                  checked={exportRoundedCorners}
+                  onCheckedChange={(checked) =>
+                    setExportRoundedCorners(checked === true)
+                  }
+                />
+                Rounded
+              </label>
+            </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Button
-            className="gap-2"
-            disabled={downloading !== null || (!exportFront && !exportBack)}
-            onClick={() => void handleDownload("pdf")}
-          >
-            {downloading === "pdf" ? (
-              <HugeiconsIcon
-                icon={Loading03Icon}
-                size={16}
-                className="animate-spin"
-              />
-            ) : (
-              <HugeiconsIcon icon={PrinterIcon} size={16} />
-            )}
-            {downloading === "pdf"
-              ? "Preparing PDF…"
-              : "Download print-ready PDF"}
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <div className="mt-5 flex flex-wrap gap-2">
               <Button
-                variant="outline"
-                className="gap-1.5"
+                className="gap-2"
                 disabled={downloading !== null || (!exportFront && !exportBack)}
+                onClick={() => void handleDownload("pdf")}
               >
-                {downloading && downloading !== "pdf" ? (
+                {downloading === "pdf" ? (
                   <HugeiconsIcon
                     icon={Loading03Icon}
-                    size={14}
+                    size={16}
                     className="animate-spin"
                   />
                 ) : (
-                  <HugeiconsIcon icon={Download01Icon} size={14} />
+                  <HugeiconsIcon icon={PrinterIcon} size={16} />
                 )}
-                {downloading && downloading !== "pdf"
-                  ? `Downloading ${downloading.toUpperCase()}…`
-                  : "More formats"}
-                <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
+                {downloading === "pdf"
+                  ? "Preparing PDF…"
+                  : "Download print-ready PDF"}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => void handleDownload("png")}>
-                PNG — high-resolution image
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void handleDownload("svg")}>
-                SVG — editable vector file
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="gap-1.5"
+                    disabled={
+                      downloading !== null || (!exportFront && !exportBack)
+                    }
+                  >
+                    {downloading && downloading !== "pdf" ? (
+                      <HugeiconsIcon
+                        icon={Loading03Icon}
+                        size={14}
+                        className="animate-spin"
+                      />
+                    ) : (
+                      <HugeiconsIcon icon={Download01Icon} size={14} />
+                    )}
+                    {downloading && downloading !== "pdf"
+                      ? `Downloading ${downloading.toUpperCase()}…`
+                      : "More formats"}
+                    <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => void handleDownload("png")}>
+                    PNG — high-resolution image
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => void handleDownload("svg")}>
+                    SVG — editable vector file
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-        <ul className="mt-5 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
-          <li>
-            <span className="font-medium text-foreground">At home:</span> print
-            the PDF at <strong>100% scale</strong> (not &ldquo;fit to
-            page&rdquo;) on cardstock.
-          </li>
-          <li>
-            <span className="font-medium text-foreground">Double-sided:</span>{" "}
-            print all pages, reload the stack, then print again — or use duplex
-            / long-edge flip if your printer supports it.
-          </li>
-          <li>
-            <span className="font-medium text-foreground">Corners:</span> leave{" "}
-            <strong>rounded corners</strong> unchecked for square edges (best
-            for printing); check it to match the on-screen preview.
-          </li>
-          <li>
-            <span className="font-medium text-foreground">Print shop:</span>{" "}
-            send the PDF or PNG; files are exported at 6× resolution (~300 DPI).
-          </li>
-        </ul>
+            <ul className="mt-5 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
+              <li>
+                <span className="font-medium text-foreground">At home:</span>{" "}
+                print the PDF at <strong>100% scale</strong> (not &ldquo;fit to
+                page&rdquo;) on cardstock.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">
+                  Double-sided:
+                </span>{" "}
+                print all pages, reload the stack, then print again — or use
+                duplex / long-edge flip if your printer supports it.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Corners:</span>{" "}
+                leave <strong>rounded corners</strong> unchecked for square
+                edges (best for printing); check it to match the on-screen
+                preview.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Print shop:</span>{" "}
+                send the PDF or PNG; files are exported at 6× resolution (~300
+                DPI).
+              </li>
+            </ul>
+          </>
+        ) : (
+          <div className="mt-5 flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
+            <p className="max-w-md text-sm text-muted-foreground">
+              Export print-ready PDFs, high-resolution PNGs, and editable SVGs
+              with Pro.
+            </p>
+            <Button type="button" asChild>
+              <Link href="/settings#pricing-plans">Upgrade to Pro</Link>
+            </Button>
+          </div>
+        )}
       </section>
 
-      <CardExportSurface
-        ref={cardExportRef}
-        data={card.cardData}
-        theme={theme}
-        roundedCorners={exportRoundedCorners}
-      />
+      {canDownload ? (
+        <CardExportSurface
+          ref={cardExportRef}
+          data={card.cardData}
+          theme={theme}
+          roundedCorners={exportRoundedCorners}
+        />
+      ) : null}
 
       <Tabs defaultValue="link" className="mt-8">
         <TabsList>
@@ -527,10 +578,11 @@ export function ShareView({ cardId }: { cardId: string }) {
                   qrCodeId={card.qrCodeId}
                   downloadName={downloadName}
                   published={card.published}
+                  canPublish={canPublish}
                   publishPending={setPublished.isPending}
                   onPublish={() => {
                     if (!card.published && !setPublished.isPending) {
-                      setPublished.mutate({ id: card.id, published: true });
+                      handlePublishToggle(true);
                     }
                   }}
                 />

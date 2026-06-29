@@ -342,6 +342,16 @@
     display: none; /* Chrome, Safari, Edge */
   }
 
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    @apply cursor-not-allowed;
+  }
+
   /* Clerk pricing/checkout UI above the marketing header (z-50). */
   .cl-modalBackdrop,
   .cl-modalContent,

@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 export type CardFieldKey =
   | "logo"
   | "company"
-  | "tagline"
   | "name"
   | "title"
   | "email"
@@ -27,7 +26,10 @@ export type CardFieldStyle = {
   fontSize: number;
 };
 
-export const CARD_FIELD_FONT_SIZES = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24] as const;
+export const CARD_FIELD_FONT_SIZES = [
+  2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40,
+  42, 44, 46, 48, 50,
+] as const;
 
 export type CardFieldFontSize = (typeof CARD_FIELD_FONT_SIZES)[number];
 
@@ -36,7 +38,6 @@ export type CardFieldSettings = Record<CardFieldKey, CardFieldStyle>;
 export const CARD_FIELD_KEYS: CardFieldKey[] = [
   "logo",
   "company",
-  "tagline",
   "name",
   "title",
   "email",

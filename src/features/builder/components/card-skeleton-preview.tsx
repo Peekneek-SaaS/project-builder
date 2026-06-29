@@ -484,7 +484,6 @@ export function skeletonPreviewData(name: string): CardData {
     builderLabel: "",
     title: "",
     company: "",
-    tagline: "",
     logoUrl: "",
     email: "",
     phone: "",

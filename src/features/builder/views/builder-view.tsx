@@ -67,6 +67,8 @@ export default function BuilderView() {
     enabled: cardIds.length > 0,
   });
 
+  const { data: billing } = useQuery(trpc.billing.getPlan.queryOptions());
+
   const [cards, setCards] = useState<BuilderCard[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [mobileEditOpen, setMobileEditOpen] = useState(false);
@@ -172,6 +174,12 @@ export default function BuilderView() {
 
   function handlePublish() {
     if (!activeCard) return;
+
+    if (!billing?.canPublish) {
+      toast.error("Upgrade to Pro to publish your card.");
+      return;
+    }
+
     publishMutation.mutate({
       id: activeCard.id,
       publishSet: cards.length > 1,
@@ -287,7 +295,6 @@ export default function BuilderView() {
       phone: data.phone || fallbackPreview.phone,
       location: data.location || fallbackPreview.location,
       website: data.website || fallbackPreview.website,
-      tagline: data.tagline || fallbackPreview.tagline,
       logoUrl: data.logoUrl || fallbackPreview.logoUrl,
       bio: data.bio,
       experience: data.experience,
@@ -353,6 +360,11 @@ export default function BuilderView() {
             className="gap-1.5 px-2.5 sm:gap-2 sm:px-4"
             size="sm"
             disabled={publishMutation.isPending}
+            title={
+              billing && !billing.canPublish
+                ? "Upgrade to Pro to publish your card"
+                : undefined
+            }
             onClick={handlePublish}
           >
             <HugeiconsIcon icon={Share01Icon} size={16} />
@@ -429,6 +441,7 @@ export default function BuilderView() {
                             theme={theme}
                             compact
                             displayMode="front"
+                            showWatermark={!billing?.isPro}
                             className="pointer-events-none shadow-none ring-0"
                           />
                         </div>
@@ -436,7 +449,7 @@ export default function BuilderView() {
                           {cardLabel}
                         </span> */}
                       </button>
-                      {cards.length > 1 ? (
+                      {/* {cards.length > 1 ? (
                         <Button
                           type="button"
                           variant="ghost"
@@ -447,7 +460,7 @@ export default function BuilderView() {
                         >
                           <HugeiconsIcon icon={Delete02Icon} size={10} />
                         </Button>
-                      ) : null}
+                      ) : null} */}
                     </div>
                   );
                 })}
@@ -477,7 +490,7 @@ export default function BuilderView() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+                    className="gap-1.5 text-xs text-destructive hover:text-destructive"
                     onClick={() => setRemoveTarget(activeCard)}
                   >
                     <HugeiconsIcon icon={Delete02Icon} size={14} />
@@ -510,17 +523,20 @@ export default function BuilderView() {
               minHeightClass="min-h-[min(340px,42vh)] lg:min-h-[calc(100vh-11rem)]"
               className="mt-4 min-w-0 max-w-full flex-1 rounded-xl border border-border bg-muted/30 sm:mt-5 sm:rounded-2xl"
             >
-              <BusinessCard
-                data={displayData}
-                theme={activeTheme}
-                displayMode={displayMode}
-                showSideLabels={false}
-                className={
-                  displayMode === "pair"
-                    ? "flex-col items-center justify-center gap-8 md:gap-12"
-                    : undefined
-                }
-              />
+              <div data-card-preview style={{ display: "contents" }}>
+                <BusinessCard
+                  data={displayData}
+                  theme={activeTheme}
+                  displayMode={displayMode}
+                  showSideLabels={false}
+                  showWatermark={!billing?.isPro}
+                  className={
+                    displayMode === "pair"
+                      ? "flex-col items-center justify-center gap-8 md:gap-12"
+                      : undefined
+                  }
+                />
+              </div>
             </CardPreviewScaler>
           </section>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import {
@@ -8,9 +8,14 @@ import {
   CardFront,
   type LinkClickPayload,
 } from "@/features/builder/components/card-layouts";
+import { CardSideFrame } from "@/features/builder/components/card-plan-watermark";
 import type { CardData, CardDisplayMode } from "@/lib/card-data";
 import type { CardTheme } from "@/lib/card-themes";
-import { getThemeStyleClasses } from "@/lib/card-theme-utils";
+import {
+  applyColorOverrides,
+  cardSideColorVars,
+  getThemeStyleClasses,
+} from "@/lib/card-theme-utils";
 
 type CardSide = "front" | "back";
 
@@ -37,21 +42,36 @@ export function PublicCardStack({
   data,
   theme,
   displayMode,
+  showWatermark = false,
   interactive,
   onLinkClick,
 }: {
   data: CardData;
   theme: CardTheme;
   displayMode: CardDisplayMode;
+  showWatermark?: boolean;
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
 }) {
-  const styles = getThemeStyleClasses(theme.id);
+  const styles = applyColorOverrides(
+    getThemeStyleClasses(theme.id),
+    theme,
+    data.customColors,
+  );
+  const frontVars = cardSideColorVars(data.customColors, "front");
+  const backVars = cardSideColorVars(data.customColors, "back");
 
   if (displayMode === "front") {
     return (
       <div className="flex justify-center">
-        <CardFront data={data} theme={theme} styles={styles} />
+        <CardSideFrame
+          side="front"
+          showWatermark={showWatermark}
+          theme={theme}
+          style={frontVars}
+        >
+          <CardFront data={data} theme={theme} styles={styles} />
+        </CardSideFrame>
       </div>
     );
   }
@@ -59,13 +79,20 @@ export function PublicCardStack({
   if (displayMode === "back") {
     return (
       <div className="flex justify-center">
-        <CardBack
-          data={data}
+        <CardSideFrame
+          side="back"
+          showWatermark={showWatermark}
           theme={theme}
-          styles={styles}
-          interactive={interactive}
-          onLinkClick={onLinkClick}
-        />
+          style={backVars}
+        >
+          <CardBack
+            data={data}
+            theme={theme}
+            styles={styles}
+            interactive={interactive}
+            onLinkClick={onLinkClick}
+          />
+        </CardSideFrame>
       </div>
     );
   }
@@ -75,6 +102,9 @@ export function PublicCardStack({
       data={data}
       theme={theme}
       styles={styles}
+      frontVars={frontVars}
+      backVars={backVars}
+      showWatermark={showWatermark}
       interactive={interactive}
       onLinkClick={onLinkClick}
     />
@@ -85,12 +115,18 @@ function CardPairStack({
   data,
   theme,
   styles,
+  frontVars,
+  backVars,
+  showWatermark,
   interactive,
   onLinkClick,
 }: {
   data: CardData;
   theme: CardTheme;
   styles: ReturnType<typeof getThemeStyleClasses>;
+  frontVars?: CSSProperties;
+  backVars?: CSSProperties;
+  showWatermark: boolean;
   interactive?: boolean;
   onLinkClick?: (payload: LinkClickPayload) => void;
 }) {
@@ -138,13 +174,20 @@ function CardPairStack({
             aria-label="Show back of card"
             aria-pressed={activeSide === "back"}
           >
-            <CardBack
-              data={data}
+            <CardSideFrame
+              side="back"
+              showWatermark={showWatermark}
               theme={theme}
-              styles={styles}
-              interactive={interactive && topSide === "back"}
-              onLinkClick={onLinkClick}
-            />
+              style={backVars}
+            >
+              <CardBack
+                data={data}
+                theme={theme}
+                styles={styles}
+                interactive={interactive && topSide === "back"}
+                onLinkClick={onLinkClick}
+              />
+            </CardSideFrame>
           </motion.div>
 
           {/* Front */}
@@ -167,7 +210,14 @@ function CardPairStack({
             aria-label="Show front of card"
             aria-pressed={activeSide === "front"}
           >
-            <CardFront data={data} theme={theme} styles={styles} />
+            <CardSideFrame
+              side="front"
+              showWatermark={showWatermark}
+              theme={theme}
+              style={frontVars}
+            >
+              <CardFront data={data} theme={theme} styles={styles} />
+            </CardSideFrame>
           </motion.div>
         </div>
       </div>

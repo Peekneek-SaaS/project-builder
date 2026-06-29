@@ -265,8 +265,8 @@ export default function SettingsPage() {
             <div id="pricing-plans" className="scroll-mt-24">
               <h3 className="text-sm font-semibold">Change plan</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Upgrade to Pro for unlimited cards, all themes, analytics, and
-                embed branding removal.
+                Upgrade to Pro to publish your card, create unlimited cards,
+                access analytics, and remove embed branding.
               </p>
               <div className="mt-4 rounded-xl border border-border bg-card p-4 sm:p-6">
                 <PricingTable newSubscriptionRedirectUrl="/dashboard" />
